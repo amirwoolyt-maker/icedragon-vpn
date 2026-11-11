@@ -14,12 +14,12 @@ const appVersion = String.fromEnvironment('APP_VERSION', defaultValue: '0.0.0');
 
 /// The GitHub repository, "owner/name", for the source link and the update
 /// check.
-const githubRepo = 'armanlife/arman-vpn-client';
+const githubRepo = 'amirwoolyt-maker/icedragon-vpn';
 
 const updateManifestUrl =
-    'https://raw.githubusercontent.com/arman-org/update-manifests/main/arman-vpn-client/updates.json';
+    'https://raw.githubusercontent.com/amirwoolyt-maker/icedragon-vpn/main/.github/updates.json';
 const updateManifestMirror =
-    'https://cdn.jsdelivr.net/gh/arman-org/update-manifests@main/arman-vpn-client/updates.json';
+    'https://cdn.jsdelivr.net/gh/amirwoolyt-maker/icedragon-vpn@main/.github/updates.json';
 
 /// A release server used instead of GitHub, to try updates with a local
 /// test release: it serves [updatesFile] at `<server>/updates.json`, answers
@@ -38,7 +38,7 @@ String linuxName(String platformVersion) =>
     'Linux-${platformVersion.contains('arm64') ? 'arm64' : 'amd64'}.tar.gz';
 
 /// The name part of the release file that [os]'s app installs or downloads
-/// (`Arman-VPN-<version>-<part>`); a release that has it was built for
+/// (`IceDragon-VPN-<version>-<part>`); a release that has it was built for
 /// [os]. null for another system.
 String? releaseFilePart(String os) => switch (os) {
   'windows' => 'Windows-x64.zip',
@@ -127,7 +127,7 @@ Future<Release?> checkForUpdate({
         ? 'https://github.com/$repo/releases'
         : '$srv/releases';
     final part = releaseFilePart(system);
-    final file = part == null ? 'SHA256SUMS.txt' : 'Arman-VPN-$wanted-$part';
+    final file = part == null ? 'SHA256SUMS.txt' : 'IceDragon-VPN-$wanted-$part';
     if (!await _published(client, '$releases/download/v$wanted/$file')) {
       throw HttpException('version $wanted is not published yet');
     }
@@ -246,8 +246,8 @@ Future<Release?> _latestRelease(
     };
     final downloads = <String, Object?>{};
     for (final entry in parts.entries) {
-      final fixed = 'Arman-VPN-${entry.value}';
-      final versioned = 'Arman-VPN-$version-${entry.value}';
+      final fixed = 'IceDragon-VPN-${entry.value}';
+      final versioned = 'IceDragon-VPN-$version-${entry.value}';
       final file = assets.containsKey(fixed) ? fixed : versioned;
       if (assets.containsKey(file)) {
         downloads[entry.key] = {'file': file, 'url': assets[file]};
@@ -279,7 +279,7 @@ Future<bool> _published(HttpClient client, String url) async {
       .timeout(const Duration(seconds: 20));
   req
     ..followRedirects = false
-    ..headers.set(HttpHeaders.userAgentHeader, 'arman-vpn/$appVersion');
+    ..headers.set(HttpHeaders.userAgentHeader, 'icedragon-vpn/$appVersion');
   final res = await req.close().timeout(const Duration(seconds: 20));
   await res.drain<void>();
   if (res.statusCode == 404) return false;
@@ -302,7 +302,7 @@ Future<(int, String)> _get(
       .timeout(const Duration(seconds: 20));
   req.headers
     ..set(HttpHeaders.acceptHeader, accept)
-    ..set(HttpHeaders.userAgentHeader, 'arman-vpn/$appVersion');
+    ..set(HttpHeaders.userAgentHeader, 'icedragon-vpn/$appVersion');
   final res = await req.close().timeout(const Duration(seconds: 20));
   final bytes = BytesBuilder(copy: false);
   await for (final chunk in res.timeout(const Duration(seconds: 20))) {

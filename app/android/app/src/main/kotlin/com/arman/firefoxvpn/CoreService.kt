@@ -653,20 +653,42 @@ class CoreService : VpnService() {
             ConnectWidget.updateAll(context)
         }
 
+        /** Last startup error caught on the JVM/JNI boundary, if any. */
+        @Volatile
+        var lastStartError: String? = null
+            private set
+
+        fun recordStartError(e: Throwable) {
+            lastStartError = e.message?.takeIf { it.isNotBlank() } ?: e.toString()
+        }
+
+        /** Returns the core's last startup or exit error, or "" when none. */
+        fun coreError(): String {
+            val startErr = lastStartError
+            if (!startErr.isNullOrBlank()) return startErr
+            return try {
+                mobile.Mobile.lastError()
+            } catch (e: Throwable) {
+                e.message?.takeIf { it.isNotBlank() } ?: e.toString()
+            }
+        }
+
         /** Starts the core, with the proxy [on] or off, if it does not run. */
         @Synchronized
         fun startCore(context: Context, on: Boolean) {
-            if (mobile.Mobile.running()) return
-            if ((context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                importFromComputer(context)
-            } else {
-                // Shared storage is writable by other apps on older Android:
-                // a release build never takes data from there.
-                File(context.getExternalFilesDir(null), "import").takeIf { it.exists() }?.deleteRecursively()
-            }
             try {
+                if (mobile.Mobile.running()) return
+                lastStartError = null
+                if ((context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                    importFromComputer(context)
+                } else {
+                    // Shared storage is writable by other apps on older Android:
+                    // a release build never takes data from there.
+                    File(context.getExternalFilesDir(null), "import").takeIf { it.exists() }?.deleteRecursively()
+                }
                 mobile.Mobile.start(dataDir(context).absolutePath, on)
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
+                recordStartError(e)
                 Log.e(TAG, "the core did not start", e)
             }
         }

@@ -1,19 +1,26 @@
+# Tests every push and pull request, builds release Android APKs, and
+# publishes/updates the GitHub release (both fixed filenames for README
+# releases/latest/download links and versioned filenames for in-app updates).
+#
+# Optional secrets for consistent release APK signing (else debug-signed):
+#   ANDROID_KEYSTORE_BASE64    base64-encoded .jks/.keystore file
+#   ANDROID_KEYSTORE_PASSWORD  keystore & "release" key password
 name: Build IceDragon VPN APK
 
 on:
   push:
     branches: [main, master]
     tags: ['v*']
-    paths-ignore: ['**.md', 'LICENSE']
+    paths-ignore: ['docs/**', 'LICENSE']
   pull_request:
-    paths-ignore: ['**.md', 'LICENSE']
+    paths-ignore: ['docs/**', 'LICENSE']
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: build-${{ github.ref }}
+  group: build-apk-${{ github.ref }}
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 env:
@@ -26,35 +33,70 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
+
       - name: Version
         id: version
         run: |
-          v="$(sed -n 's/^version: *\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' app/pubspec.yaml)"
+          v="$(sed -n 's/^version:[[:space:]]*\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' app/pubspec.yaml)"
           test -n "$v"
           echo "version=$v" >> "$GITHUB_OUTPUT"
-      - uses: actions/setup-go@v7
+          if [[ "$GITHUB_REF" == refs/tags/* && "$GITHUB_REF_NAME" != "v$v" ]]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match app/pubspec.yaml ($v)"
+            exit 1
+          fi
+
+      - name: Update manifest check
+        run: |
+          jq -e 'type == "object"
+            and all(keys[]; IN("android", "linux", "macos", "windows"))
+            and all(.[]; type == "string" and test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))' .github/updates.json >/dev/null || {
+            echo "::error::.github/updates.json must map android/linux/macos/windows to major.minor.patch versions"
+            exit 1
+          }
+          v="${{ steps.version.outputs.version }}"
+          ahead="$(jq -r --arg v "$v" '($v | split(".") | map(tonumber)) as $app
+            | to_entries[] | select((.value | split(".") | map(tonumber)) > $app) | "\(.key) \(.value)"' .github/updates.json | xargs)"
+          if [ -n "$ahead" ]; then
+            echo "::error::.github/updates.json names versions newer than app/pubspec.yaml ($v): $ahead"
+            exit 1
+          fi
+
+      - uses: actions/setup-go@v5
         with:
           go-version-file: core/go.mod
           cache-dependency-path: core/go.sum
-      - name: Core vet & tests
+
+      - name: Core tests & vet
         working-directory: core
         run: |
           go vet ./...
-          go test -count=1 -timeout=120s ./...
+          go test -count=1 ./...
           go vet -tags with_gvisor ./internal/tunstack/
-          go test -tags with_gvisor ./internal/tunstack/
+          go test -count=1 -tags with_gvisor ./internal/tunstack/
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Relay worker syntax
+        run: node --check docs/relay/cloudflare/worker.js
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+
       - name: Flutter pub get
         working-directory: app
         run: flutter pub get
+
       - name: Flutter analyze
         working-directory: app
-        run: flutter analyze
+        run: flutter analyze --no-pub
+
       - name: Flutter tests
         working-directory: app
         run: flutter test --no-pub --reporter expanded
@@ -63,38 +105,44 @@ jobs:
     needs: test
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
         with:
           go-version-file: core/go.mod
           cache-dependency-path: core/go.sum
-      - uses: actions/setup-java@v6
+
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+
       - name: NDK and gomobile
         run: |
           ndk="$(sed -n 's/.*ndkVersion = "\(.*\)".*/\1/p' app/android/app/build.gradle.kts)"
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;$ndk" > /dev/null
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$ndk" >> "$GITHUB_ENV"
           go install "golang.org/x/mobile/cmd/gomobile@$GOMOBILE_VERSION" "golang.org/x/mobile/cmd/gobind@$GOMOBILE_VERSION"
-      - name: Optional release signing key
+
+      - name: Release keystore (optional)
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
-          if [ -z "$KEYSTORE" ]; then
-            echo "::notice::No ANDROID_KEYSTORE_BASE64 secret set; APKs will be signed with the Android debug key."
+          if [ -z "$KEYSTORE" ] || [ -z "$PASSWORD" ]; then
+            echo "::warning::ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD not set; APKs will use the runner debug key"
             exit 0
           fi
           printf '%s' "$KEYSTORE" | base64 -d > app/android/release.jks
           printf 'storeFile=../release.jks\nstorePassword=%s\nkeyAlias=release\nkeyPassword=%s\n' "$PASSWORD" "$PASSWORD" > app/android/key.properties
-      - name: Build core.aar & APKs
+
+      - name: Build IceDragon VPN core & APKs
         run: |
           v='${{ needs.test.outputs.version }}'
           mkdir -p app/android/app/libs
@@ -107,15 +155,63 @@ jobs:
           mkdir -p ../out
           flutter build apk --release --split-per-abi --dart-define=APP_VERSION=$v
           for abi in arm64-v8a armeabi-v7a x86_64; do
-            cp "build/app/outputs/flutter-apk/app-$abi-release.apk" "../out/IceDragon-VPN-$v-$abi.apk"
+            cp "build/app/outputs/flutter-apk/app-$abi-release.apk" "../out/IceDragon-VPN-Android-$abi.apk"
           done
           flutter build apk --release --dart-define=APP_VERSION=$v
-          cp build/app/outputs/flutter-apk/app-release.apk "../out/IceDragon-VPN-$v-universal.apk"
-      - name: Cleanup signing key
+          cp build/app/outputs/flutter-apk/app-release.apk ../out/IceDragon-VPN-Android-universal.apk
+
+      - name: Remove keystore files
         if: always()
         run: rm -f app/android/release.jks app/android/key.properties
-      - uses: actions/upload-artifact@v7
+
+      - uses: actions/upload-artifact@v4
         with:
           name: icedragon-vpn-apks
           path: out/*.apk
           if-no-files-found: error
+
+  release:
+    needs: [test, android]
+    if: !failure() && !cancelled() && github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: icedragon-vpn-apks
+          path: release
+
+      - name: Prepare versioned assets & checksums
+        working-directory: release
+        run: |
+          v="${{ needs.test.outputs.version }}"
+          for f in IceDragon-VPN-*.apk; do
+            cp "$f" "IceDragon-VPN-$v-${f#IceDragon-VPN-}"
+          done
+          sha256sum IceDragon-VPN-*.apk > SHA256SUMS.txt
+          printf '# IceDragon VPN version: %s\n' "$v" >> SHA256SUMS.txt
+          ls -lh
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="${{ needs.test.outputs.version }}"
+          tag="v$v"
+          bash scripts/release-notes.sh "$tag" > notes.md
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" release/* --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit "$tag" --repo "$GITHUB_REPOSITORY" \
+              --title "IceDragon VPN $v" \
+              --notes-file notes.md \
+              --latest
+          else
+            gh release create "$tag" release/* --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "IceDragon VPN $v" \
+              --notes-file notes.md \
+              --latest
+          fi

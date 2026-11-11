@@ -155,6 +155,14 @@ class CoreController extends ChangeNotifier {
       if (e.statusCode == 401 || e.statusCode == 403) {
         _lost(CoreUnavailable(CoreProblem.refused, e.message));
       }
+    } on Exception catch (e) {
+      if (status == null || unavailable == null) {
+        _lost(CoreUnavailable(CoreProblem.notAnswering, '$e'));
+      }
+    } on Error catch (e) {
+      if (status == null || unavailable == null) {
+        _lost(CoreUnavailable(CoreProblem.exited, '$e'));
+      }
     } finally {
       _polling = false;
       if (!_disposed) {

@@ -109,9 +109,9 @@ class MainActivity : FlutterActivity() {
         channel.setMethodCallHandler { call, result ->
             when (call.method) {
                 "dataDir" -> result.success(CoreService.dataDir(this).absolutePath)
-                "startCore" -> {
+                "startCore" -> inBackground(result) {
                     CoreService.startCore(this, on = false)
-                    result.success(null)
+                    CoreService.coreError().ifBlank { null }
                 }
                 "setOn" -> {
                     if (call.argument<Boolean>("on") != true) {
@@ -131,7 +131,15 @@ class MainActivity : FlutterActivity() {
                         }
                     }
                 }
-                "isRunning" -> result.success(mobile.Mobile.running())
+                "isRunning" -> result.success(
+                    try {
+                        mobile.Mobile.running()
+                    } catch (e: Throwable) {
+                        CoreService.recordStartError(e)
+                        false
+                    },
+                )
+                "coreError" -> result.success(CoreService.coreError())
                 "connectionMode" -> result.success(CoreService.connectionMode(this))
                 "showSpeed" -> result.success(CoreService.showSpeed(this))
                 "setShowSpeed" -> {
@@ -311,7 +319,7 @@ class MainActivity : FlutterActivity() {
         worker.execute {
             val value = try {
                 work()
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 null
             }
             main.post { result.success(value) }

@@ -123,29 +123,116 @@ class AndroidCore {
     ]);
   }
 
-  AndroidCore(this._dataDir);
+  AndroidCore(
+    this._dataDir, {
+    this.startupGrace = const Duration(seconds: 12),
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   final String _dataDir;
+  final Duration startupGrace;
+  final DateTime Function() _now;
+  bool _startAttempted = false;
+  DateTime? _startingSince;
+
+  /// Clears startup timing state so the next connect attempt gets a fresh grace
+  /// window (for manual retries or port changes).
+  void resetStart() {
+    _startAttempted = false;
+    _startingSince = null;
+  }
+
+  Future<String> _coreError() async {
+    try {
+      final raw = await _channel.invokeMethod<String>('coreError');
+      return raw?.trim() ?? '';
+    } on PlatformException {
+      return '';
+    } on MissingPluginException {
+      return '';
+    }
+  }
+
+  static final _addressPattern = RegExp(r'\b127\.0\.0\.1:\d+\b');
+
+  static CoreUnavailable _unavailableFromError(String error) {
+    final trimmed = error.trim();
+    if (trimmed.contains('already in use')) {
+      final addr = _addressPattern.firstMatch(trimmed)?.group(0) ?? trimmed;
+      return CoreUnavailable(CoreProblem.portInUse, addr);
+    }
+    return CoreUnavailable(CoreProblem.exited, trimmed);
+  }
 
   /// Opens a client of the core, starting the core (off) when it does not
   /// run; it throws [CoreUnavailable] until the core answers.
   Future<CoreApi> connect() async {
-    if (await _channel.invokeMethod<bool>('isRunning') != true) {
-      await _channel.invokeMethod<void>('startCore');
-      throw const CoreUnavailable(CoreProblem.starting);
-    }
     try {
-      final api = CoreApi(await CoreLocator.locate(_dataDir));
+      if (await _channel.invokeMethod<bool>('isRunning') != true) {
+        final priorError = await _coreError();
+        if (_startAttempted && priorError.isNotEmpty) {
+          resetStart();
+          throw _unavailableFromError(priorError);
+        }
+        _startAttempted = true;
+        _startingSince ??= _now();
+        final rawStartError = await _channel.invokeMethod<Object?>('startCore');
+        final startError = rawStartError is String ? rawStartError.trim() : '';
+        final running = await _channel.invokeMethod<bool>('isRunning') == true;
+        if (!running) {
+          final detail = startError.isNotEmpty
+              ? startError
+              : await _coreError();
+          if (detail.isNotEmpty) {
+            resetStart();
+            throw _unavailableFromError(detail);
+          }
+          if (_now().difference(_startingSince!) >= startupGrace) {
+            resetStart();
+            throw const CoreUnavailable(
+              CoreProblem.exited,
+              'the core did not start',
+            );
+          }
+        }
+        throw const CoreUnavailable(CoreProblem.starting);
+      }
+      _startingSince ??= _now();
       try {
-        await api.status();
-        return api;
-      } on Exception {
-        api.close();
+        final api = CoreApi(await CoreLocator.locate(_dataDir));
+        try {
+          await api.status();
+          resetStart();
+          return api;
+        } on Exception {
+          api.close();
+          rethrow;
+        }
+      } on CoreUnavailable {
+        if (await _channel.invokeMethod<bool>('isRunning') != true) {
+          final detail = await _coreError();
+          if (detail.isNotEmpty) {
+            resetStart();
+            throw _unavailableFromError(detail);
+          }
+        }
+        if (_now().difference(_startingSince!) < startupGrace) {
+          // Started, and its API is still coming up.
+          throw const CoreUnavailable(CoreProblem.starting);
+        }
+        final detail = await _coreError();
+        resetStart();
+        if (detail.isNotEmpty) {
+          throw _unavailableFromError(detail);
+        }
         rethrow;
       }
-    } on CoreUnavailable {
-      // Started, and its API is still coming up.
-      throw const CoreUnavailable(CoreProblem.starting);
+    } on PlatformException catch (e) {
+      resetStart();
+      throw CoreUnavailable(CoreProblem.exited, e.message ?? e.code);
+    } on MissingPluginException catch (e) {
+      resetStart();
+      throw CoreUnavailable(CoreProblem.exited, e.message ?? e.toString());
     }
   }
 

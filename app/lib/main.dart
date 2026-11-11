@@ -90,8 +90,15 @@ Future<void> runAndroid() async {
     systemCountry:
         WidgetsBinding.instance.platformDispatcher.locale.countryCode,
   );
+  final androidCore = AndroidCore(dataDir);
   final core = CoreController(
-    AndroidCore(dataDir).connect,
+    androidCore.connect,
+    moveStoppedCore: (port) async {
+      final listen = await CoreLocator.dashboardListen(dataDir);
+      await CoreLocator.setDashboardListen(dataDir, withPort(listen, port));
+      androidCore.resetStart();
+    },
+    retryStoppedCore: () async => androidCore.resetStart(),
     turnOn: AndroidCore.setOn,
   )..start();
   AppLifecycleListener(

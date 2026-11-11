@@ -95,6 +95,9 @@ func Start(dataDir string, on bool) error {
 	if err := neverSleep(paths.Config); err != nil {
 		return err
 	}
+	if err := ensureFreeDefaultPorts(paths.Config); err != nil {
+		return err
+	}
 	d, err := service.NewDaemon(paths, false)
 	if err != nil {
 		return err
@@ -256,6 +259,50 @@ func neverSleep(path string) error {
 	}
 	cfg.Proxy.IdleSleep = 0
 	return config.Save(path, cfg)
+}
+
+// ensureFreeDefaultPorts moves untouched default local listeners (dashboard or
+// proxy) to a free loopback port if another app on the device (such as another
+// copy of the VPN) already holds the default port.
+func ensureFreeDefaultPorts(path string) error {
+	cfg, _, err := config.Load(path)
+	if err != nil {
+		return err
+	}
+	changed := false
+	if cfg.Dashboard.Enabled {
+		if next, moved := freeListenIfBusy(cfg.Dashboard.Listen, config.DefaultDashboardListen); moved {
+			cfg.Dashboard.Listen = next
+			changed = true
+		}
+	}
+	if next, moved := freeListenIfBusy(cfg.Proxy.Listen, config.DefaultProxyListen); moved {
+		cfg.Proxy.Listen = next
+		changed = true
+	}
+	if !changed {
+		return nil
+	}
+	return config.Save(path, cfg)
+}
+
+func freeListenIfBusy(addr, defaultAddr string) (string, bool) {
+	if addr != defaultAddr {
+		return addr, false
+	}
+	if ln, err := net.Listen("tcp", addr); err == nil {
+		_ = ln.Close()
+		return addr, false
+	} else if !service.IsAddressInUse(err) {
+		return addr, false
+	}
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		return addr, false
+	}
+	free := ln.Addr().String()
+	_ = ln.Close()
+	return free, true
 }
 
 // Speed is the proxy's current speed in bytes per second, "down,up" (a

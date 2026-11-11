@@ -604,8 +604,8 @@ void main() {
             'html_url': 'https://github.com/example/app/releases/tag/v1.2.3',
             'assets': [
               for (final name in [
-                'Arman-VPN-Windows-x64.zip',
-                'Arman-VPN-Windows-Setup-x64.exe',
+                'IceDragon-VPN-Windows-x64.zip',
+                'IceDragon-VPN-Windows-Setup-x64.exe',
                 'SHA256SUMS.txt',
                 'SHA256SUMS.txt.sig',
               ])
@@ -624,7 +624,7 @@ void main() {
       ))!;
       expect(
         release.installSource(os: 'windows')!['url'],
-        'https://downloads.example/Arman-VPN-Windows-x64.zip',
+        'https://downloads.example/IceDragon-VPN-Windows-x64.zip',
       );
       expect(requests, ['GET /updates.json', 'GET /releases/latest']);
     },
@@ -641,7 +641,7 @@ void main() {
             'html_url': 'https://github.com/example/app/releases/tag/v1.2.3',
             'assets': [
               for (final name in [
-                'Arman-VPN-Android-universal.apk',
+                'IceDragon-VPN-Android-universal.apk',
                 'SHA256SUMS.txt',
                 'SHA256SUMS.txt.sig',
               ])
