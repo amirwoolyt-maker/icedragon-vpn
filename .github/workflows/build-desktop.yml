@@ -21,8 +21,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: build-desktop-${{ github.ref }}
-  cancel-in-progress: false
+  group: build-desktop-${{ github.sha }}
+  cancel-in-progress: true
 
 env:
   FLUTTER_VERSION: 3.47.7
