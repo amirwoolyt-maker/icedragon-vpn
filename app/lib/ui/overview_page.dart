@@ -2750,7 +2750,8 @@ class _QuickLocationChips extends StatelessWidget {
       required String label,
       required bool selected,
       required VoidCallback onTap,
-      Widget? leading,
+      required Widget leading,
+      TextDirection? textDirection,
     }) => Material(
       color: selected ? accent.withValues(alpha: 0.22) : palette.card,
       shape: StadiumBorder(
@@ -2768,9 +2769,11 @@ class _QuickLocationChips extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (leading != null) ...[leading, const SizedBox(width: 6)],
+              leading,
+              const SizedBox(width: 6),
               Text(
                 label,
+                textDirection: textDirection,
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: selected ? palette.text : palette.muted,
                   fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
@@ -2817,7 +2820,8 @@ class _QuickLocationChips extends StatelessWidget {
           for (final code in favorites) ...[
             const SizedBox(width: 8),
             chip(
-              label: ltr(code),
+              label: code,
+              textDirection: TextDirection.ltr,
               selected: chosen == code.toLowerCase(),
               leading: CountryFlag(code: code, width: 18),
               onTap: () {

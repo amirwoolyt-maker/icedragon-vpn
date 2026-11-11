@@ -118,6 +118,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
+    expect(tester.takeException(), isNull);
     expect(find.text('IceDragon VPN'), findsOneWidget);
     expect(find.byType(LiveSpeedCard), findsOneWidget);
     expect(find.byType(SessionDurationText), findsOneWidget);
@@ -131,6 +132,44 @@ void main() {
 
     await tester.pumpWidget(const SizedBox());
     core.dispose();
+  });
+
+  testWidgets('LiveSpeedCard fits ultra-narrow screens without overflow', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final traffic = Traffic.fromJson({
+      'up': 12 << 20,
+      'down': 345 << 20,
+      'up_rate': 950 << 10,
+      'down_rate': 12 << 20,
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(20),
+            child: LiveSpeedCard(
+              traffic: traffic,
+              samples: const [SpeedSample(1024, 512), SpeedSample(4096, 1024)],
+              startedAt: DateTime.now().subtract(const Duration(minutes: 2)),
+              dark: true,
+              textColor: Colors.white,
+              mutedColor: Colors.white70,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(LiveSpeedCard), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
   });
 
   testWidgets('ServersPage filters countries and pins favorites', (

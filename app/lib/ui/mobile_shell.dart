@@ -231,74 +231,77 @@ class _SettingsList extends StatelessWidget {
         () => SettingsPage(core: core, settings: settings, section: section),
       ),
     );
-    return ListView(
+    return SingleChildScrollView(
       padding: pagePadding(context),
-      children: [
-        PageTitle(l.settingsTitle),
-        // Language and theme first, what someone looks for before anything
-        // else, with which country and account; then how the traffic goes,
-        // what helps when Mozilla is blocked, and the app itself.
-        group(l.sectionGeneral, [
-          section(
-            SettingsSection.general,
-            Icons.tune_rounded,
-            l.sectionGeneral,
-          ),
-          tile(Icons.public_rounded, l.navServers, onOpenServers),
-          tile(Icons.people_outline_rounded, l.navAccounts, onOpenAccounts),
-        ]),
-        group(l.groupNetwork, [
-          tile(
-            Icons.auto_fix_high_rounded,
-            MobileStrings.of(context).smartDoctor,
-            () => showConnectionDoctorSheet(context, core),
-          ),
-          section(
-            SettingsSection.connection,
-            Icons.vpn_lock_outlined,
-            l.sectionConnection,
-          ),
-          section(
-            SettingsSection.routing,
-            Icons.alt_route_rounded,
-            l.sectionRouting,
-          ),
-          section(SettingsSection.dns, Icons.dns_rounded, l.sectionDns),
-        ]),
-        group(l.sectionBypass, [
-          section(SettingsSection.relay, Icons.cloud_outlined, l.apiRelay),
-          section(
-            SettingsSection.fragment,
-            Icons.content_cut_rounded,
-            l.tlsFragment,
-          ),
-          section(
-            SettingsSection.upstreamProxy,
-            Icons.lan_outlined,
-            l.upstreamProxy,
-          ),
-        ]),
-        group(l.groupApp, [
-          // The app's port and the web dashboard: computers only (a narrow
-          // window shows this layout too).
-          if (!Platform.isAndroid)
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          PageTitle(l.settingsTitle),
+          // Language and theme first, what someone looks for before anything
+          // else, with which country and account; then how the traffic goes,
+          // what helps when Mozilla is blocked, and the app itself.
+          group(l.sectionGeneral, [
             section(
-              SettingsSection.advanced,
-              Icons.build_outlined,
-              l.sectionAdvanced,
+              SettingsSection.general,
+              Icons.tune_rounded,
+              l.sectionGeneral,
             ),
-          tile(
-            Icons.receipt_long_outlined,
-            l.navLogs,
-            () => push(l.navLogs, () => LogsPage(core: core)),
-          ),
-          tile(
-            Icons.info_outline_rounded,
-            l.navAbout,
-            () => push(l.navAbout, () => AboutPage(core: core)),
-          ),
-        ]),
-      ],
+            tile(Icons.public_rounded, l.navServers, onOpenServers),
+            tile(Icons.people_outline_rounded, l.navAccounts, onOpenAccounts),
+          ]),
+          group(l.groupNetwork, [
+            tile(
+              Icons.auto_fix_high_rounded,
+              MobileStrings.of(context).smartDoctor,
+              () => showConnectionDoctorSheet(context, core),
+            ),
+            section(
+              SettingsSection.connection,
+              Icons.vpn_lock_outlined,
+              l.sectionConnection,
+            ),
+            section(
+              SettingsSection.routing,
+              Icons.alt_route_rounded,
+              l.sectionRouting,
+            ),
+            section(SettingsSection.dns, Icons.dns_rounded, l.sectionDns),
+          ]),
+          group(l.sectionBypass, [
+            section(SettingsSection.relay, Icons.cloud_outlined, l.apiRelay),
+            section(
+              SettingsSection.fragment,
+              Icons.content_cut_rounded,
+              l.tlsFragment,
+            ),
+            section(
+              SettingsSection.upstreamProxy,
+              Icons.lan_outlined,
+              l.upstreamProxy,
+            ),
+          ]),
+          group(l.groupApp, [
+            // The app's port and the web dashboard: computers only (a narrow
+            // window shows this layout too).
+            if (!Platform.isAndroid)
+              section(
+                SettingsSection.advanced,
+                Icons.build_outlined,
+                l.sectionAdvanced,
+              ),
+            tile(
+              Icons.receipt_long_outlined,
+              l.navLogs,
+              () => push(l.navLogs, () => LogsPage(core: core)),
+            ),
+            tile(
+              Icons.info_outline_rounded,
+              l.navAbout,
+              () => push(l.navAbout, () => AboutPage(core: core)),
+            ),
+          ]),
+        ],
+      ),
     );
   }
 }

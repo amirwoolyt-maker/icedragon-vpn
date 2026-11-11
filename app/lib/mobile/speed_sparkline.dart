@@ -154,42 +154,61 @@ class LiveSpeedCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              _SpeedMetric(
-                icon: Icons.south_rounded,
-                color: DarkGlassPalette.mint,
-                label: ms.downloadLabel,
-                value: formatRate(traffic.downRate),
-                textColor: textColor,
-                mutedColor: mutedColor,
+              Expanded(
+                flex: 3,
+                child: _SpeedMetric(
+                  icon: Icons.south_rounded,
+                  color: DarkGlassPalette.mint,
+                  label: ms.downloadLabel,
+                  value: formatRate(traffic.downRate),
+                  textColor: textColor,
+                  mutedColor: mutedColor,
+                ),
               ),
-              const SizedBox(width: 14),
-              _SpeedMetric(
-                icon: Icons.north_rounded,
-                color: DarkGlassPalette.cyan,
-                label: ms.uploadLabel,
-                value: formatRate(traffic.upRate),
-                textColor: textColor,
-                mutedColor: mutedColor,
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 3,
+                child: _SpeedMetric(
+                  icon: Icons.north_rounded,
+                  color: DarkGlassPalette.cyan,
+                  label: ms.uploadLabel,
+                  value: formatRate(traffic.upRate),
+                  textColor: textColor,
+                  mutedColor: mutedColor,
+                ),
               ),
-              const Spacer(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    ms.sessionData,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: mutedColor,
-                    ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        ms.sessionData,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: mutedColor,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: Text(
+                          formatBytes(totalProxy),
+                          maxLines: 1,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: textColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    formatBytes(totalProxy),
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: textColor,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
@@ -235,33 +254,41 @@ class _SpeedMetric extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 26,
-          height: 26,
+          width: 24,
+          height: 24,
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.16),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, size: 15, color: color),
+          child: Icon(icon, size: 14, color: color),
         ),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(color: mutedColor),
-            ),
-            Text(
-              value,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: textColor,
-                fontWeight: FontWeight.w700,
+        const SizedBox(width: 6),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelSmall?.copyWith(color: mutedColor),
               ),
-            ),
-          ],
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: textColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
