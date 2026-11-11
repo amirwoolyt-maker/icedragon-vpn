@@ -7,6 +7,7 @@ import '../core/core_api.dart';
 import '../core/core_controller.dart';
 import '../core/models.dart';
 import '../l10n/app_localizations.dart';
+import '../mobile/location_ping_cache.dart';
 import '../mobile/mobile_strings.dart';
 import 'format.dart';
 import 'browser_signin.dart';
@@ -64,6 +65,7 @@ class _ServersPageState extends State<ServersPage> {
   Future<void> _load() async {
     try {
       final list = await _core.call((api) => api.locations());
+      LocationPingCache.recordAll(list.locations);
       final config = await _core.settings();
       if (!mounted) return;
       setState(() {
@@ -114,6 +116,7 @@ class _ServersPageState extends State<ServersPage> {
     });
     try {
       final result = await _core.call((api) => api.pingLocations(codes));
+      LocationPingCache.recordAll(result.locations);
       final tested = {for (final loc in result.locations) loc.code: loc};
       if (!mounted) return;
       setState(() {
@@ -152,6 +155,7 @@ class _ServersPageState extends State<ServersPage> {
     });
     try {
       final result = await _core.call((api) => api.pingLocations(codes));
+      LocationPingCache.recordAll(result.locations);
       final tested = {for (final loc in result.locations) loc.code: loc};
       final updated = [
         for (final loc in _locations ?? const <Location>[])

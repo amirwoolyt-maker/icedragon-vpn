@@ -10,13 +10,11 @@ import android.content.Intent
 import android.net.VpnService
 import android.util.Log
 import android.widget.RemoteViews
+import java.util.Locale
 
 /**
- * The home-screen widget: one round button that turns the VPN on or off,
- * like the Quick Settings tile. Its color shows the state: green when
- * connected, amber while connecting, grey when off. CoreService calls
- * [updateAll] whenever the state changes; after a reboot the process is
- * new, CoreService.on is false, and the system's update shows it off.
+ * The home-screen widget: a compact dark-glass card that turns the VPN on or
+ * off with one tap and shows live connection state + country.
  */
 class ConnectWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
@@ -60,8 +58,8 @@ class ConnectWidget : AppWidgetProvider() {
         }
     }
 
-    /** What the button shows; [needsApp]: a tap opens the app (no VPN permission). */
-    private data class Shown(val state: Int, val needsApp: Boolean)
+    /** What the widget shows now; [needsApp]: a tap opens the app (no VPN permission). */
+    private data class Shown(val state: Int, val needsApp: Boolean, val country: String)
 
     companion object {
         private const val TAG = "ConnectWidget"
@@ -100,9 +98,10 @@ class ConnectWidget : AppWidgetProvider() {
                 CoreService.connected -> CONNECTED
                 else -> CONNECTING
             }
+            val country = if (state == CONNECTED) CoreService.exitCountryCode else ""
             // Asked only while off: a tap then turns it on.
             val needsApp = state == OFF && CoreService.usesVpn(context) && VpnService.prepare(context) != null
-            return Shown(state, needsApp)
+            return Shown(state, needsApp, country)
         }
 
         private fun views(context: Context, shown: Shown): RemoteViews {
@@ -115,6 +114,22 @@ class ConnectWidget : AppWidgetProvider() {
                     else -> R.drawable.widget_button_off
                 },
             )
+            val subtitle = when (shown.state) {
+                CONNECTED -> if (shown.country.length == 2) {
+                    "${CoreService.flag(shown.country)} ${Locale.Builder().setRegion(shown.country).build().displayCountry}"
+                } else {
+                    context.getString(R.string.widget_status_connected)
+                }
+                CONNECTING -> context.getString(R.string.widget_status_connecting)
+                else -> context.getString(R.string.widget_status_off)
+            }
+            val subtitleColor = when (shown.state) {
+                CONNECTED -> 0xFF10D9A0.toInt()
+                CONNECTING -> 0xFFFFB547.toInt()
+                else -> 0xFF9EA8CE.toInt()
+            }
+            views.setTextViewText(R.id.widget_subtitle, subtitle)
+            views.setTextColor(R.id.widget_subtitle, subtitleColor)
             views.setContentDescription(
                 R.id.widget_button,
                 context.getString(if (shown.state == OFF) R.string.widget_connect else R.string.widget_disconnect),
@@ -133,6 +148,7 @@ class ConnectWidget : AppWidgetProvider() {
                     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
                 )
             }
+            views.setOnClickPendingIntent(R.id.widget_root, tap)
             views.setOnClickPendingIntent(R.id.widget_button, tap)
             return views
         }

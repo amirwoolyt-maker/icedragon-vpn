@@ -119,6 +119,12 @@ class MobileStrings {
     _ => 'Auto-Fix',
   };
 
+  String get autoFixAndConnect => switch (lang) {
+    'fa' => 'تنظیم خودکار بهترین مسیر و اتصال',
+    'ar' => 'إصلاح تلقائي والاتصال',
+    _ => 'Auto-Fix & Connect',
+  };
+
   String get smartDoctorIntro => switch (lang) {
     'fa' =>
         'پزشک اتصال به‌صورت خودکار DNS، رله، TLS Fragment و پروتکل‌های H2/H3/H1 را برای شبکه فعلی آزمایش می‌کند تا بهترین مسیر وصل به Mozilla پیدا شود.',

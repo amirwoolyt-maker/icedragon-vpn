@@ -7,10 +7,14 @@
     <string name="notification_no_network">No internet connection</string>
     <string name="notification_proxy">Proxy only · %1$s</string>
     <string name="notification_stop">Disconnect</string>
+    <string name="notification_reconnect">Reconnect</string>
     <!-- The home-screen widget: its name and description in the widget
          picker, and what its button does (for screen readers). -->
     <string name="widget_label">Quick connect</string>
     <string name="widget_description">Connect or disconnect with one tap</string>
     <string name="widget_connect">Tap to connect</string>
     <string name="widget_disconnect">Tap to disconnect</string>
+    <string name="widget_status_off">Off · Tap to connect</string>
+    <string name="widget_status_connecting">Connecting…</string>
+    <string name="widget_status_connected">Connected</string>
 </resources>

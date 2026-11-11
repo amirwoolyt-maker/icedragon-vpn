@@ -6,6 +6,8 @@ import 'package:arman_vpn/app_settings.dart';
 import 'package:arman_vpn/core/core_controller.dart';
 import 'package:arman_vpn/core/models.dart';
 import 'package:arman_vpn/l10n/app_localizations.dart';
+import 'package:arman_vpn/mobile/connection_doctor.dart';
+import 'package:arman_vpn/mobile/location_ping_cache.dart';
 import 'package:arman_vpn/mobile/speed_sparkline.dart';
 import 'package:arman_vpn/ui/app.dart';
 import 'package:arman_vpn/ui/servers_page.dart';
@@ -13,6 +15,14 @@ import 'package:arman_vpn/ui/servers_page.dart';
 import 'widget_test.dart' show FakeApi;
 
 class _MobileFakeApi extends FakeApi {
+  @override
+  Future<List<DnsTestHost>> testDns(List<String> servers) async => [
+    DnsTestHost.fromJson({
+      'host': 'accounts.firefox.com',
+      'addrs': ['34.120.1.2'],
+    }),
+  ];
+
   @override
   Future<CoreStatus> status() async => CoreStatus.fromJson({
     'state': on ? {'phase': 'running', 'message': ''} : {'phase': 'off'},
@@ -99,6 +109,8 @@ void main() {
   testWidgets('Phone home shows live speed chart and quick location chips', (
     tester,
   ) async {
+    LocationPingCache.clear();
+    addTearDown(LocationPingCache.clear);
     tester.view.physicalSize = const Size(400, 860);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -123,6 +135,7 @@ void main() {
     expect(find.byType(LiveSpeedCard), findsOneWidget);
     expect(find.byType(SessionDurationText), findsOneWidget);
     expect(find.text('DE'), findsOneWidget);
+    expect(find.text('650ms'), findsOneWidget);
 
     await tester.ensureVisible(find.text('DE'));
     await tester.pump();
@@ -200,6 +213,59 @@ void main() {
     await tester.tap(find.byTooltip('Pin to favorites').first);
     await tester.pumpAndSettle();
     expect(settings.favoriteCountries, isNotEmpty);
+
+    await tester.pumpWidget(const SizedBox());
+    core.dispose();
+  });
+
+  test('LocationPingCache stores measured delays and ignores failures', () {
+    LocationPingCache.clear();
+    addTearDown(LocationPingCache.clear);
+
+    LocationPingCache.recordAll([
+      Location.fromJson({'code': 'de', 'name': 'Germany', 'ping_ms': 95}),
+      Location.fromJson({'code': 'jp', 'name': 'Japan', 'ping_ms': 0}),
+    ]);
+
+    expect(LocationPingCache.latencies.value, {'DE': 95});
+  });
+
+  testWidgets('Smart Connection Doctor autoStart probes profiles immediately', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 860);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final api = _MobileFakeApi();
+    final core = CoreController(
+      () async => api,
+      pollInterval: const Duration(hours: 1),
+      turnOn: (on) async => api.on = on,
+    );
+    core.start();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () =>
+                  showConnectionDoctorSheet(context, core, autoStart: true),
+              child: const Text('Open Doctor'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open Doctor'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Working profile found'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
     core.dispose();

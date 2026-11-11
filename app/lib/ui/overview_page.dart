@@ -14,6 +14,7 @@ import '../core/models.dart';
 import '../core/ports.dart';
 import '../l10n/app_localizations.dart';
 import '../mobile/connection_doctor.dart';
+import '../mobile/location_ping_cache.dart';
 import '../mobile/mobile_strings.dart';
 import '../mobile/mobile_theme.dart';
 import '../mobile/speed_sparkline.dart';
@@ -1361,12 +1362,22 @@ class _PhoneHome extends StatelessWidget {
                   ),
                 ),
                 if (!short && !noNetwork && status.totalAccounts > 0) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   Center(
                     child: FilledButton.tonalIcon(
-                      onPressed: () => showConnectionDoctorSheet(context, core),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: DarkGlassPalette.purple.withValues(
+                          alpha: 0.24,
+                        ),
+                        foregroundColor: p.dark ? Colors.white : p.idle,
+                      ),
+                      onPressed: () => showConnectionDoctorSheet(
+                        context,
+                        core,
+                        autoStart: true,
+                      ),
                       icon: const Icon(Icons.auto_fix_high_rounded, size: 18),
-                      label: Text(ms.smartDoctorShort),
+                      label: Text(ms.autoFixAndConnect),
                     ),
                   ),
                 ],
@@ -2721,8 +2732,9 @@ class _LowQuotaNoticeState extends State<_LowQuotaNotice> {
 }
 
 /// Horizontal quick-pick bar for Auto (Recommended), Fastest, and any pinned
-/// favorite countries right on the phone Home screen.
-class _QuickLocationChips extends StatelessWidget {
+/// favorite countries right on the phone Home screen, showing cached real
+/// latency (ms) next to favorite countries once measured.
+class _QuickLocationChips extends StatefulWidget {
   const _QuickLocationChips({
     required this.core,
     required this.settings,
@@ -2740,11 +2752,59 @@ class _QuickLocationChips extends StatelessWidget {
   final VoidCallback? onOpenServers;
 
   @override
+  State<_QuickLocationChips> createState() => _QuickLocationChipsState();
+}
+
+class _QuickLocationChipsState extends State<_QuickLocationChips> {
+  bool _fetched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _maybePrefetch();
+  }
+
+  @override
+  void didUpdateWidget(covariant _QuickLocationChips oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.core != widget.core ||
+        !listEquals(
+          oldWidget.settings.favoriteCountries,
+          widget.settings.favoriteCountries,
+        )) {
+      _maybePrefetch();
+    }
+  }
+
+  void _maybePrefetch() {
+    if (_fetched ||
+        widget.settings.favoriteCountries.isEmpty ||
+        LocationPingCache.latencies.value.isNotEmpty) {
+      return;
+    }
+    final api = widget.core.api;
+    if (api == null) return;
+    _fetched = true;
+    unawaited(() async {
+      try {
+        final list = await api.locations();
+        LocationPingCache.recordAll(list.locations);
+      } on Exception {
+        // Best-effort prefetch; Servers page updates latency on open or ping.
+      }
+    }());
+  }
+
+  @override
   Widget build(BuildContext context) {
     final ms = MobileStrings.of(context);
     final theme = Theme.of(context);
-    final chosen = selection.trim().toLowerCase();
-    final favorites = settings.favoriteCountries;
+    final chosen = widget.selection.trim().toLowerCase();
+    final favorites = widget.settings.favoriteCountries;
+    final palette = widget.palette;
+    final accent = widget.accent;
+    final core = widget.core;
+    final onOpenServers = widget.onOpenServers;
 
     Widget chip({
       required String label,
@@ -2752,6 +2812,7 @@ class _QuickLocationChips extends StatelessWidget {
       required VoidCallback onTap,
       required Widget leading,
       TextDirection? textDirection,
+      int? pingMs,
     }) => Material(
       color: selected ? accent.withValues(alpha: 0.22) : palette.card,
       shape: StadiumBorder(
@@ -2779,71 +2840,87 @@ class _QuickLocationChips extends StatelessWidget {
                   fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                 ),
               ),
+              if (pingMs != null && pingMs > 0) ...[
+                const SizedBox(width: 5),
+                Text(
+                  '${pingMs}ms',
+                  textDirection: TextDirection.ltr,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: delayColor(pingMs),
+                    fontWeight: FontWeight.w800,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
             ],
           ),
         ),
       ),
     );
 
-    return SizedBox(
-      height: 34,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: [
-          chip(
-            label: ms.quickFastest,
-            selected: chosen == 'fastest',
-            leading: Icon(
-              Icons.bolt_rounded,
-              size: 15,
-              color: chosen == 'fastest' ? accent : palette.muted,
-            ),
-            onTap: () {
-              unawaited(HapticFeedback.selectionClick());
-              runShowingErrors(context, () => core.setLocation('fastest'));
-            },
-          ),
-          const SizedBox(width: 8),
-          chip(
-            label: ms.quickAuto,
-            selected: chosen.isEmpty,
-            leading: Icon(
-              Icons.auto_awesome_rounded,
-              size: 14,
-              color: chosen.isEmpty ? accent : palette.muted,
-            ),
-            onTap: () {
-              unawaited(HapticFeedback.selectionClick());
-              runShowingErrors(context, () => core.setLocation(''));
-            },
-          ),
-          for (final code in favorites) ...[
-            const SizedBox(width: 8),
+    return ValueListenableBuilder<Map<String, int>>(
+      valueListenable: LocationPingCache.latencies,
+      builder: (context, pings, _) => SizedBox(
+        height: 34,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
             chip(
-              label: code,
-              textDirection: TextDirection.ltr,
-              selected: chosen == code.toLowerCase(),
-              leading: CountryFlag(code: code, width: 18),
+              label: ms.quickFastest,
+              selected: chosen == 'fastest',
+              leading: Icon(
+                Icons.bolt_rounded,
+                size: 15,
+                color: chosen == 'fastest' ? accent : palette.muted,
+              ),
               onTap: () {
                 unawaited(HapticFeedback.selectionClick());
-                runShowingErrors(context, () => core.setLocation(code));
+                runShowingErrors(context, () => core.setLocation('fastest'));
               },
             ),
-          ],
-          if (onOpenServers != null) ...[
             const SizedBox(width: 8),
             chip(
-              label: ms.allServersShort,
-              selected: false,
+              label: ms.quickAuto,
+              selected: chosen.isEmpty,
               leading: Icon(
-                Icons.public_rounded,
+                Icons.auto_awesome_rounded,
                 size: 14,
-                color: palette.muted,
+                color: chosen.isEmpty ? accent : palette.muted,
               ),
-              onTap: onOpenServers!,
+              onTap: () {
+                unawaited(HapticFeedback.selectionClick());
+                runShowingErrors(context, () => core.setLocation(''));
+              },
             ),
+            for (final code in favorites) ...[
+              const SizedBox(width: 8),
+              chip(
+                label: code,
+                textDirection: TextDirection.ltr,
+                selected: chosen == code.toLowerCase(),
+                leading: CountryFlag(code: code, width: 18),
+                pingMs: pings[code.trim().toUpperCase()],
+                onTap: () {
+                  unawaited(HapticFeedback.selectionClick());
+                  runShowingErrors(context, () => core.setLocation(code));
+                },
+              ),
+            ],
+            if (onOpenServers != null) ...[
+              const SizedBox(width: 8),
+              chip(
+                label: ms.allServersShort,
+                selected: false,
+                leading: Icon(
+                  Icons.public_rounded,
+                  size: 14,
+                  color: palette.muted,
+                ),
+                onTap: onOpenServers,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

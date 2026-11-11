@@ -130,13 +130,31 @@ jobs:
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$ndk" >> "$GITHUB_ENV"
           go install "golang.org/x/mobile/cmd/gomobile@$GOMOBILE_VERSION" "golang.org/x/mobile/cmd/gobind@$GOMOBILE_VERSION"
 
+      - name: Cache fallback debug keystore
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: icedragon-debug-keystore-v1
+
       - name: Release keystore (optional)
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           if [ -z "$KEYSTORE" ] || [ -z "$PASSWORD" ]; then
-            echo "::warning::ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD not set; APKs will use the runner debug key"
+            echo "::warning::ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD not set; using cached debug keystore"
+            mkdir -p ~/.android
+            if [ ! -f ~/.android/debug.keystore ]; then
+              keytool -genkeypair -v \
+                -keystore ~/.android/debug.keystore \
+                -storepass android \
+                -alias androiddebugkey \
+                -keypass android \
+                -keyalg RSA \
+                -keysize 2048 \
+                -validity 10000 \
+                -dname "CN=Android Debug,O=Android,C=US"
+            fi
             exit 0
           fi
           printf '%s' "$KEYSTORE" | base64 -d > app/android/release.jks

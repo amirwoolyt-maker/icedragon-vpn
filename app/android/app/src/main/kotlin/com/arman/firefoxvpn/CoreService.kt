@@ -92,6 +92,7 @@ class CoreService : VpnService() {
                 else -> ""
             }
             connected = on && code.length == 2
+            exitCountryCode = if (connected) code else ""
             ConnectWidget.updateAll(this@CoreService)
             // Proxy mode names the address apps connect to; the VPN needs none.
             val proxy = if (usesVpn(this@CoreService) || !mobile.Mobile.running()) "" else mobile.Mobile.proxyAddress()
@@ -217,6 +218,28 @@ class CoreService : VpnService() {
             turnOff(this)
             return START_NOT_STICKY
         }
+        if (intent?.action == ACTION_RETRY) {
+            if (on) {
+                connected = false
+                exitCountryCode = ""
+                shownCountry = ""
+                getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification(""))
+                ConnectWidget.updateAll(this)
+                worker.execute {
+                    try {
+                        if (mobile.Mobile.running()) {
+                            mobile.Mobile.setOn(false)
+                            mobile.Mobile.setOn(true)
+                            mobile.Mobile.connect()
+                        }
+                    } catch (e: Throwable) {
+                        Log.w(TAG, "notification reconnect failed", e)
+                    }
+                    main.post { refreshNotification() }
+                }
+            }
+            return START_STICKY
+        }
         if (intent?.action == ACTION_RECONNECT) {
             // New settings: the apps left out of the VPN, or the mode.
             if (on) {
@@ -270,6 +293,7 @@ class CoreService : VpnService() {
         stopTunnel()
         on = false
         connected = false
+        exitCountryCode = ""
         QuickTile.refresh(this)
         ConnectWidget.updateAll(this)
         super.onDestroy()
@@ -419,6 +443,10 @@ class CoreService : VpnService() {
             this, 1, Intent(this, CoreService::class.java).setAction(ACTION_STOP),
             PendingIntent.FLAG_IMMUTABLE,
         )
+        val retry = PendingIntent.getService(
+            this, 2, Intent(this, CoreService::class.java).setAction(ACTION_RETRY),
+            PendingIntent.FLAG_IMMUTABLE,
+        )
         val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(this, CHANNEL)
         } else {
@@ -433,12 +461,14 @@ class CoreService : VpnService() {
             .setContentIntent(open)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .addAction(Notification.Action.Builder(null, getString(R.string.notification_reconnect), retry).build())
             .addAction(Notification.Action.Builder(null, getString(R.string.notification_stop), stop).build())
             .build()
     }
 
     companion object {
         const val ACTION_STOP = "com.arman.firefoxvpn.STOP"
+        private const val ACTION_RETRY = "com.arman.firefoxvpn.RETRY"
         private const val ACTION_RECONNECT = "com.arman.firefoxvpn.RECONNECT"
         private const val PREFS = "vpn"
         private const val MODE = "app_mode"
@@ -610,6 +640,11 @@ class CoreService : VpnService() {
         var connected = false
             private set
 
+        /** Two-letter exit country code while [connected], or "" otherwise. */
+        @Volatile
+        var exitCountryCode = ""
+            private set
+
         /** The core's data folder: accounts, settings, logs, the local token. */
         fun dataDir(context: Context): File = File(context.filesDir, "core")
 
@@ -632,6 +667,7 @@ class CoreService : VpnService() {
             mobile.Mobile.connect()
             on = true
             connected = false
+            exitCountryCode = ""
             QuickTile.refresh(context)
             ConnectWidget.updateAll(context)
         }
@@ -648,6 +684,7 @@ class CoreService : VpnService() {
             if (mobile.Mobile.running()) mobile.Mobile.setOn(false)
             on = false
             connected = false
+            exitCountryCode = ""
             context.stopService(Intent(context, CoreService::class.java))
             QuickTile.refresh(context)
             ConnectWidget.updateAll(context)

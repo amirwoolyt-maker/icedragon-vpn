@@ -15,12 +15,13 @@ import 'mobile_theme.dart';
 /// working route to Mozilla for restricted networks.
 Future<void> showConnectionDoctorSheet(
   BuildContext context,
-  CoreController core,
-) => showModalBottomSheet<void>(
+  CoreController core, {
+  bool autoStart = false,
+}) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
   useSafeArea: true,
-  builder: (_) => _ConnectionDoctorSheet(core: core),
+  builder: (_) => _ConnectionDoctorSheet(core: core, autoStart: autoStart),
 );
 
 enum _StepStatus { running, passed, failed, info }
@@ -81,9 +82,13 @@ const _autoDohServers = <String>[
 ];
 
 class _ConnectionDoctorSheet extends StatefulWidget {
-  const _ConnectionDoctorSheet({required this.core});
+  const _ConnectionDoctorSheet({
+    required this.core,
+    this.autoStart = false,
+  });
 
   final CoreController core;
+  final bool autoStart;
 
   @override
   State<_ConnectionDoctorSheet> createState() => _ConnectionDoctorSheetState();
@@ -97,6 +102,18 @@ class _ConnectionDoctorSheetState extends State<_ConnectionDoctorSheet> {
   bool _solved = false;
   bool _cancelled = false;
   String _summary = '';
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.autoStart) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_running && !_solved) {
+          _runDoctor();
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
