@@ -310,6 +310,7 @@ class _DesktopHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SpeedHistory.record(status);
     final base = Theme.of(context);
     final p = base.brightness == Brightness.dark
         ? _HomePalette.night
@@ -387,6 +388,7 @@ class _DesktopHome extends StatelessWidget {
 
   Widget _content(BuildContext context, _HomePalette p) {
     final l = AppLocalizations.of(context);
+    final ms = MobileStrings.of(context);
     final theme = Theme.of(context);
     final look = PhaseLook.of(l, status);
     final proxy = status.proxy;
@@ -429,6 +431,67 @@ class _DesktopHome extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if ((connected && proxy != null && proxy.transport.isNotEmpty) ||
+            status.totalAccounts > 0) ...[
+          Row(
+            children: [
+              if (connected && proxy != null && proxy.transport.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: ShapeDecoration(
+                    color: accent.withValues(alpha: 0.16),
+                    shape: StadiumBorder(
+                      side: BorderSide(color: accent.withValues(alpha: 0.4)),
+                    ),
+                  ),
+                  child: Text(
+                    ltr(proxy.transport.toUpperCase()),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: accent,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              const Spacer(),
+              if (status.totalAccounts > 0)
+                _HomePill(
+                  palette: p,
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(999),
+                      onTap: () => showConnectionDoctorSheet(context, core),
+                      child: Tooltip(
+                        message: ms.smartDoctor,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.auto_fix_high_rounded,
+                              size: 16,
+                              color: p.second,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              ms.smartDoctorShort,
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: p.text,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+        ],
         Center(
           child: _PowerOrb(
             palette: p,
@@ -463,6 +526,28 @@ class _DesktopHome extends StatelessWidget {
             runSpacing: 8,
             children: [
               _HomeDelay(core: core, palette: p),
+              if (proxy?.startedAt != null)
+                _HomePill(
+                  palette: p,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.timer_outlined,
+                        size: 15,
+                        color: p.muted,
+                      ),
+                      const SizedBox(width: 5),
+                      SessionDurationText(
+                        startedAt: proxy!.startedAt,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: p.text,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               if (ip.isNotEmpty)
                 _HomePill(
                   palette: p,
@@ -479,7 +564,7 @@ class _DesktopHome extends StatelessWidget {
                 ),
             ],
           )
-        else if (failing || noNetwork || gaveUp)
+        else if (failing || noNetwork || gaveUp) ...[
           // Not connecting stands out from the ordinary hints.
           _ProblemBox(
             text: noNetwork
@@ -490,8 +575,25 @@ class _DesktopHome extends StatelessWidget {
             color: p.error,
             icon: Icons.error_outline_rounded,
             tooltip: noNetwork ? '' : failure?.detail ?? '',
-          )
-        else
+          ),
+          if (!noNetwork && status.totalAccounts > 0) ...[
+            const SizedBox(height: 10),
+            Center(
+              child: FilledButton.tonalIcon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: DarkGlassPalette.purple.withValues(
+                    alpha: 0.24,
+                  ),
+                  foregroundColor: p.dark ? Colors.white : p.idle,
+                ),
+                onPressed: () =>
+                    showConnectionDoctorSheet(context, core, autoStart: true),
+                icon: const Icon(Icons.auto_fix_high_rounded, size: 18),
+                label: Text(ms.autoFixAndConnect),
+              ),
+            ),
+          ],
+        ] else
           // A start failure's hint is general; the core's reason is on
           // hover or a long press.
           Tooltip(
@@ -613,7 +715,22 @@ class _DesktopHome extends StatelessWidget {
             tooltip: tooltip,
           ),
         ),
-        const SizedBox(height: 24),
+        if (_running && proxy != null && sharedWithLan(proxy.listen)) ...[
+          const SizedBox(height: 10),
+          Center(child: _LanChip(port: portOf(proxy.listen) ?? 10810)),
+        ],
+        const SizedBox(height: 20),
+        if (on && status.traffic != null && settings.showSpeedChart) ...[
+          LiveSpeedCard(
+            traffic: status.traffic!,
+            samples: SpeedHistory.samples,
+            startedAt: proxy?.startedAt,
+            dark: p.dark,
+            textColor: p.text,
+            mutedColor: p.muted,
+          ),
+          const SizedBox(height: 12),
+        ],
         _UpdateNotice(core: core, settings: settings, palette: p),
         _UdpNotice(status: status, settings: settings, palette: p),
         _Notices(notices: homeNotices(status.notices)),
@@ -624,6 +741,17 @@ class _DesktopHome extends StatelessWidget {
           connected: connected,
           palette: p,
         ),
+        if (status.totalAccounts > 0) ...[
+          _QuickLocationChips(
+            core: core,
+            settings: settings,
+            selection: status.selection,
+            palette: p,
+            accent: accent,
+            onOpenServers: onOpenServers,
+          ),
+          const SizedBox(height: 12),
+        ],
         // Side by side when there is room.
         LayoutBuilder(
           builder: (context, box) => box.maxWidth >= 560

@@ -13,6 +13,7 @@ import '../core/ports.dart';
 import '../core/tun_service.dart';
 import '../desktop/desktop_bridge.dart';
 import '../l10n/app_localizations.dart';
+import '../mobile/connection_doctor.dart';
 import '../mobile/mobile_strings.dart';
 import '../platform.dart';
 import 'bypass_apps_page.dart';
@@ -728,6 +729,29 @@ class _SettingsPageState extends State<SettingsPage> {
                     }),
                   ),
                 ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Panel(
+          title: MobileStrings.of(context).smartDoctor,
+          icon: Icons.auto_fix_high_rounded,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                MobileStrings.of(context).smartDoctorIntro,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: FilledButton.tonalIcon(
+                  onPressed: () => showConnectionDoctorSheet(context, _core),
+                  icon: const Icon(Icons.auto_fix_high_rounded, size: 18),
+                  label: Text(MobileStrings.of(context).doctorStart),
+                ),
               ),
             ],
           ),

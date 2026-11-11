@@ -4,7 +4,7 @@
 
 <h1 align="center">IceDragon VPN</h1>
 
-<h3 align="center">Fast, Encrypted &amp; Open-Source Android VPN with Dark-Glass Design</h3>
+<h3 align="center">Fast, Encrypted &amp; Open-Source Cross-Platform VPN (Android, Windows, Linux &amp; macOS) with Dark-Glass Design</h3>
 
 [![Last Version](https://img.shields.io/github/v/release/amirwoolyt-maker/icedragon-vpn?style=flat-square&label=Version&color=38BDF8)](https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/amirwoolyt-maker/icedragon-vpn/total?style=flat-square&logo=github&label=Downloads&color=6366F1)](https://github.com/amirwoolyt-maker/icedragon-vpn/releases)
@@ -36,7 +36,7 @@
 
 ## 📥 Quick Download
 
-Choose the APK matching your Android device:
+Choose the package matching your device (Android, Windows, Linux, or macOS):
 
 <table>
   <tr>
@@ -63,6 +63,31 @@ Choose the APK matching your Android device:
     <td><strong>Android x86_64</strong></td>
     <td>x86_64 Chromebooks, emulators &amp; tablets</td>
     <td><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Android-x86_64.apk"><img src="https://img.shields.io/badge/Download-x86__64%20APK-38BDF8?style=flat-square&logo=android" alt="Download x86_64 APK"></a></td>
+  </tr>
+  <tr>
+    <td><strong>Windows x64 Installer</strong></td>
+    <td>Windows 10/11 64-bit setup wizard (recommended)</td>
+    <td><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Windows-Setup-x64.exe"><img src="https://img.shields.io/badge/Download-Windows%20Setup-0078D4?style=flat-square&logo=windows" alt="Download Windows Installer"></a></td>
+  </tr>
+  <tr>
+    <td><strong>Windows x64 Portable</strong></td>
+    <td>Portable ZIP (no installation required)</td>
+    <td><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Windows-x64.zip"><img src="https://img.shields.io/badge/Download-Windows%20ZIP-0078D4?style=flat-square&logo=windows" alt="Download Windows Portable ZIP"></a></td>
+  </tr>
+  <tr>
+    <td><strong>Linux x64 (<code>amd64</code>)</strong></td>
+    <td>Ubuntu, Debian, Fedora &amp; standard 64-bit Linux PCs</td>
+    <td><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Linux-amd64.tar.gz"><img src="https://img.shields.io/badge/Download-Linux%20amd64-FCC624?style=flat-square&logo=linux&logoColor=black" alt="Download Linux amd64"></a></td>
+  </tr>
+  <tr>
+    <td><strong>Linux ARM64 (<code>arm64</code>)</strong></td>
+    <td>64-bit ARM Linux desktops &amp; SBCs</td>
+    <td><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Linux-arm64.tar.gz"><img src="https://img.shields.io/badge/Download-Linux%20arm64-FCC624?style=flat-square&logo=linux&logoColor=black" alt="Download Linux arm64"></a></td>
+  </tr>
+  <tr>
+    <td><strong>macOS Universal (<code>DMG</code>)</strong></td>
+    <td>Apple Silicon (M-series) &amp; Intel Macs</td>
+    <td><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-macOS.dmg"><img src="https://img.shields.io/badge/Download-macOS%20DMG-111827?style=flat-square&logo=apple" alt="Download macOS DMG"></a></td>
   </tr>
 </table>
 

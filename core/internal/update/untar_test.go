@@ -191,7 +191,7 @@ func TestAMacReleaseInstalls(t *testing.T) {
 	r.files[AssetName("1.2.3")] = appTar(t, files...)
 	r.sign()
 	r.serve(t)
-	if AssetName("1.2.3") != "Arman-VPN-1.2.3-macOS.tar.gz" {
+	if AssetName("1.2.3") != "IceDragon-VPN-1.2.3-macOS.tar.gz" {
 		t.Fatalf("asset %s", AssetName("1.2.3"))
 	}
 	appDir, dataDir := appFolder(t, "1.0.0", false)

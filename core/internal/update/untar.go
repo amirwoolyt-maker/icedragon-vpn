@@ -17,17 +17,17 @@ import (
 // (scripts/build-linux.sh): an arman-vpn folder with the app, its lib/ and
 // data/, and core/.
 var linuxPackage = appPackage{
-	name:   func(v string) string { return "Arman-VPN-" + v + "-Linux-" + runtime.GOARCH + ".tar.gz" },
+	name:   func(v string) string { return "IceDragon-VPN-" + v + "-Linux-" + runtime.GOARCH + ".tar.gz" },
 	app:    "arman-vpn",
 	core:   "core/arman-vpn-core",
 	unpack: untar,
 }
 
-// macPackage is the macOS app's tar.gz (scripts/build-macos.sh): Firefox
-// VPN.app, for Apple silicon and Intel, as the disk image holds it. The
-// app's folder is the bundle, so an update replaces its Contents.
+// macPackage is the macOS app's tar.gz (scripts/build-macos.sh):
+// bundle contents for Apple silicon and Intel, as the disk image holds it.
+// The app's folder is the bundle, so an update replaces its Contents.
 var macPackage = appPackage{
-	name:   func(v string) string { return "Arman-VPN-" + v + "-macOS.tar.gz" },
+	name:   func(v string) string { return "IceDragon-VPN-" + v + "-macOS.tar.gz" },
 	app:    "Contents/MacOS/Arman VPN",
 	core:   "Contents/MacOS/arman-vpn-core",
 	unpack: untar,

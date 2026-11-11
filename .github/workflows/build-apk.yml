@@ -190,7 +190,7 @@ jobs:
 
   release:
     needs: [test, android]
-    if: ${{ !failure() && !cancelled() && github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') }}
+    if: ${{ !failure() && !cancelled() && github.event_name != 'pull_request' && !contains(github.event.head_commit.message, '[with-desktop]') && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') }}
     runs-on: ubuntu-24.04
     permissions:
       contents: write

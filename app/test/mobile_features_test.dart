@@ -148,6 +148,52 @@ void main() {
     core.dispose();
   });
 
+  testWidgets(
+    'Desktop home matches mobile features: speed chart, timer, chips, and doctor',
+    (tester) async {
+      LocationPingCache.clear();
+      addTearDown(LocationPingCache.clear);
+      tester.view.physicalSize = const Size(1280, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      final api = _MobileFakeApi();
+      LocationPingCache.recordAll([
+        Location.fromJson({'code': 'DE', 'name': 'Germany', 'ping_ms': 95}),
+      ]);
+      final core = CoreController(
+        () async => api,
+        pollInterval: const Duration(hours: 1),
+        turnOn: (on) async => api.on = on,
+      );
+      final settings = AppSettings()
+        ..themeMode = ThemeMode.dark
+        ..favoriteCountries = const ['DE'];
+
+      await tester.pumpWidget(VpnApp(core: core, settings: settings));
+      core.start();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(LiveSpeedCard), findsOneWidget);
+      expect(find.byType(SessionDurationText), findsOneWidget);
+      expect(find.text('HTTP/2'), findsOneWidget);
+      expect(find.text('Auto-Fix'), findsOneWidget);
+      expect(find.text('DE'), findsOneWidget);
+      expect(find.text('95ms'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('DE'));
+      await tester.pump();
+      await tester.tap(find.text('DE'));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(api.location, 'DE');
+
+      await tester.pumpWidget(const SizedBox());
+      core.dispose();
+    },
+  );
+
   testWidgets('AboutPage shows positive IceDragon info and Telegram channel', (
     tester,
   ) async {
