@@ -21,20 +21,22 @@ const firefoxAccountSignUpUrl = 'https://accounts.firefox.com/';
 const firefoxAccountSetPasswordUrl =
     'https://accounts.firefox.com/reset_password/';
 
-/// The program's logo, its tile (assets/logo.png, made by
-/// tool/app_icons.py), [size] logical pixels square.
+/// The program's IceDragon emblem (assets/logo.png), [size] logical pixels square.
 class AppLogo extends StatelessWidget {
   const AppLogo({super.key, required this.size});
 
   final double size;
 
   @override
-  Widget build(BuildContext context) => Image.asset(
-    'assets/logo.png',
-    width: size,
-    height: size,
-    filterQuality: FilterQuality.medium,
-    excludeFromSemantics: true,
+  Widget build(BuildContext context) => ClipRRect(
+    borderRadius: BorderRadius.circular(size * 0.24),
+    child: Image.asset(
+      'assets/logo.png',
+      width: size,
+      height: size,
+      filterQuality: FilterQuality.high,
+      excludeFromSemantics: true,
+    ),
   );
 }
 

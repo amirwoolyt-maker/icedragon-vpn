@@ -1208,11 +1208,15 @@ class _PhoneHome extends StatelessWidget {
                 children: [
                   const AppLogo(size: 28),
                   const SizedBox(width: 8),
-                  Text(
-                    l.appTitle,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: p.text,
+                  Flexible(
+                    child: Text(
+                      l.appTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: p.text,
+                      ),
                     ),
                   ),
                   if (connected &&
@@ -1356,7 +1360,7 @@ class _PhoneHome extends StatelessWidget {
                     tooltip: noNetwork ? '' : failure?.detail ?? '',
                   ),
                 ),
-                if (!noNetwork && status.totalAccounts > 0) ...[
+                if (!short && !noNetwork && status.totalAccounts > 0) ...[
                   const SizedBox(height: 8),
                   Center(
                     child: FilledButton.tonalIcon(

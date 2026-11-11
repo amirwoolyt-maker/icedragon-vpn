@@ -333,7 +333,7 @@ class _SparklinePainter extends CustomPainter {
   }) {
     final n = values.length;
     final dx = size.width / (n - 1);
-    final padTop = 3.0;
+    const padTop = 3.0;
     final usable = math.max(4.0, size.height - padTop - 2);
     final points = <Offset>[
       for (var i = 0; i < n; i++)

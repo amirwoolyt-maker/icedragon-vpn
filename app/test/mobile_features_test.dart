@@ -39,6 +39,15 @@ class _MobileFakeApi extends FakeApi {
       'down_rate': 2048,
     },
     'active_account': accountsJson.first,
+    'last_test': {
+      'at': DateTime.now().toUtc().toIso8601String(),
+      'ok': true,
+      'http_status': 204,
+      'tunnel_ms': 100,
+      'tls_ms': 80,
+      'response_ms': 60,
+      'total_ms': 240,
+    },
     'accounts': {'total': 2, 'ready': 1, 'reauth_required': 1},
     'switch_threshold_percent': 90,
     'version': '1.0.18',
@@ -109,12 +118,15 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
+    expect(find.text('IceDragon VPN'), findsOneWidget);
     expect(find.byType(LiveSpeedCard), findsOneWidget);
     expect(find.byType(SessionDurationText), findsOneWidget);
     expect(find.text('DE'), findsOneWidget);
 
-    await tester.tap(find.text('DE'));
+    await tester.ensureVisible(find.text('DE'));
     await tester.pump();
+    await tester.tap(find.text('DE'));
+    await tester.pump(const Duration(milliseconds: 50));
     expect(api.location, 'DE');
 
     await tester.pumpWidget(const SizedBox());
@@ -131,7 +143,7 @@ void main() {
     );
     final settings = AppSettings();
     core.start();
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
 
     await tester.pumpWidget(
       MaterialApp(

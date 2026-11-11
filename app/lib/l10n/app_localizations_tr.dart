@@ -10,7 +10,7 @@ class AppLocalizationsTr extends AppLocalizations {
   AppLocalizationsTr([String locale = 'tr']) : super(locale);
 
   @override
-  String get appTitle => 'Arman VPN';
+  String get appTitle => 'IceDragon VPN';
 
   @override
   String get navOverview => 'Genel bakış';
@@ -1514,7 +1514,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get tunBusy =>
-      'Arman VPN\'in başka bir kopyası TUN modunu kullanıyor.';
+      'IceDragon VPN\'in başka bir kopyası TUN modunu kullanıyor.';
 
   @override
   String get tunNoDriver =>
@@ -1541,11 +1541,11 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get tunInstallPrompt =>
-      'Arman VPN, TUN modu için hizmeti yüklemek istiyor.';
+      'IceDragon VPN, TUN modu için hizmeti yüklemek istiyor.';
 
   @override
   String get tunRemovePrompt =>
-      'Arman VPN, TUN modunun hizmetini kaldırmak istiyor.';
+      'IceDragon VPN, TUN modunun hizmetini kaldırmak istiyor.';
 
   @override
   String tunRemoveFailed(String error) {

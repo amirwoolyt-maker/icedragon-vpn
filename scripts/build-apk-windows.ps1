@@ -16,7 +16,7 @@ $root = Split-Path -Parent $PSScriptRoot
 $match = Select-String -Path "$root\app\pubspec.yaml" -Pattern '^version:\s*(\d+\.\d+\.\d+)'
 if (-not $match) { throw 'No version in app\pubspec.yaml' }
 $version = $match.Matches[0].Groups[1].Value
-$out = "$root\dist\Arman-VPN-Mobile-$version-android"
+$out = "$root\dist\IceDragon-VPN-$version-android"
 
 if (Test-Path $ToolsRoot) {
     if (-not $env:ANDROID_HOME -and (Test-Path "$ToolsRoot\android-sdk")) {
@@ -77,8 +77,8 @@ try {
 
 New-Item -ItemType Directory -Force $out | Out-Null
 foreach ($apk in Get-ChildItem "$root\app\build\app\outputs\flutter-apk\app-*-release.apk") {
-    $name = $apk.Name -replace '^app-', "Arman-VPN-Mobile-$version-" -replace '-release', ''
+    $name = $apk.Name -replace '^app-', "IceDragon-VPN-$version-" -replace '-release', ''
     Copy-Item $apk.FullName (Join-Path $out $name) -Force
 }
-Copy-Item "$root\app\build\app\outputs\flutter-apk\app-release.apk" (Join-Path $out "Arman-VPN-Mobile-$version-universal.apk") -Force
+Copy-Item "$root\app\build\app\outputs\flutter-apk\app-release.apk" (Join-Path $out "IceDragon-VPN-$version-universal.apk") -Force
 Get-ChildItem $out | ForEach-Object { Write-Host ("Built {0} ({1:N1} MB)" -f $_.FullName, ($_.Length / 1MB)) }

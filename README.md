@@ -1,6 +1,6 @@
-# Arman VPN Mobile (نسخه اختصاصی اندروید)
+# IceDragon VPN (نسخه اختصاصی اندروید)
 
-نسخه موبایل (Android) بازطراحی‌شده بر پایه هسته متن‌باز **Arman VPN Client** با تمرکز بر **سادگی یک‌صفحه‌ای**، **تم Dark Glassmorphism**، **امنیت کامل بدون کد مشکوک** و **اتصال پایدار به سرورهای Mozilla / Fastly**.
+**IceDragon VPN** یک کلاینت موبایل (Android) سریع و زیبا با طراحی **Dark Glassmorphism** و **لوگوی اختصاصی IceDragon** است که بر پایه هسته متن‌باز و بدون تغییر امنیتی **Arman VPN Client** (اتصال مستقیم به سرورهای **Mozilla / Fastly**) ساخته شده است.
 
 ---
 
@@ -29,8 +29,8 @@
 نیازی به نصب هیچ ابزار سنگینی روی کامپیوتر ندارید:
 1. یک ریپوزیتوری جدید (عمومی یا خصوصی) در **GitHub** بسازید.
 2. پوشه `C:\Users\mehregano\.gemini\antigravity\scratch\arman-vpn-mobile` را داخل آن Push کنید.
-3. از تب **Actions** روی گیت‌هاب، ورک‌فلو **`Build Android APK`** را اجرا کنید (یا با هر Push به‌صورت خودکار اجرا می‌شود).
-4. پس از چند دقیقه از بخش **Artifacts** فایل آماده **`android-apks`** (`Arman-VPN-Mobile-...-arm64-v8a.apk` یا `universal.apk`) را دانلود و روی گوشی نصب کنید.
+3. از تب **Actions** روی گیت‌هاب، ورک‌فلو **`Build IceDragon VPN APK`** به‌صورت خودکار اجرا می‌شود.
+4. پس از چند دقیقه از بخش **Artifacts** فایل آماده **`icedragon-vpn-apks`** (`IceDragon-VPN-...-arm64-v8a.apk` یا `universal.apk`) را دانلود و روی گوشی نصب کنید.
 
 ### روش ۲: ساخت محلی روی ویندوز
 در صورت داشتن ابزارهای **Go 1.27+**, **gomobile**, **Flutter 3.47+**, **JDK 17/21** و **Android SDK + NDK `30.0.16248370`**:
