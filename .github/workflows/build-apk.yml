@@ -221,11 +221,17 @@ jobs:
           tag="v$v"
           bash scripts/release-notes.sh "$tag" > notes.md
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$tag" release/* --repo "$GITHUB_REPOSITORY" --clobber
-            gh release edit "$tag" --repo "$GITHUB_REPOSITORY" \
-              --title "IceDragon VPN $v" \
-              --notes-file notes.md \
-              --latest
+            if out="$(gh release upload "$tag" release/* --repo "$GITHUB_REPOSITORY" --clobber 2>&1)"; then
+              gh release edit "$tag" --repo "$GITHUB_REPOSITORY" \
+                --title "IceDragon VPN $v" \
+                --notes-file notes.md \
+                --latest
+            elif echo "$out" | grep -qi "immutable"; then
+              echo "::warning::Release $tag already exists and is immutable. Bump version in app/pubspec.yaml to publish a new release."
+            else
+              echo "$out" >&2
+              exit 1
+            fi
           else
             gh release create "$tag" release/* --repo "$GITHUB_REPOSITORY" \
               --target "$GITHUB_SHA" \
