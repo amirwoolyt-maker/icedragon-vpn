@@ -1,0 +1,15 @@
+# Build & local caches
+app/build/
+app/.dart_tool/
+app/.flutter-plugins-dependencies
+app/android/.gradle/
+app/android/local.properties
+app/android/app/libs/core.aar
+app/android/app/libs/core-sources.jar
+app/android/key.properties
+app/android/*.jks
+dist/
+out/
+*.apk
+*.aab
+*.signing-key

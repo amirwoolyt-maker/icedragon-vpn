@@ -1,0 +1,112 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+    paths-ignore: ['**.md', 'LICENSE']
+  pull_request:
+    paths-ignore: ['**.md', 'LICENSE']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: 3.47.7
+  GOMOBILE_VERSION: v0.0.0-20260908204917-8b95e45f8d3e
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Version
+        id: version
+        run: |
+          v="$(sed -n 's/^version: *\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' app/pubspec.yaml)"
+          test -n "$v"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: core/go.mod
+          cache-dependency-path: core/go.sum
+      - name: Core tests & vet
+        working-directory: core
+        run: |
+          go test -count=1 -timeout=120s ./...
+          go vet ./...
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: App analyze & tests
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+
+  android:
+    needs: test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: core/go.mod
+          cache-dependency-path: core/go.sum
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: NDK and gomobile
+        run: |
+          ndk="$(sed -n 's/.*ndkVersion = "\(.*\)".*/\1/p' app/android/app/build.gradle.kts)"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;$ndk" > /dev/null
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$ndk" >> "$GITHUB_ENV"
+          go install "golang.org/x/mobile/cmd/gomobile@$GOMOBILE_VERSION" "golang.org/x/mobile/cmd/gobind@$GOMOBILE_VERSION"
+      - name: Optional release signing key
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE" ]; then
+            echo "::notice::No ANDROID_KEYSTORE_BASE64 secret set; APKs will be signed with the Android debug key."
+            exit 0
+          fi
+          printf '%s' "$KEYSTORE" | base64 -d > app/android/release.jks
+          printf 'storeFile=../release.jks\nstorePassword=%s\nkeyAlias=release\nkeyPassword=%s\n' "$PASSWORD" "$PASSWORD" > app/android/key.properties
+      - name: Build core.aar & APKs
+        run: |
+          v='${{ needs.test.outputs.version }}'
+          mkdir -p app/android/app/libs
+          flags="-s -w -X github.com/armanlife/arman-vpn-client/core/internal/version.Current=$v"
+          (cd core && gomobile bind -target=android -androidapi 24 -trimpath \
+            -ldflags "$flags" \
+            -o ../app/android/app/libs/core.aar ./mobile)
+          cd app
+          flutter pub get
+          mkdir -p ../out
+          flutter build apk --release --split-per-abi --dart-define=APP_VERSION=$v
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            cp "build/app/outputs/flutter-apk/app-$abi-release.apk" "../out/Arman-VPN-Mobile-$v-$abi.apk"
+          done
+          flutter build apk --release --dart-define=APP_VERSION=$v
+          cp build/app/outputs/flutter-apk/app-release.apk "../out/Arman-VPN-Mobile-$v-universal.apk"
+      - name: Cleanup signing key
+        if: always()
+        run: rm -f app/android/release.jks app/android/key.properties
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apks
+          path: out/*.apk
+          if-no-files-found: error
