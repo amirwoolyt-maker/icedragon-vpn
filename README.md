@@ -1,65 +1,95 @@
 <div align="center">
 
-**🇺🇸 English** &nbsp;/&nbsp; [🇮🇷 فارسی](docs/readme/README_fa.md)
-
-</div>
-<br>
-
-<p align="center"><img src="docs/images/logo.png" width="128" alt="IceDragon VPN"></p>
+<p align="center"><img src="docs/images/logo.png" width="136" alt="IceDragon VPN"></p>
 
 <h1 align="center">IceDragon VPN</h1>
 
-<h2 align="center">⚠️ Unofficial independent project</h2>
+<h3 align="center">Fast, Encrypted &amp; Open-Source Android VPN with Dark-Glass Design</h3>
 
-<h3 align="center">IceDragon VPN is a customized Dark-Glass Android client built on the open-source <a href="https://github.com/armanlife/arman-vpn-client">Arman VPN</a> core. It is not made, owned, sponsored, or endorsed by Mozilla, and is not affiliated with Mozilla in any way.</h3>
-
-<div align="center">
-
-[![Downloads](https://img.shields.io/github/downloads/amirwoolyt-maker/icedragon-vpn/total?style=flat-square&logo=github&label=Downloads)](https://github.com/amirwoolyt-maker/icedragon-vpn/releases)
-[![Last Version](https://img.shields.io/github/v/release/amirwoolyt-maker/icedragon-vpn?style=flat-square&label=Version)](https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest)
+[![Last Version](https://img.shields.io/github/v/release/amirwoolyt-maker/icedragon-vpn?style=flat-square&label=Version&color=38BDF8)](https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/amirwoolyt-maker/icedragon-vpn/total?style=flat-square&logo=github&label=Downloads&color=6366F1)](https://github.com/amirwoolyt-maker/icedragon-vpn/releases)
+[![Telegram](https://img.shields.io/badge/Telegram-@icedragon__lair-26A5E4?style=flat-square&logo=telegram)](https://t.me/icedragon_lair)
 [![License](https://img.shields.io/github/license/amirwoolyt-maker/icedragon-vpn?style=flat-square&label=License)](LICENSE)
+
+[📥 Download Latest APK](#-quick-download) &bull; [✨ Features](#-why-icedragon-vpn) &bull; [💬 Telegram Channel](https://t.me/icedragon_lair) &bull; [🌐 فارسی](docs/readme/README_fa.md) &bull; [Русский](docs/readme/README_ru.md) &bull; [中文](docs/readme/README_zh.md)
 
 </div>
 
-## What is IceDragon VPN?
+---
 
-**IceDragon VPN** is a free, open-source Android VPN that works with a Firefox Account. It carries your internet traffic through Mozilla's servers on **Fastly**'s infrastructure over secure **HTTP/1.1, HTTP/2, and HTTP/3** tunnels, wrapped in a sleek **Dark Glassmorphism** interface.
+## ✨ Why IceDragon VPN?
 
-Completely free, no ads, no tracking.
+**IceDragon VPN** is a fast, free, and open-source Android VPN built for speed, stability, and everyday privacy. Powered by high-throughput **HTTP/2 & HTTP/3** encrypted tunnels, smart multi-account failover, and a sleek **Dark-Glass** interface, it delivers reliable, low-latency connectivity in a single tap.
 
-## 📥 Download
+### Key Highlights
+
+- 🧊 **Dark-Glass Experience:** Clean, fluid, battery-friendly dark UI with instant splash launch (`#070A18`), adaptive dragon crest icon, and real-time connection metrics.
+- 🚀 **HTTP/2 & HTTP/3 Encrypted Tunnels:** High-speed encrypted transport built to stay fast and resilient across demanding networks.
+- 🔄 **50 GB/month per Account + Smart Failover:** Seamlessly switch between saved accounts at your configured threshold without dropping active connections.
+- ⚡ **Quick Server Chips with Live Latency:** One-tap access to recent locations on the home screen with color-coded ping badges (`ms`), plus automatic fastest-server selection.
+- 🩺 **1-Tap Auto-Fix & Connect:** Built-in Connection Doctor diagnoses core, DNS, TLS, and relay issues and gets you connected automatically.
+- 📲 **Home Screen Widget & Quick Settings Tile:** Connect, disconnect, or reconnect straight from your Android home screen widget or status-bar notification.
+- 🛡️ **App Split Tunneling & Built-in Bypass Tools:** Per-app VPN bypass, TLS fragmentation, custom DoH/DoT DNS, and relay support for restrictive networks.
+- 🔔 **Automatic Update Notifications:** Stay effortlessly up to date with non-intrusive in-app notifications and direct APK downloads from GitHub Releases.
+
+---
+
+## 📥 Quick Download
+
+Choose the APK matching your Android device:
 
 <table>
-<thead>
-<tr><th>System</th><th>Download</th></tr>
-</thead>
-<tbody>
-<tr><td>Android</td><td><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Android-universal.apk"><img src="https://img.shields.io/badge/APK-Universal-1a7f37?logo=android&logoColor=white" alt="APK Universal"></a><br><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Android-arm64-v8a.apk"><img src="https://img.shields.io/badge/APK-ARMv8-2da44e?logo=android&logoColor=white" alt="APK ARMv8"></a><br><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Android-armeabi-v7a.apk"><img src="https://img.shields.io/badge/APK-ARMv7-4ac26b?logo=android&logoColor=white" alt="APK ARMv7"></a><br><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Android-x86_64.apk"><img src="https://img.shields.io/badge/APK-x64-6fdd8b?logo=android&logoColor=white" alt="APK x64"></a></td></tr>
-<tr><td>Android TV</td><td><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Android-universal.apk"><img src="https://img.shields.io/badge/APK-Universal-1a7f37?logo=android&logoColor=white" alt="APK Universal"></a></td></tr>
-</tbody>
+  <tr>
+    <th>Edition</th>
+    <th>Recommended For</th>
+    <th>Download</th>
+  </tr>
+  <tr>
+    <td><strong>Android ARM64 (<code>arm64-v8a</code>)</strong></td>
+    <td>Modern Android phones &amp; tablets (recommended)</td>
+    <td><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Android-arm64-v8a.apk"><img src="https://img.shields.io/badge/Download-ARM64%20APK-38BDF8?style=flat-square&logo=android" alt="Download ARM64 APK"></a></td>
+  </tr>
+  <tr>
+    <td><strong>Android Universal</strong></td>
+    <td>Any Android device (includes all CPU architectures)</td>
+    <td><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Android-universal.apk"><img src="https://img.shields.io/badge/Download-Universal%20APK-6366F1?style=flat-square&logo=android" alt="Download Universal APK"></a></td>
+  </tr>
+  <tr>
+    <td><strong>Android ARMv7 (<code>armeabi-v7a</code>)</strong></td>
+    <td>Older 32-bit Android phones &amp; Android TV boxes</td>
+    <td><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Android-armeabi-v7a.apk"><img src="https://img.shields.io/badge/Download-ARMv7%20APK-38BDF8?style=flat-square&logo=android" alt="Download ARMv7 APK"></a></td>
+  </tr>
+  <tr>
+    <td><strong>Android x86_64</strong></td>
+    <td>x86_64 Chromebooks, emulators &amp; tablets</td>
+    <td><a href="https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/IceDragon-VPN-Android-x86_64.apk"><img src="https://img.shields.io/badge/Download-x86__64%20APK-38BDF8?style=flat-square&logo=android" alt="Download x86_64 APK"></a></td>
+  </tr>
 </table>
 
-**Which file should I download?**
+> Browse all versions, release notes, and SHA-256 checksums on the [Releases page](https://github.com/amirwoolyt-maker/icedragon-vpn/releases).
 
-- **ARMv8 (`arm64-v8a`):** Recommended for most modern Android phones (smaller download).
-- **Universal (`universal`):** Installs on every Android phone and Android TV.
+---
 
-## 🚀 Main features
+## 💬 Community & Updates
 
-- 🐉 **Dark Glassmorphism UI:** Refined dark interface with luminous connection ring, live speed sparkline, session duration timer, and quick location chips.
-- ⭐ **Favorites & One-Tap Fastest Server:** Pin favorite countries to the home screen and connect to the fastest server with a single tap.
-- 🩺 **Smart Connection Doctor:** Automatically diagnoses DNS filtering, relay health, and tests optimal circumvention combinations (`H2+SNI`, `H3`, `H2+Record`, `H1+First-Byte`).
-- 🆓 **50 GB/month per Firefox Account:** Full multi-account support with automatic quota-threshold switching.
-- 🔀 **Split Tunneling (App & Site Routing):** Choose which sites (`geosite.dat`, `geoip.dat`) and Android apps bypass the VPN.
-- 🔒 **Encrypted DNS (DoH / DoT)**, **TLS Fragment**, **API Relay + ECH**, and **Android Kill Switch** shortcut.
-- 🔄 **In-App Update Checker:** Detects the matching APK for your phone architecture right from **Settings → About → Check for updates**.
+Join the official IceDragon VPN Telegram channel for announcements, troubleshooting tips, release alerts, and direct community support:
 
-## 🛠️ Building from source
+👉 **[t.me/icedragon_lair](https://t.me/icedragon_lair)** (`@icedragon_lair`)
 
-GitHub Actions automatically tests Go core + Flutter app, builds all Android APKs (`arm64-v8a`, `armeabi-v7a`, `x86_64`, `universal`), and publishes them to [Releases](https://github.com/amirwoolyt-maker/icedragon-vpn/releases).
+---
 
-To build locally on Windows:
+## 🛠️ Building from Source
+
+GitHub Actions automatically runs Go &amp; Flutter tests and builds signed release APKs on every push to `main` via [`.github/workflows/build-apk.yml`](.github/workflows/build-apk.yml).
+
+To build APKs locally on Windows:
 
 ```powershell
-.\scripts\build-apk-windows.ps1 -ToolsRoot "E:\arman-dev-tools"
+.\scripts\build-apk-windows.ps1 -ToolsRoot "E:\icedragon-dev-tools"
 ```
+
+---
+
+## 📄 License
+
+Released under the [GNU General Public License v3.0](LICENSE).

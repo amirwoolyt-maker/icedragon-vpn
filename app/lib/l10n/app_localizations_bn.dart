@@ -538,7 +538,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get unofficialNote =>
-      'এটি অফিসিয়াল ক্লায়েন্ট নয়। Mozilla-র সাথে এর কোনো সম্পর্ক নেই।';
+      'দ্রুত, নিরাপদ ও ওপেন-সোর্স এনক্রিপ্টেড VPN — স্থিতিশীল সংযোগের জন্য তৈরি।';
 
   @override
   String get closeTitle => 'উইন্ডো বন্ধ করবেন?';

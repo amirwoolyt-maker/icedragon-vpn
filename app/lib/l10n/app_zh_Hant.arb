@@ -150,7 +150,7 @@
   "saved": "已儲存",
   "dataFolder": "資料儲存位置",
   "openFolder": "開啟資料夾",
-  "unofficialNote": "非官方用戶端，與 Mozilla 無關。",
+  "unofficialNote": "快速、安全、開源的加密 VPN，採用現代加密協定與暗夜玻璃設計，連線穩定流暢。",
   "closeTitle": "要關閉視窗嗎？",
   "closeBody": "最小化到系統匣時，VPN 會保持連線；結束則會中斷連線。",
   "rememberChoice": "記住我的選擇",

@@ -30,7 +30,7 @@ import (
 const (
 	installFolder = "Arman VPN"
 	displayName   = "Arman VPN TUN"
-	description   = "Runs the TUN mode of Arman VPN."
+	description   = "Runs the TUN mode of IceDragon VPN."
 	newExeName    = "arman-vpn-tun.new.exe"
 	oldExeName    = "arman-vpn-tun.old.exe"
 )

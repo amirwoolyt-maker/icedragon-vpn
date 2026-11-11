@@ -543,7 +543,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get openFolder => 'Ouvrir le dossier';
 
   @override
-  String get unofficialNote => 'Client non officiel. Non affilié à Mozilla.';
+  String get unofficialNote =>
+      'VPN rapide, sécurisé et open source avec chiffrement moderne et connexion fiable.';
 
   @override
   String get closeTitle => 'Fermer la fenêtre ?';

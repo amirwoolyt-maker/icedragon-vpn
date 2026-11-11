@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../app_info.dart';
 import '../app_settings.dart';
 import '../core/android_core.dart';
 import '../core/core_api.dart';
@@ -372,6 +373,25 @@ class _SettingsPageState extends State<SettingsPage> {
                     if (onOpenLogs != null &&
                         entries.last.$1 == SettingsSection.advanced)
                       row(Icons.receipt_long_outlined, l.navLogs, onOpenLogs),
+                  ],
+                ),
+              if (Platform.isAndroid)
+                SettingsGroup(
+                  title: Localizations.localeOf(context).languageCode == 'fa'
+                      ? 'ارتباط و پشتیبانی'
+                      : 'Community',
+                  tiles: [
+                    ListTile(
+                      leading: const Icon(Icons.send_rounded),
+                      title: Text(
+                        Localizations.localeOf(context).languageCode == 'fa'
+                            ? 'کانال تلگرام'
+                            : 'Telegram Channel',
+                      ),
+                      subtitle: const Text(telegramChannelHandle),
+                      trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+                      onTap: () => openLink(context, telegramChannelUrl),
+                    ),
                   ],
                 ),
             ],

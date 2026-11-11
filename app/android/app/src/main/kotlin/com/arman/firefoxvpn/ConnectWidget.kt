@@ -63,7 +63,7 @@ class ConnectWidget : AppWidgetProvider() {
 
     companion object {
         private const val TAG = "ConnectWidget"
-        private const val ACTION_TOGGLE = "com.arman.firefoxvpn.WIDGET_TOGGLE"
+        private const val ACTION_TOGGLE = "com.icedragon.vpn.WIDGET_TOGGLE"
 
         private const val OFF = 0
         private const val CONNECTING = 1

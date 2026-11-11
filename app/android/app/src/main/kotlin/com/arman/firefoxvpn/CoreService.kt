@@ -228,9 +228,7 @@ class CoreService : VpnService() {
                 worker.execute {
                     try {
                         if (mobile.Mobile.running()) {
-                            mobile.Mobile.setOn(false)
-                            mobile.Mobile.setOn(true)
-                            mobile.Mobile.connect()
+                            mobile.Mobile.reconnect()
                         }
                     } catch (e: Throwable) {
                         Log.w(TAG, "notification reconnect failed", e)
@@ -467,9 +465,9 @@ class CoreService : VpnService() {
     }
 
     companion object {
-        const val ACTION_STOP = "com.arman.firefoxvpn.STOP"
-        private const val ACTION_RETRY = "com.arman.firefoxvpn.RETRY"
-        private const val ACTION_RECONNECT = "com.arman.firefoxvpn.RECONNECT"
+        const val ACTION_STOP = "com.icedragon.vpn.STOP"
+        private const val ACTION_RETRY = "com.icedragon.vpn.RETRY"
+        private const val ACTION_RECONNECT = "com.icedragon.vpn.RECONNECT"
         private const val PREFS = "vpn"
         private const val MODE = "app_mode"
         const val MODE_EXCLUDE = "exclude"

@@ -1,4 +1,4 @@
-# Arman VPN app
+# IceDragon VPN app
 
 The Flutter app: the shared UI for Windows, Linux, macOS, and Android. It holds no
 VPN logic; it is a client of the core's dashboard API on loopback

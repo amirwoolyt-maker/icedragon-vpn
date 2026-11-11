@@ -1,4 +1,4 @@
-# Arman VPN on OpenWrt
+# IceDragon VPN on OpenWrt
 
 Your router becomes a **proxy** (SOCKS5 and HTTP, one port) with a **web panel**. Your devices use it, and their traffic goes through Mozilla's VPN servers.
 
@@ -35,7 +35,7 @@ case "$(uname -m)" in
   x86_64) arch=amd64 ;;
   armv7*) arch=armv7 ;;
 esac
-wget -O core.tar.gz "https://github.com/armanlife/arman-vpn-client/releases/latest/download/arman-vpn-core-linux-$arch.tar.gz"
+wget -O core.tar.gz "https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/arman-vpn-core-linux-$arch.tar.gz"
 tar -xzf core.tar.gz && mv "arman-vpn-core-linux-$arch/arman-vpn-core" . && rm -r core.tar.gz "arman-vpn-core-linux-$arch"
 chmod +x arman-vpn-core
 ```
@@ -47,7 +47,7 @@ chmod +x arman-vpn-core
 
 1. On the router, check the processor: `grep DISTRIB_ARCH /etc/openwrt_release`
    `x86_64` → **amd64** · `aarch64_…` → **arm64** · `arm_cortex-a…` → **armv7**
-2. Download [arm64](https://github.com/armanlife/arman-vpn-client/releases/latest/download/arman-vpn-core-linux-arm64.tar.gz), [amd64](https://github.com/armanlife/arman-vpn-client/releases/latest/download/arman-vpn-core-linux-amd64.tar.gz), or [armv7](https://github.com/armanlife/arman-vpn-client/releases/latest/download/arman-vpn-core-linux-armv7.tar.gz) and unpack it.
+2. Download [arm64](https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/arman-vpn-core-linux-arm64.tar.gz), [amd64](https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/arman-vpn-core-linux-amd64.tar.gz), or [armv7](https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest/download/arman-vpn-core-linux-armv7.tar.gz) and unpack it.
 3. Open [Bitvise SSH Client](https://www.bitvise.com/ssh-client-download) or [WinSCP](https://winscp.net/): router address, port 22, user `root`.
 4. Put `arman-vpn-core` in `/root/arman-vpn/` (make the folder).
 5. On the router: `chmod +x /root/arman-vpn/arman-vpn-core`
@@ -131,11 +131,11 @@ Calls and games on other ports do not work.
 
 ## 6. The whole network, with PassWall2
 
-With [PassWall2](https://github.com/Openwrt-Passwall/openwrt-passwall2) on the router, every device goes through Arman VPN with no setting on the device, and PassWall2's own rules choose what goes through it and what goes direct.
+With [PassWall2](https://github.com/Openwrt-Passwall/openwrt-passwall2) on the router, every device goes through IceDragon VPN with no setting on the device, and PassWall2's own rules choose what goes through it and what goes direct.
 
 1. **Node List → Add:** protocol **Socks**, address `127.0.0.1`, port `10810`, and the proxy login from step 2.
 2. **Basic Settings:** choose this node and turn the main switch on.
-3. **Turn off Localhost Proxy** (the router's own traffic). Otherwise Arman VPN's own connections go back into it in a loop, and nothing connects.
+3. **Turn off Localhost Proxy** (the router's own traffic). Otherwise IceDragon VPN's own connections go back into it in a loop, and nothing connects.
 4. **DNS → Remote DNS Protocol: DoH** (`https://1.1.1.1/dns-query`).
 5. Make your routing rules in PassWall2 (for example, your country's sites direct).
 

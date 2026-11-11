@@ -540,7 +540,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get openFolder => 'Открыть папку';
 
   @override
-  String get unofficialNote => 'Неофициальный клиент. Не связан с Mozilla.';
+  String get unofficialNote =>
+      'Быстрый, безопасный VPN с открытым исходным кодом, современным шифрованием и стабильным соединением.';
 
   @override
   String get closeTitle => 'Закрыть окно?';

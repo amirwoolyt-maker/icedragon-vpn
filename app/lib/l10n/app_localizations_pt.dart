@@ -540,7 +540,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get unofficialNote =>
-      'Cliente não oficial. Sem vínculo com a Mozilla.';
+      'VPN rápida, segura e de código aberto com criptografia moderna e conexão estável.';
 
   @override
   String get closeTitle => 'Fechar a janela?';

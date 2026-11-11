@@ -16,6 +16,9 @@ const appVersion = String.fromEnvironment('APP_VERSION', defaultValue: '0.0.0');
 /// check.
 const githubRepo = 'amirwoolyt-maker/icedragon-vpn';
 
+const telegramChannelUrl = 'https://t.me/icedragon_lair';
+const telegramChannelHandle = '@icedragon_lair';
+
 const updateManifestUrl =
     'https://raw.githubusercontent.com/amirwoolyt-maker/icedragon-vpn/main/.github/updates.json';
 const updateManifestMirror =

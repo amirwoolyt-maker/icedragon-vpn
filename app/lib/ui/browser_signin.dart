@@ -117,12 +117,12 @@ class FxaWebChannel {
   /// The JavaScript injected into every page of the sign-in. It forwards
   /// the page's WebChannel messages to [handle]; [post] is a statement
   /// sending its argument `o` (an object) to Dart. It defines
-  /// `window.__armanReply` for [reply].
+  /// `window.__iceDragonReply` for [reply].
   static String hookJs(String post) =>
       '''
 (function () {
-  if (window.__armanHooked) return;
-  window.__armanHooked = true;
+  if (window.__iceDragonHooked) return;
+  window.__iceDragonHooked = true;
   var send = function (o) { try { $post } catch (e) {} };
   var onChannel = function (e) {
     var d = e.detail;
@@ -131,7 +131,7 @@ class FxaWebChannel {
   };
   window.addEventListener('WebChannelMessageToChrome', onChannel);
   document.addEventListener('WebChannelMessageToChrome', onChannel);
-  window.__armanReply = function (id, messageId, command, data) {
+  window.__iceDragonReply = function (id, messageId, command, data) {
     var detail = { id: id, message: { messageId: messageId, command: command, data: data } };
     window.dispatchEvent(new CustomEvent('WebChannelMessageToContent', { detail: detail }));
     document.dispatchEvent(new CustomEvent('WebChannelMessageToContent', { detail: detail }));
@@ -178,7 +178,7 @@ class FxaWebChannel {
 
   void _reply(String id, Object? messageId, String command, Object data) =>
       reply(
-        'window.__armanReply(${jsonEncode(id)}, ${jsonEncode(messageId)}, '
+        'window.__iceDragonReply(${jsonEncode(id)}, ${jsonEncode(messageId)}, '
         '${jsonEncode(command)}, ${jsonEncode(data)})',
       );
 
@@ -333,14 +333,14 @@ class _BrowserSignInPageState extends State<BrowserSignInPage> {
       _viewProxySet = set;
     }
     final hook = FxaWebChannel.hookJs(
-      'ArmanFxa.postMessage(JSON.stringify(o));',
+      'IceDragonFxa.postMessage(JSON.stringify(o));',
     );
     late final wf.WebViewController c;
     c = wf.WebViewController()
       ..setJavaScriptMode(wf.JavaScriptMode.unrestricted)
       ..setUserAgent(_userAgent)
       ..addJavaScriptChannel(
-        'ArmanFxa',
+        'IceDragonFxa',
         onMessageReceived: (m) => _channel.handle(m.message),
       )
       ..setNavigationDelegate(

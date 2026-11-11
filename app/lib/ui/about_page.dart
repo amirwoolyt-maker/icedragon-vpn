@@ -160,6 +160,31 @@ class _AboutPageState extends State<AboutPage> {
                   ),
                 ],
               ),
+              const Divider(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          Localizations.localeOf(context).languageCode == 'fa'
+                              ? 'کانال تلگرام'
+                              : 'Telegram Channel',
+                          style: theme.textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(telegramChannelHandle, style: muted),
+                      ],
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => openLink(context, telegramChannelUrl),
+                    icon: const Icon(Icons.send_rounded, size: 18),
+                    label: const Text('Telegram'),
+                  ),
+                ],
+              ),
               if (Platform.isAndroid) ...[
                 const Divider(height: 24),
                 Row(

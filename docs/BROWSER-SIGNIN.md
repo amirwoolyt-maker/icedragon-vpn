@@ -11,8 +11,8 @@ also need the browser sign-in.
 
 ## 1. Sign in with the browser in an app
 
-1. Install the Arman VPN app on Windows, macOS, or Android
-   ([downloads](https://github.com/armanlife/arman-vpn-client#downloads)).
+1. Install the IceDragon VPN app on Windows, macOS, or Android
+   ([downloads](https://github.com/amirwoolyt-maker/icedragon-vpn#downloads)).
 2. Open **Accounts** and change **Sign-in method** from the default,
    **Sign in directly**, to **Sign in with the browser**.
 3. Press **Add account** and sign in on Mozilla's page. Any verification

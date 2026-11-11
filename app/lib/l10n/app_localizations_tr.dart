@@ -539,7 +539,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get unofficialNote =>
-      'Resmî olmayan istemci. Mozilla ile bir ilişkisi yoktur.';
+      'Hızlı, güvenli ve açık kaynaklı VPN — modern şifreleme ve kesintisiz bağlantı için.';
 
   @override
   String get closeTitle => 'Pencere kapatılsın mı?';

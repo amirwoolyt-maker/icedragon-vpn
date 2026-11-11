@@ -18,8 +18,8 @@ const unitName = tunapi.ServiceName + ".service"
 // a crash and after an update (which ends it); an uninstall stops it for
 // good (stopForGood).
 const unit = `[Unit]
-Description=Arman VPN TUN
-Documentation=https://github.com/armanlife/arman-vpn-client
+Description=IceDragon VPN TUN
+Documentation=https://github.com/amirwoolyt-maker/icedragon-vpn
 After=network.target
 
 [Service]

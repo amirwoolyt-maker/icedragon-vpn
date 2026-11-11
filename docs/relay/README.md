@@ -1,6 +1,6 @@
 <div dir="rtl">
 
-# آموزش ساخت رله برای Arman VPN
+# آموزش ساخت رله برای IceDragon VPN
 
 **برای کاربران داخل ایران که خطای `HTTP 451: unavailable_in_region` می‌بینن.**
 

@@ -1,6 +1,6 @@
-# Arman VPN core
+# IceDragon VPN core
 
-An unofficial Go client for Mozilla's Firefox VPN (IP Protection) service. It signs in with Firefox Accounts, obtains a Guardian ProxyPass, and serves a local SOCKS5 CONNECT proxy through Mozilla's Fastly HTTP/2 (or experimental HTTP/3) proxies. Several accounts can be stored; when the active one has used its quota threshold (95% by default; the last usable account goes on to the end of its quota), the next one takes over without dropping open connections. A built-in web dashboard manages accounts, settings, logs, and connection tests.
+The high-performance Go VPN core behind **IceDragon VPN**. It signs in securely, obtains ProxyPasses, and serves a local SOCKS5/HTTP CONNECT proxy over HTTP/2 and HTTP/3 encrypted tunnels with automatic multi-account quota failover and a built-in web dashboard for managing accounts, settings, logs, and connection tests.
 
 The proxy carries TCP traffic, and UDP on the ports Mozilla's proxy allows, from applications configured to use SOCKS5. Firefox does not need to be installed or running. There is no SOCKS5 BIND; the desktop app adds a TUN mode for the whole computer.
 

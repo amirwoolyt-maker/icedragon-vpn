@@ -540,7 +540,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get openFolder => 'فتح المجلد';
 
   @override
-  String get unofficialNote => 'عميل غير رسمي. لا صلة له بـ Mozilla.';
+  String get unofficialNote =>
+      'شبكة VPN سريعة وآمنة ومفتوحة المصدر بتشفير قوي وتجربة اتصال موثوقة.';
 
   @override
   String get closeTitle => 'إغلاق النافذة؟';

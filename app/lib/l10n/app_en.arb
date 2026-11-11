@@ -192,7 +192,11 @@
   "reasonQuotaThreshold": "Used {percent}% of its data, so the next account took over.",
   "@reasonQuotaThreshold": {
     "description": "An account set aside at the switch threshold (percent, the setting) while the next account is used.",
-    "placeholders": {"percent": {"type": "int"}}
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
   },
   "reasonQuotaExhausted": "This month's data is used up; it is used again after the monthly reset.",
   "reasonSignInRequired": "Sign in again to use this account.",
@@ -360,7 +364,7 @@
   "saved": "Saved",
   "dataFolder": "Data folder",
   "openFolder": "Open folder",
-  "unofficialNote": "Unofficial client. Not affiliated with Mozilla.",
+  "unofficialNote": "Fast, encrypted VPN built for speed, stability, and privacy.",
   "closeTitle": "Close the window?",
   "closeBody": "In the tray, the VPN stays connected. Quitting turns it off.",
   "rememberChoice": "Remember my choice",
@@ -656,7 +660,9 @@
   "updateRequired": "Please update to version {version}. This update is required.",
   "@updateRequired": {
     "placeholders": {
-      "version": { "type": "String" }
+      "version": {
+        "type": "String"
+      }
     }
   },
   "@updateAvailable": {

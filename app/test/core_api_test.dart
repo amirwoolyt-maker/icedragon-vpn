@@ -24,7 +24,7 @@ void main() {
             ..headers.contentType = ContentType('application', 'zip')
             ..headers.set(
               'Content-Disposition',
-              'attachment; filename="Arman-VPN-backup-2026-11-06_19-26-03.zip"',
+              'attachment; filename="IceDragon-VPN-backup-2026-11-06_19-26-03.zip"',
             )
             ..add([0x50, 0x4b, 0x03, 0x04]);
           await req.response.close();
@@ -199,7 +199,7 @@ void main() {
     test('saves and takes in a backup', () async {
       final file = await api.exportBackup();
       expect(seen['token'], 'secret-token');
-      expect(file.name, 'Arman-VPN-backup-2026-11-06_19-26-03.zip');
+      expect(file.name, 'IceDragon-VPN-backup-2026-11-06_19-26-03.zip');
       expect(file.bytes, [0x50, 0x4b, 0x03, 0x04]);
 
       final contents = await api.inspectBackup(file.bytes);

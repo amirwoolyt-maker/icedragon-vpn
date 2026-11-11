@@ -539,7 +539,7 @@ class AppLocalizationsAz extends AppLocalizations {
 
   @override
   String get unofficialNote =>
-      'Qeyri-rəsmi tətbiq. Mozilla ilə əlaqəsi yoxdur.';
+      'Sürətli, şifrələnmiş və açıq mənbəli VPN — stabil və təhlükəsiz bağlantı üçün.';
 
   @override
   String get closeTitle => 'Pəncərə bağlansın?';

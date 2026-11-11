@@ -691,7 +691,7 @@ void main() {
     addTearDown(core.dispose);
     const rawError =
         "Mozilla's security check refused this sign-in from here. "
-        'Sign in with the browser in the Arman VPN app instead.';
+        'Sign in with the browser in the IceDragon VPN app instead.';
     final state = SignInState.fromJson({
       'email': 'me@example.com',
       'step': SignInStep.failed,

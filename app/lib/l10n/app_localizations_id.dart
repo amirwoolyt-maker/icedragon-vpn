@@ -537,7 +537,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get unofficialNote =>
-      'Klien tidak resmi. Tidak berafiliasi dengan Mozilla.';
+      'VPN cepat, aman, dan sumber terbuka dengan enkripsi modern serta koneksi stabil.';
 
   @override
   String get closeTitle => 'Tutup jendela?';

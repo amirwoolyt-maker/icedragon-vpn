@@ -523,7 +523,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get openFolder => '打开文件夹';
 
   @override
-  String get unofficialNote => '非官方客户端，与 Mozilla 无关。';
+  String get unofficialNote =>
+      '快速、安全、开源的加密 VPN，采用现代加密协议与暗夜玻璃设计，连接稳定流畅。';
 
   @override
   String get closeTitle => '关闭窗口？';
@@ -2136,7 +2137,8 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get openFolder => '開啟資料夾';
 
   @override
-  String get unofficialNote => '非官方用戶端，與 Mozilla 無關。';
+  String get unofficialNote =>
+      '快速、安全、開源的加密 VPN，採用現代加密協定與暗夜玻璃設計，連線穩定流暢。';
 
   @override
   String get closeTitle => '要關閉視窗嗎？';

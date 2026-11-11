@@ -165,6 +165,17 @@ func Connect() {
 	}
 }
 
+// Reconnect restarts an active proxy connection without flipping IsOn to false.
+func Reconnect() {
+	mu.Lock()
+	d := running
+	mu.Unlock()
+	if d != nil {
+		d.RequestRestart()
+		d.Connect()
+	}
+}
+
 // IsOn reports whether the proxy is on; false once the core gave up a
 // connect, which the app then turns off with its VPN.
 func IsOn() bool {

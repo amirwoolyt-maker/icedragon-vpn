@@ -543,7 +543,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get unofficialNote =>
-      'Nem hivatalos kliens. Nem áll kapcsolatban a Mozillával.';
+      'Gyors, titkosított, nyílt forráskódú VPN a megbízható és stabil kapcsolathoz.';
 
   @override
   String get closeTitle => 'Bezárja az ablakot?';

@@ -115,7 +115,7 @@ func runListAccounts(paths service.DataPaths) error {
 // use marked, its state, and its data.
 func writeAccountList(out io.Writer, p paint, list []accounts.Account, activeID string, enabled map[string]bool, threshold float64, now time.Time) {
 	const rule = "────────────────────────────────────────────────────────────────"
-	fmt.Fprintf(out, "\n  %s\n  %s\n", p.bold("Arman VPN accounts"), p.dim(rule))
+	fmt.Fprintf(out, "\n  %s\n  %s\n", p.bold("IceDragon VPN accounts"), p.dim(rule))
 	if len(list) == 0 {
 		fmt.Fprintf(out, "    No accounts yet. Add one: %s\n\n", p.cyan("arman-vpn add-account"))
 		return
@@ -311,7 +311,7 @@ func interactiveSignIn() (*fxa.TokenResponse, string, string) {
 
 // accountTransferGuide explains signing in with the app's browser page
 // and moving the account to a device without one.
-const accountTransferGuide = "https://github.com/armanlife/arman-vpn-client/blob/main/docs/BROWSER-SIGNIN.md"
+const accountTransferGuide = "https://github.com/amirwoolyt-maker/icedragon-vpn/blob/main/docs/BROWSER-SIGNIN.md"
 
 // printBlockedHint suggests the app's browser sign-in when Fastly's bot
 // check keeps refusing the terminal one.
@@ -321,7 +321,7 @@ func printBlockedHint(err error) {
 	}
 	fmt.Println()
 	fmt.Println("Mozilla's security check is refusing sign-ins from this program right now.")
-	fmt.Println("Tip: sign in with the browser in the Arman VPN app, then copy that")
+	fmt.Println("Tip: sign in with the browser in the IceDragon VPN app, then copy that")
 	fmt.Println("device's data folder to this one.")
 	fmt.Println("Guide: " + accountTransferGuide)
 }

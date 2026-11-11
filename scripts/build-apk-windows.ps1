@@ -3,11 +3,11 @@
   Builds the Android core (gomobile core.aar) and Flutter APKs locally on Windows.
 .DESCRIPTION
   Redirects heavy Gradle/Pub/Go caches away from C:\ (when $ToolsRoot is on
-  another drive such as E:\arman-dev-tools) so a tight system drive never fills up.
+  another drive such as E:\icedragon-dev-tools) so a tight system drive never fills up.
   Requires: Go 1.27+, gomobile/gobind, Flutter 3.47+, JDK 17/21, and Android SDK + NDK 30.0.16248370.
 #>
 param(
-    [string]$ToolsRoot = "E:\arman-dev-tools"
+    [string]$ToolsRoot = "E:\icedragon-dev-tools"
 )
 
 $ErrorActionPreference = 'Stop'

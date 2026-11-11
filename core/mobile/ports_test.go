@@ -52,3 +52,16 @@ func TestEnsureFreeDefaultPortsSavesValidConfig(t *testing.T) {
 		t.Fatalf("unexpected dashboard config: %+v", loaded.Dashboard)
 	}
 }
+
+func TestReconnectWithoutRunningDaemonIsSafe(t *testing.T) {
+	mu.Lock()
+	prev := running
+	running = nil
+	mu.Unlock()
+	defer func() {
+		mu.Lock()
+		running = prev
+		mu.Unlock()
+	}()
+	Reconnect()
+}

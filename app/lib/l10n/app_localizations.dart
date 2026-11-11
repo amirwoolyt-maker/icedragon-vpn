@@ -1026,7 +1026,7 @@ abstract class AppLocalizations {
   /// No description provided for @unofficialNote.
   ///
   /// In en, this message translates to:
-  /// **'Unofficial client. Not affiliated with Mozilla.'**
+  /// **'Fast, encrypted VPN built for speed, stability, and privacy.'**
   String get unofficialNote;
 
   /// No description provided for @closeTitle.

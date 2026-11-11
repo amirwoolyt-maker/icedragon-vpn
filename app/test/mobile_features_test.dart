@@ -132,6 +132,9 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('IceDragon VPN'), findsOneWidget);
+    expect(find.text('@icedragon_lair', skipOffstage: false), findsOneWidget);
+    expect(find.text('Telegram', skipOffstage: false), findsOneWidget);
+    expect(find.textContaining('Unofficial', skipOffstage: false), findsNothing);
     expect(find.byType(LiveSpeedCard), findsOneWidget);
     expect(find.byType(SessionDurationText), findsOneWidget);
     expect(find.text('DE'), findsOneWidget);

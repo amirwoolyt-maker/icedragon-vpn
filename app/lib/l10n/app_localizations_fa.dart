@@ -536,7 +536,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get openFolder => 'باز کردن پوشه';
 
   @override
-  String get unofficialNote => 'کلاینت غیررسمی. وابسته به Mozilla نیست.';
+  String get unofficialNote =>
+      'وی‌پی‌ان سریع، امن و متن‌باز با طراحی اختصاصی Dark Glass برای اتصالی پایدار و پرسرعت.';
 
   @override
   String get closeTitle => 'پنجره بسته شود؟';

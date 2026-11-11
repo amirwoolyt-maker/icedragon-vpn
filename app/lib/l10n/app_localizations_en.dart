@@ -538,7 +538,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unofficialNote =>
-      'Unofficial client. Not affiliated with Mozilla.';
+      'Fast, encrypted VPN built for speed, stability, and privacy.';
 
   @override
   String get closeTitle => 'Close the window?';

@@ -539,7 +539,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get unofficialNote =>
-      'Ứng dụng không chính thức. Không liên kết với Mozilla.';
+      'VPN nhanh, bảo mật và mã nguồn mở với mã hóa hiện đại cùng kết nối ổn định.';
 
   @override
   String get closeTitle => 'Đóng cửa sổ?';

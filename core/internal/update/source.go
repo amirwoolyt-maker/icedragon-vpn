@@ -20,7 +20,8 @@ type Source struct {
 }
 
 const packageFile = "package.json"
-const versionPrefix = "# Arman VPN version: "
+const versionPrefix = "# IceDragon VPN version: "
+const legacyVersionPrefix = "# Arman VPN version: "
 
 func (m *Manager) defaultSource(v string) Source {
 	base := m.baseURL + "v" + v + "/"
@@ -70,7 +71,12 @@ func checkedPackageHash(sums, sig []byte, name, v string) (string, error) {
 	}
 	var signedVersion string
 	for _, line := range strings.Split(string(sums), "\n") {
-		if value, ok := strings.CutPrefix(strings.TrimSpace(line), versionPrefix); ok {
+		trimmed := strings.TrimSpace(line)
+		value, ok := strings.CutPrefix(trimmed, versionPrefix)
+		if !ok {
+			value, ok = strings.CutPrefix(trimmed, legacyVersionPrefix)
+		}
+		if ok {
 			if signedVersion != "" {
 				return "", bad("the release's checksum list repeats its version")
 			}

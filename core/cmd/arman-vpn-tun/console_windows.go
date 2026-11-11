@@ -70,7 +70,7 @@ func showIntro() {
 		color = windows.SetConsoleMode(h, mode|windows.ENABLE_VIRTUAL_TERMINAL_PROCESSING|windows.ENABLE_PROCESSED_OUTPUT) == nil
 	}
 	if own {
-		_, _ = out.WriteString("\x1b]0;Arman VPN TUN service\x07")
+		_, _ = out.WriteString("\x1b]0;IceDragon VPN TUN service\x07")
 		// A new console window opens behind the window that was in front
 		// (Explorer), which then gets the Enter meant for it and opens
 		// the file again: bring it to the front. Explorer started this
