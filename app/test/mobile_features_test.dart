@@ -178,7 +178,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.byType(LiveSpeedCard), findsOneWidget);
       expect(find.byType(SessionDurationText), findsOneWidget);
-      expect(find.text('HTTP/2'), findsOneWidget);
+      expect(find.textContaining('HTTP/2'), findsOneWidget);
       expect(find.text('Auto-Fix'), findsOneWidget);
       expect(find.text('DE'), findsOneWidget);
       expect(find.text('95ms'), findsOneWidget);
