@@ -9,6 +9,7 @@ import 'package:arman_vpn/l10n/app_localizations.dart';
 import 'package:arman_vpn/mobile/connection_doctor.dart';
 import 'package:arman_vpn/mobile/location_ping_cache.dart';
 import 'package:arman_vpn/mobile/speed_sparkline.dart';
+import 'package:arman_vpn/ui/about_page.dart';
 import 'package:arman_vpn/ui/app.dart';
 import 'package:arman_vpn/ui/servers_page.dart';
 
@@ -132,9 +133,6 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('IceDragon VPN'), findsOneWidget);
-    expect(find.text('@icedragon_lair', skipOffstage: false), findsOneWidget);
-    expect(find.text('Telegram', skipOffstage: false), findsOneWidget);
-    expect(find.textContaining('Unofficial', skipOffstage: false), findsNothing);
     expect(find.byType(LiveSpeedCard), findsOneWidget);
     expect(find.byType(SessionDurationText), findsOneWidget);
     expect(find.text('DE'), findsOneWidget);
@@ -145,6 +143,35 @@ void main() {
     await tester.tap(find.text('DE'));
     await tester.pump(const Duration(milliseconds: 50));
     expect(api.location, 'DE');
+
+    await tester.pumpWidget(const SizedBox());
+    core.dispose();
+  });
+
+  testWidgets('AboutPage shows positive IceDragon info and Telegram channel', (
+    tester,
+  ) async {
+    final api = _MobileFakeApi();
+    final core = CoreController(
+      () async => api,
+      pollInterval: const Duration(hours: 1),
+    );
+    core.start();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: AboutPage(core: core)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('IceDragon VPN'), findsOneWidget);
+    expect(find.text('@icedragon_lair', skipOffstage: false), findsOneWidget);
+    expect(find.text('Telegram', skipOffstage: false), findsOneWidget);
+    expect(find.textContaining('Unofficial', skipOffstage: false), findsNothing);
 
     await tester.pumpWidget(const SizedBox());
     core.dispose();
