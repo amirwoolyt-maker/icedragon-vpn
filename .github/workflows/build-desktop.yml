@@ -1,0 +1,156 @@
+# Manual on-demand Desktop build workflow (Windows, Linux, macOS).
+# Trigger manually via Actions -> Build IceDragon VPN Desktop -> Run workflow
+# whenever ready to produce desktop packages alongside Android.
+
+name: Build IceDragon VPN Desktop
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: 'Attach desktop builds to GitHub Release v<pubspec version>'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+env:
+  FLUTTER_VERSION: 3.47.7
+
+jobs:
+  version:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        run: |
+          v="$(sed -n 's/^version:[[:space:]]*\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' app/pubspec.yaml)"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+  windows:
+    needs: version
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: core/go.mod
+          cache-dependency-path: core/go.sum
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Install Inno Setup
+        shell: pwsh
+        run: winget install --id JRSoftware.InnoSetup --silent --accept-package-agreements --accept-source-agreements
+      - name: Build Windows app & installer
+        shell: pwsh
+        env:
+          ARMAN_VPN_SIGNING_KEY: ${{ secrets.FIREFOX_VPN_SIGNING_KEY }}
+        run: .\scripts\build-windows.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-desktop
+          path: |
+            dist/IceDragon-VPN-*-Windows-x64.zip
+            dist/IceDragon-VPN-*-Windows-Setup-x64.exe
+          if-no-files-found: error
+
+  linux:
+    needs: version
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-22.04
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: core/go.mod
+          cache-dependency-path: core/go.sum
+      - uses: subosito/flutter-action@v2
+        if: matrix.arch == 'amd64'
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Flutter (ARM)
+        if: matrix.arch == 'arm64'
+        run: |
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$HOME/flutter"
+          echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
+      - name: Install GTK build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq clang cmake ninja-build pkg-config libgtk-3-dev
+      - name: Build Linux desktop bundle
+        env:
+          ARMAN_VPN_SIGNING_KEY: ${{ secrets.FIREFOX_VPN_SIGNING_KEY }}
+        run: bash scripts/build-linux.sh
+      - name: Build Linux headless core
+        if: matrix.arch == 'amd64'
+        run: bash scripts/build-linux-core.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-desktop-${{ matrix.arch }}
+          path: |
+            dist/IceDragon-VPN-*-Linux-*.tar.gz
+            dist/arman-vpn-core-linux-*.tar.gz
+          if-no-files-found: error
+
+  macos:
+    needs: version
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: core/go.mod
+          cache-dependency-path: core/go.sum
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Build macOS DMG & update archive
+        env:
+          ARMAN_VPN_SIGNING_KEY: ${{ secrets.FIREFOX_VPN_SIGNING_KEY }}
+        run: bash scripts/build-macos.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-desktop
+          path: |
+            dist/IceDragon-VPN-*-macOS.dmg
+            dist/IceDragon-VPN-*-macOS.tar.gz
+          if-no-files-found: error
+
+  attach-release:
+    needs: [version, windows, linux, macos]
+    if: ${{ inputs.publish_release }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: desktop-out
+          merge-multiple: true
+      - name: Attach to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="${{ needs.version.outputs.version }}"
+          tag="v$v"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" desktop-out/* --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$tag" desktop-out/* --repo "$GITHUB_REPOSITORY" \
+              --title "IceDragon VPN $v"
+          fi

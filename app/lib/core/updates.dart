@@ -117,8 +117,20 @@ String? updateProxy(CoreStatus? status) {
 /// cannot install it, and on Android, whose core does not update, the notice
 /// opens the download.
 abstract final class Updates {
-  /// How long a successful look holds.
+  /// How long a successful look holds on desktop.
   static const every = Duration(days: 1);
+
+  /// Faster background refresh interval on mobile networks.
+  @visibleForTesting
+  static Duration androidEvery = const Duration(hours: 4);
+
+  /// Delay after app launch before the first automatic update check.
+  @visibleForTesting
+  static Duration initialDelay = const Duration(seconds: 6);
+
+  /// Delay after VPN reaches running state when no check succeeded yet.
+  @visibleForTesting
+  static Duration reconnectDelay = const Duration(seconds: 3);
 
   /// The newer release, once one was found.
   static final available = ValueNotifier<Release?>(null);
@@ -143,8 +155,12 @@ abstract final class Updates {
 
   static Timer? _first;
   static Timer? _timer;
+  static Timer? _retryOnConnect;
   static CoreController? _core;
   static AppSettings? _settings;
+  static bool _checkedThisRun = false;
+  static bool _checkingDue = false;
+  static bool _retriedOnConnect = false;
 
   /// The app's arguments that its next start keeps (core/internal/update
   /// AppArgs, and a copy's own --data-dir).
@@ -186,7 +202,7 @@ abstract final class Updates {
           : releaseFromJson(settings.updateDetails);
     }
     core.addListener(_onStatus);
-    _first = Timer(const Duration(minutes: 1), _due);
+    _first = Timer(initialDelay, _due);
     _timer = Timer.periodic(const Duration(hours: 1), (_) => _due());
   }
 
@@ -195,9 +211,13 @@ abstract final class Updates {
   static void reset() {
     _first?.cancel();
     _timer?.cancel();
+    _retryOnConnect?.cancel();
     _core?.removeListener(_onStatus);
-    _first = _timer = _core = _settings = _wanted = null;
+    _first = _timer = _retryOnConnect = _core = _settings = _wanted = null;
     _started = false;
+    _checkedThisRun = false;
+    _checkingDue = false;
+    _retriedOnConnect = false;
     _startArgs = const [];
     _downloadsAsked.clear();
     available.value = null;
@@ -215,8 +235,21 @@ abstract final class Updates {
   /// downloaded, and a version found downloads by itself.
   static void _onStatus() {
     final core = _core, settings = _settings;
-    final update = core?.status?.update;
-    if (core == null || settings == null || update == null) return;
+    if (core == null || settings == null) return;
+    final phase = core.status?.state.phase;
+    if (phase != Phase.running) {
+      _retriedOnConnect = false;
+      _retryOnConnect?.cancel();
+      _retryOnConnect = null;
+    } else if (!_checkedThisRun && !_checkingDue && !_retriedOnConnect) {
+      _retriedOnConnect = true;
+      _retryOnConnect ??= Timer(reconnectDelay, () {
+        _retryOnConnect = null;
+        unawaited(_due());
+      });
+    }
+    final update = core.status?.update;
+    if (update == null) return;
     if (!_started) {
       _started = true;
       // Not right after an update that failed (the old version started
@@ -330,8 +363,14 @@ abstract final class Updates {
   }
 
   static Future<void> _due() async {
+    if (_checkingDue) return;
+    final interval = Platform.isAndroid ? androidEvery : every;
     final last = _settings?.updateCheckedAt;
-    if (last != null && DateTime.now().difference(last) < every) return;
+    if (last != null && DateTime.now().difference(last) < interval) {
+      _checkedThisRun = true;
+      return;
+    }
+    _checkingDue = true;
     try {
       found(
         await checkForUpdate(
@@ -339,8 +378,11 @@ abstract final class Updates {
           onAnnouncements: receiveAnnouncements,
         ),
       );
+      _checkedThisRun = true;
     } on Exception {
-      // No network, or GitHub not reachable: the next hour tries again.
+      // No network, or GitHub not reachable yet: reconnect or the next hour tries again.
+    } finally {
+      _checkingDue = false;
     }
   }
 

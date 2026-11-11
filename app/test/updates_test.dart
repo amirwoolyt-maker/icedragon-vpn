@@ -271,5 +271,12 @@ void main() {
       expect(versionFor({'linux': '1.2.3'}, 'android'), isNull);
       expect(versionFor(['1.2.3'], 'linux'), isNull);
     });
+
+    test('Updates uses responsive mobile check intervals', () {
+      expect(Updates.initialDelay, const Duration(seconds: 6));
+      expect(Updates.reconnectDelay, const Duration(seconds: 3));
+      expect(Updates.androidEvery, const Duration(hours: 4));
+      expect(Updates.every, const Duration(days: 1));
+    });
   });
 }
