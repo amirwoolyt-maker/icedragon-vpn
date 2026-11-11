@@ -26,11 +26,11 @@ Future<void> showConnectionDoctorSheet(
 enum _StepStatus { running, passed, failed, info }
 
 class _DoctorStep {
-  _DoctorStep(this.title, this.status, [this.detail = '']);
+  _DoctorStep(this.title, this.status);
 
   final String title;
   _StepStatus status;
-  String detail;
+  String detail = '';
 }
 
 class _ProfileCandidate {
