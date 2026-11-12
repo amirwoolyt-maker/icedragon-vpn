@@ -50,9 +50,25 @@ type nativeDiscoverPayload struct {
 	CoreVersion     string `json:"core_version"`
 }
 
+// NativeMessagingHost handles the Chrome/Edge/Firefox Native Messaging protocol.
+type NativeMessagingHost struct {
+	paths       DataPaths
+	probeStatus func(ctx context.Context, apiURL, token string) bool
+}
+
+// NewNativeMessagingHost creates a new Native Messaging host instance.
+func NewNativeMessagingHost(paths DataPaths) *NativeMessagingHost {
+	return &NativeMessagingHost{paths: paths}
+}
+
 // RunNativeMessaging serves Chrome/Edge/Firefox Native Messaging requests over
 // stdin/stdout using 4-byte little-endian length-prefixed JSON frames.
 func RunNativeMessaging(paths DataPaths, in io.Reader, out io.Writer) error {
+	return NewNativeMessagingHost(paths).Serve(in, out)
+}
+
+// Serve reads requests from in and writes responses to out until EOF.
+func (h *NativeMessagingHost) Serve(in io.Reader, out io.Writer) error {
 	for {
 		msg, err := readNativeFrame(in)
 		if errors.Is(err, io.EOF) {
@@ -72,7 +88,7 @@ func RunNativeMessaging(paths DataPaths, in io.Reader, out io.Writer) error {
 			}
 			continue
 		}
-		resp := handleNativeRequest(context.Background(), paths, req)
+		resp := h.handleRequest(context.Background(), req)
 		if err := writeNativeFrame(out, resp); err != nil {
 			return err
 		}
@@ -112,7 +128,7 @@ func writeNativeFrame(w io.Writer, v any) error {
 	return err
 }
 
-func handleNativeRequest(ctx context.Context, paths DataPaths, req nativeRequest) nativeResponse {
+func (h *NativeMessagingHost) handleRequest(ctx context.Context, req nativeRequest) nativeResponse {
 	switch req.Type {
 	case "ping":
 		return nativeResponse{
@@ -122,7 +138,7 @@ func handleNativeRequest(ctx context.Context, paths DataPaths, req nativeRequest
 			Version: version.Current,
 		}
 	case "discover":
-		payload := discoverDaemon(ctx, paths)
+		payload := h.discover(ctx)
 		raw, _ := json.Marshal(payload)
 		return nativeResponse{
 			ID:      req.ID,
@@ -132,7 +148,7 @@ func handleNativeRequest(ctx context.Context, paths DataPaths, req nativeRequest
 			Version: version.Current,
 		}
 	case "start_daemon":
-		if err := ensureDaemonRunning(ctx, paths); err != nil {
+		if err := h.ensureDaemonRunning(ctx); err != nil {
 			return nativeResponse{
 				ID:    req.ID,
 				Type:  "start_daemon",
@@ -140,7 +156,7 @@ func handleNativeRequest(ctx context.Context, paths DataPaths, req nativeRequest
 				Error: err.Error(),
 			}
 		}
-		payload := discoverDaemon(ctx, paths)
+		payload := h.discover(ctx)
 		raw, _ := json.Marshal(payload)
 		return nativeResponse{
 			ID:      req.ID,
@@ -150,7 +166,7 @@ func handleNativeRequest(ctx context.Context, paths DataPaths, req nativeRequest
 			Version: version.Current,
 		}
 	case "request":
-		return proxyNativeAPIRequest(ctx, paths, req)
+		return proxyNativeAPIRequest(ctx, h.paths, req)
 	default:
 		return nativeResponse{
 			ID:    req.ID,
@@ -161,21 +177,25 @@ func handleNativeRequest(ctx context.Context, paths DataPaths, req nativeRequest
 	}
 }
 
-func discoverDaemon(ctx context.Context, paths DataPaths) nativeDiscoverPayload {
-	cfg, _, _ := config.Load(paths.Config)
-	token, _ := readLocalToken(paths.LocalToken)
-	client := NewClient(paths)
+func (h *NativeMessagingHost) discover(ctx context.Context) nativeDiscoverPayload {
+	cfg, _, _ := config.Load(h.paths.Config)
+	token, _ := readLocalToken(h.paths.LocalToken)
+	client := NewClient(h.paths)
 	apiURL, err := client.DashboardURL()
 	if err != nil && cfg.Dashboard.Listen != "" {
 		apiURL = "http://" + loopbackAddr(cfg.Dashboard.Listen)
 	}
 	running := false
 	if apiURL != "" {
-		probeCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
-		defer cancel()
-		var status map[string]any
-		if client.Do(probeCtx, http.MethodGet, "/api/status", nil, &status) == nil {
-			running = true
+		if h.probeStatus != nil {
+			running = h.probeStatus(ctx, apiURL, token)
+		} else {
+			probeCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+			defer cancel()
+			var status map[string]any
+			if client.Do(probeCtx, http.MethodGet, "/api/status", nil, &status) == nil {
+				running = true
+			}
 		}
 	}
 	return nativeDiscoverPayload{
@@ -185,13 +205,13 @@ func discoverDaemon(ctx context.Context, paths DataPaths) nativeDiscoverPayload 
 		ProxyAuth:       cfg.Proxy.Username != "",
 		SystemProxyMode: cfg.SystemProxy.Mode,
 		LocalToken:      token,
-		DataDir:         paths.Dir,
+		DataDir:         h.paths.Dir,
 		CoreVersion:     version.Current,
 	}
 }
 
-func ensureDaemonRunning(ctx context.Context, paths DataPaths) error {
-	if discoverDaemon(ctx, paths).DaemonRunning {
+func (h *NativeMessagingHost) ensureDaemonRunning(ctx context.Context) error {
+	if h.discover(ctx).DaemonRunning {
 		return nil
 	}
 	exe, err := os.Executable()
@@ -199,8 +219,8 @@ func ensureDaemonRunning(ctx context.Context, paths DataPaths) error {
 		return err
 	}
 	args := []string{"-tray"}
-	if paths.Dir != "" {
-		args = append(args, "-data-dir", paths.Dir)
+	if h.paths.Dir != "" {
+		args = append(args, "-data-dir", h.paths.Dir)
 	}
 	cmd := exec.Command(exe, args...)
 	cmd.Stdin = nil
@@ -213,7 +233,7 @@ func ensureDaemonRunning(ctx context.Context, paths DataPaths) error {
 
 	deadline := time.Now().Add(6 * time.Second)
 	for time.Now().Before(deadline) {
-		if discoverDaemon(ctx, paths).DaemonRunning {
+		if h.discover(ctx).DaemonRunning {
 			return nil
 		}
 		time.Sleep(250 * time.Millisecond)
