@@ -1296,7 +1296,7 @@ function renderSignIn(view) {
           el("a", {
             class: "btn primary",
             style: "margin-top:10px; width:fit-content",
-            href: "https://github.com/armanlife/arman-vpn-client/blob/main/docs/BROWSER-SIGNIN.md",
+            href: "https://github.com/amirwoolyt-maker/icedragon-vpn/blob/main/docs/BROWSER-SIGNIN.md",
             target: "_blank",
             rel: "noreferrer",
             text: "How to do it",

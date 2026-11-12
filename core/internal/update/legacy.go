@@ -13,12 +13,12 @@ package update
 
 // The app's name since 1.0.9, and the one before.
 const (
-	appName    = "Arman VPN"
+	appName    = "IceDragon VPN"
 	oldAppName = "Firefox VPN"
 )
 
 // relocate gives the app in appDir its new name after an update installed
 // it, and returns where it is then; on macOS the bundle of a version before
-// 1.0.9 becomes Arman VPN.app (legacy_darwin.go), elsewhere the folder
+// 1.0.9 becomes IceDragon VPN.app (legacy_darwin.go), elsewhere the folder
 // stays (one the user chose, or Setup's).
 var relocate = func(appDir string) string { return appDir }

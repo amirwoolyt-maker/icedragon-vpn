@@ -7,11 +7,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/egress"
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
-	"github.com/armanlife/arman-vpn-client/core/internal/tun"
-	"github.com/armanlife/arman-vpn-client/core/internal/tunapi"
-	"github.com/armanlife/arman-vpn-client/core/internal/tunstack"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/egress"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/tun"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/tunapi"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/tunstack"
 )
 
 // UDP in the TUN: a flow is one app port's packets. Its program may skip the

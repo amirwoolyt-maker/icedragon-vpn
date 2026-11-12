@@ -15,7 +15,7 @@ val releaseKey = Properties().apply {
 }
 
 android {
-    namespace = "com.arman.firefoxvpn"
+    namespace = "com.icedragon.vpn"
     compileSdk = flutter.compileSdkVersion
     // The NDK installed here (Flutter's default, 28.x, is not).
     ndkVersion = "30.0.16248370"
@@ -62,7 +62,7 @@ android {
                 // REV_ID: its version, which it would ask Git for.
                 arguments += listOf("REV_ID=2.19.3", "APP_SUPPORT_FLEXIBLE_PAGE_SIZES=true")
                 // The class its native methods bind to.
-                cFlags += listOf("-O3", "-DPKGNAME=com/arman/firefoxvpn", "-DCLSNAME=Tun2Socks")
+                cFlags += listOf("-O3", "-DPKGNAME=com/icedragon/vpn", "-DCLSNAME=Tun2Socks")
             }
         }
     }

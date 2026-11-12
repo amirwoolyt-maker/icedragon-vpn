@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:arman_vpn/core/core_api.dart';
+import 'package:icedragon_vpn/core/core_api.dart';
 
 void main() {
   group('CoreApi', () {
@@ -235,7 +235,7 @@ void main() {
       'passes manifest download metadata through the authenticated API',
       () async {
         final source = <String, Object?>{
-          'file': 'Arman-VPN-Windows-x64.zip',
+          'file': 'IceDragon-VPN-Windows-x64.zip',
           'url': 'https://cdn.example/package',
           'checksums_url': 'https://cdn.example/sums',
           'signature_url': 'https://cdn.example/signature',
@@ -308,21 +308,21 @@ void main() {
         Map<String, String>? env,
       }) => CoreLocator.dataDirFor(
         args: const [],
-        exeDir: r'D:\dist\Arman-VPN-1.3',
+        exeDir: r'D:\dist\IceDragon-VPN-1.3',
         portable: portable,
         env: env ?? {'LOCALAPPDATA': r'C:\Users\u\AppData\Local'},
         os: os,
       );
       // Windows: always beside the app.
-      expect(dir(), r'D:\dist\Arman-VPN-1.3\user-data');
-      expect(dir(portable: true), r'D:\dist\Arman-VPN-1.3\user-data');
+      expect(dir(), r'D:\dist\IceDragon-VPN-1.3\user-data');
+      expect(dir(portable: true), r'D:\dist\IceDragon-VPN-1.3\user-data');
       expect(
         dir(os: 'macos', env: {'HOME': '/Users/u'}),
-        '/Users/u/Library/Application Support/Arman VPN',
+        '/Users/u/Library/Application Support/IceDragon VPN',
       );
       expect(
         dir(os: 'linux', env: {'HOME': '/home/u'}),
-        '/home/u/.local/share/arman-vpn',
+        '/home/u/.local/share/icedragon-vpn',
       );
     });
 
@@ -341,8 +341,8 @@ void main() {
     () {
       final sep = Platform.pathSeparator;
       for (final names in [
-        ['Firefox VPN Client', 'Arman VPN'],
-        ['firefox-vpn-client', 'arman-vpn'],
+        ['Firefox VPN Client', 'IceDragon VPN'],
+        ['firefox-vpn-client', 'icedragon-vpn'],
       ]) {
         final base = Directory.systemTemp.createTempSync('legacy');
         addTearDown(() => base.deleteSync(recursive: true));

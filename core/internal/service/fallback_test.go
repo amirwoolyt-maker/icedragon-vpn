@@ -3,8 +3,8 @@ package service
 import (
 	"testing"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/proxy"
-	"github.com/armanlife/arman-vpn-client/core/internal/serverlist"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/proxy"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/serverlist"
 )
 
 func oneServerCountry(code, host string) serverlist.Country {

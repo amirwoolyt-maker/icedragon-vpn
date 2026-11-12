@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:arman_vpn/app_settings.dart';
-import 'package:arman_vpn/core/announcements.dart';
-import 'package:arman_vpn/core/updates.dart';
-import 'package:arman_vpn/l10n/app_localizations.dart';
-import 'package:arman_vpn/ui/announcement_panel.dart';
+import 'package:icedragon_vpn/app_settings.dart';
+import 'package:icedragon_vpn/core/announcements.dart';
+import 'package:icedragon_vpn/core/updates.dart';
+import 'package:icedragon_vpn/l10n/app_localizations.dart';
+import 'package:icedragon_vpn/ui/announcement_panel.dart';
 
 void main() {
   testWidgets(

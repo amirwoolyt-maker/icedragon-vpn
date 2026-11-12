@@ -12,10 +12,10 @@ func TestTheOldBundleIsRenamedAfterAnUpdate(t *testing.T) {
 	dir := t.TempDir()
 	old := filepath.Join(dir, "Firefox VPN.app")
 	os.MkdirAll(filepath.Join(old, "Contents"), 0o755)
-	if got := renameBundle(old); got != filepath.Join(dir, "Arman VPN.app") {
+	if got := renameBundle(old); got != filepath.Join(dir, "IceDragon VPN.app") {
 		t.Fatalf("renamed to %s", got)
 	}
-	if _, err := os.Stat(filepath.Join(dir, "Arman VPN.app", "Contents")); err != nil {
+	if _, err := os.Stat(filepath.Join(dir, "IceDragon VPN.app", "Contents")); err != nil {
 		t.Fatal(err)
 	}
 	other := filepath.Join(dir, "Mine.app")

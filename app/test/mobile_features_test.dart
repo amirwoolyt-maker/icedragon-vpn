@@ -2,16 +2,16 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:arman_vpn/app_settings.dart';
-import 'package:arman_vpn/core/core_controller.dart';
-import 'package:arman_vpn/core/models.dart';
-import 'package:arman_vpn/l10n/app_localizations.dart';
-import 'package:arman_vpn/mobile/connection_doctor.dart';
-import 'package:arman_vpn/mobile/location_ping_cache.dart';
-import 'package:arman_vpn/mobile/speed_sparkline.dart';
-import 'package:arman_vpn/ui/about_page.dart';
-import 'package:arman_vpn/ui/app.dart';
-import 'package:arman_vpn/ui/servers_page.dart';
+import 'package:icedragon_vpn/app_settings.dart';
+import 'package:icedragon_vpn/core/core_controller.dart';
+import 'package:icedragon_vpn/core/models.dart';
+import 'package:icedragon_vpn/l10n/app_localizations.dart';
+import 'package:icedragon_vpn/mobile/connection_doctor.dart';
+import 'package:icedragon_vpn/mobile/location_ping_cache.dart';
+import 'package:icedragon_vpn/mobile/speed_sparkline.dart';
+import 'package:icedragon_vpn/ui/about_page.dart';
+import 'package:icedragon_vpn/ui/app.dart';
+import 'package:icedragon_vpn/ui/servers_page.dart';
 
 import 'widget_test.dart' show FakeApi;
 

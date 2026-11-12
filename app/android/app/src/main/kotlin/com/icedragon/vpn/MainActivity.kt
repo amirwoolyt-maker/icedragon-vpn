@@ -1,21 +1,38 @@
-package com.arman.firefoxvpn
+package com.icedragon.vpn
 
 import android.Manifest
 import android.app.ActivityManager
+import android.app.AppOpsManager
+import android.app.usage.StorageStatsManager
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.os.Process
+import android.os.StatFs
+import android.os.storage.StorageManager
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
+import android.util.Base64
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.security.KeyStore
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 import android.net.Uri
 import android.net.VpnService
 import android.os.Build
@@ -45,6 +62,8 @@ class MainActivity : FlutterActivity() {
     private var pendingSave: Pair<ByteArray, Result>? = null
     // A backup being picked to open.
     private var pendingOpen: Result? = null
+    // Package removal dialog waiting for system completion.
+    private var pendingUninstall: Pair<String, Result>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         holdPhoneUpright(resources.configuration)
@@ -158,9 +177,50 @@ class MainActivity : FlutterActivity() {
                     }
                 }
                 "installedApps" -> inBackground(result) { installedApps() }
+                "installedAppsDetailed" -> inBackground(result) { installedAppsDetailed() }
+                "deviceInfo" -> inBackground(result) { deviceInfo() }
                 "appIcon" -> {
                     val pkg = call.argument<String>("package") ?: ""
                     inBackground(result) { appIcon(pkg) }
+                }
+                "openAppSettings" -> {
+                    val pkg = call.argument<String>("package") ?: ""
+                    result.success(openAppSettings(pkg))
+                }
+                "uninstallApp" -> {
+                    val pkg = call.argument<String>("package") ?: ""
+                    uninstallApp(pkg, result)
+                }
+                "launchApp" -> {
+                    val pkg = call.argument<String>("package") ?: ""
+                    result.success(launchApp(pkg))
+                }
+                "boostMemory" -> {
+                    val exclude = (call.argument<List<String>>("exclude") ?: emptyList()).toSet()
+                    inBackground(result) { boostMemory(exclude) }
+                }
+                "openUsageAccessSettings" -> {
+                    result.success(openUsageAccessSettings())
+                }
+                "shareText" -> {
+                    val text = call.argument<String>("text") ?: ""
+                    val subject = call.argument<String>("subject") ?: ""
+                    result.success(shareText(text, subject))
+                }
+                "openStore" -> {
+                    val pkg = call.argument<String>("package") ?: ""
+                    val store = call.argument<String>("store") ?: ""
+                    val fallbackUrl = call.argument<String>("fallbackUrl") ?: ""
+                    result.success(openStore(pkg, store, fallbackUrl))
+                }
+                "saveSecret" -> {
+                    val key = call.argument<String>("key") ?: ""
+                    val value = call.argument<String>("value") ?: ""
+                    inBackground(result) { saveSecret(key, value) }
+                }
+                "readSecret" -> {
+                    val key = call.argument<String>("key") ?: ""
+                    inBackground(result) { readSecret(key) }
                 }
                 "appRouting" -> inBackground(result) {
                     // The page shows the region's apps installed since the
@@ -360,6 +420,338 @@ class MainActivity : FlutterActivity() {
         return ByteArrayOutputStream().also { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }.toByteArray()
     }
 
+    private fun hasUsageAccess(): Boolean {
+        val appOps = getSystemService(AppOpsManager::class.java) ?: return false
+        val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            appOps.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), packageName)
+        } else {
+            @Suppress("DEPRECATION")
+            appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), packageName)
+        }
+        return mode == AppOpsManager.MODE_ALLOWED
+    }
+
+    private fun deviceInfo(): Map<String, Any> {
+        val am = getSystemService(ActivityManager::class.java)
+        val memInfo = ActivityManager.MemoryInfo()
+        am?.getMemoryInfo(memInfo)
+        val stat = StatFs(Environment.getDataDirectory().path)
+        return mapOf(
+            "sdkInt" to Build.VERSION.SDK_INT,
+            "release" to (Build.VERSION.RELEASE ?: ""),
+            "manufacturer" to (Build.MANUFACTURER ?: ""),
+            "model" to (Build.MODEL ?: ""),
+            "abi" to (Build.SUPPORTED_ABIS.firstOrNull() ?: ""),
+            "totalRamBytes" to memInfo.totalMem,
+            "availRamBytes" to memInfo.availMem,
+            "totalStorageBytes" to stat.totalBytes,
+            "freeStorageBytes" to stat.availableBytes,
+            "hasUsageAccess" to hasUsageAccess(),
+        )
+    }
+
+    private fun installedAppsDetailed(): List<Map<String, Any>> {
+        val pm = packageManager
+        val withIcon = listOf(Intent.CATEGORY_LAUNCHER, Intent.CATEGORY_LEANBACK_LAUNCHER)
+            .flatMap { pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(it), 0) }
+            .map { it.activityInfo.packageName }
+            .toSet()
+        val packages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pm.getInstalledPackages(PackageManager.PackageInfoFlags.of(PackageManager.GET_PERMISSIONS.toLong()))
+        } else {
+            @Suppress("DEPRECATION")
+            pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
+        }
+        val usageOk = hasUsageAccess()
+        val storageStats = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && usageOk) {
+            getSystemService(StorageStatsManager::class.java)
+        } else {
+            null
+        }
+        val user = Process.myUserHandle()
+        val result = ArrayList<Map<String, Any>>(packages.size)
+        for (pkgInfo in packages) {
+            val appInfo = pkgInfo.applicationInfo ?: continue
+            if (appInfo.packageName == packageName) continue
+            if ((appInfo.flags and ApplicationInfo.FLAG_HAS_CODE) == 0) continue
+
+            val isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0 &&
+                (appInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0
+            val verCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                pkgInfo.longVersionCode
+            } else {
+                @Suppress("DEPRECATION")
+                pkgInfo.versionCode.toLong()
+            }
+            val category = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) appInfo.category else -1
+            @Suppress("DEPRECATION")
+            val isGame = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) category == ApplicationInfo.CATEGORY_GAME else false) ||
+                ((appInfo.flags and ApplicationInfo.FLAG_IS_GAME) != 0)
+            val minSdk = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) appInfo.minSdkVersion else 24
+            val installer = runCatching {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    pm.getInstallSourceInfo(pkgInfo.packageName).installingPackageName ?: ""
+                } else {
+                    @Suppress("DEPRECATION")
+                    pm.getInstallerPackageName(pkgInfo.packageName) ?: ""
+                }
+            }.getOrDefault("")
+
+            var apkBytes = 0L
+            appInfo.sourceDir?.let { path ->
+                val f = File(path)
+                if (f.exists()) apkBytes += f.length()
+            }
+            appInfo.splitSourceDirs?.forEach { path ->
+                val f = File(path)
+                if (f.exists()) apkBytes += f.length()
+            }
+
+            var dataBytes = 0L
+            var cacheBytes = 0L
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && storageStats != null) {
+                runCatching {
+                    val uuid = runCatching { appInfo.storageUuid }.getOrNull() ?: StorageManager.UUID_DEFAULT
+                    val stats = storageStats.queryStatsForPackage(uuid, pkgInfo.packageName, user)
+                    if (stats.appBytes > apkBytes) apkBytes = stats.appBytes
+                    dataBytes = stats.dataBytes
+                    cacheBytes = stats.cacheBytes
+                }
+            }
+
+            val reqPerms = pkgInfo.requestedPermissions?.filterNotNull() ?: emptyList()
+            val permFlags = pkgInfo.requestedPermissionsFlags
+            val grantedPerms = ArrayList<String>()
+            if (permFlags != null) {
+                for (i in reqPerms.indices) {
+                    if (i < permFlags.size && (permFlags[i] and PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0) {
+                        grantedPerms.add(reqPerms[i])
+                    }
+                }
+            }
+
+            result.add(
+                mapOf(
+                    "package" to pkgInfo.packageName,
+                    "label" to appInfo.loadLabel(pm).toString(),
+                    "launcher" to (pkgInfo.packageName in withIcon),
+                    "system" to isSystem,
+                    "versionName" to (pkgInfo.versionName ?: ""),
+                    "versionCode" to verCode,
+                    "firstInstallTime" to pkgInfo.firstInstallTime,
+                    "lastUpdateTime" to pkgInfo.lastUpdateTime,
+                    "category" to category,
+                    "isGame" to isGame,
+                    "minSdk" to minSdk,
+                    "targetSdk" to appInfo.targetSdkVersion,
+                    "installer" to installer,
+                    "apkBytes" to apkBytes,
+                    "dataBytes" to dataBytes,
+                    "cacheBytes" to cacheBytes,
+                    "permissions" to reqPerms,
+                    "grantedPermissions" to grantedPerms,
+                ),
+            )
+        }
+        return result
+    }
+
+    private fun openAppSettings(pkg: String): Boolean = runCatching {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.parse("package:$pkg")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        startActivity(intent)
+        true
+    }.getOrDefault(false)
+
+    private fun isPackageInstalled(pkg: String): Boolean = runCatching {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.getPackageInfo(pkg, PackageManager.PackageInfoFlags.of(0))
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.getPackageInfo(pkg, 0)
+        }
+        true
+    }.getOrDefault(false)
+
+    private fun uninstallApp(pkg: String, result: Result) {
+        if (pkg.isBlank() || pkg == packageName || !isPackageInstalled(pkg)) {
+            result.success(false)
+            return
+        }
+        pendingUninstall?.second?.success(false)
+        pendingUninstall = pkg to result
+        val intent = Intent(Intent.ACTION_DELETE).apply {
+            data = Uri.parse("package:$pkg")
+            putExtra(Intent.EXTRA_RETURN_RESULT, true)
+        }
+        try {
+            startActivityForResult(intent, UNINSTALL_REQUEST)
+        } catch (e: Exception) {
+            pendingUninstall = null
+            result.success(false)
+        }
+    }
+
+    private fun launchApp(pkg: String): Boolean = runCatching {
+        val pm = packageManager
+        val intent = pm.getLaunchIntentForPackage(pkg)
+            ?: if (isTv(resources.configuration)) pm.getLeanbackLaunchIntentForPackage(pkg) else null
+        if (intent == null) return@runCatching false
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+        true
+    }.getOrDefault(false)
+
+    private fun boostMemory(exclude: Set<String>): Map<String, Any> {
+        val am = getSystemService(ActivityManager::class.java) ?: return emptyMap()
+        val beforeInfo = ActivityManager.MemoryInfo()
+        am.getMemoryInfo(beforeInfo)
+        val beforeRunning = runCatching {
+            am.runningAppProcesses
+                ?.mapNotNull { it.processName?.substringBefore(':') }
+                ?.toSet()
+        }.getOrNull() ?: emptySet()
+        val pm = packageManager
+        @Suppress("DEPRECATION")
+        val apps = pm.getInstalledApplications(0)
+        for (app in apps) {
+            val pkg = app.packageName
+            if (pkg == packageName || pkg in exclude) continue
+            if ((app.flags and ApplicationInfo.FLAG_SYSTEM) != 0) continue
+            if ((app.flags and ApplicationInfo.FLAG_PERSISTENT) != 0) continue
+            runCatching { am.killBackgroundProcesses(pkg) }
+        }
+        System.gc()
+        val afterRunning = runCatching {
+            am.runningAppProcesses
+                ?.mapNotNull { it.processName?.substringBefore(':') }
+                ?.toSet()
+        }.getOrNull() ?: emptySet()
+        val confirmedStopped = beforeRunning.count { pkg ->
+            pkg != packageName && pkg !in exclude && pkg !in afterRunning
+        }
+        val afterInfo = ActivityManager.MemoryInfo()
+        am.getMemoryInfo(afterInfo)
+        return mapOf(
+            "beforeAvailBytes" to beforeInfo.availMem,
+            "afterAvailBytes" to afterInfo.availMem,
+            "totalBytes" to afterInfo.totalMem,
+            "touchedCount" to confirmedStopped,
+        )
+    }
+
+    private fun openUsageAccessSettings(): Boolean = runCatching {
+        startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        true
+    }.getOrDefault(false)
+
+    private fun shareText(text: String, subject: String): Boolean = runCatching {
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, text)
+            if (subject.isNotBlank()) putExtra(Intent.EXTRA_SUBJECT, subject)
+        }
+        startActivity(Intent.createChooser(send, subject.ifBlank { getString(R.string.app_name) }))
+        true
+    }.getOrDefault(false)
+
+    private fun openStore(pkg: String, store: String, fallbackUrl: String): Boolean {
+        val validPkg = Regex("^[a-zA-Z][a-zA-Z0-9_]*(\\.[a-zA-Z0-9_]+)+$").matches(pkg)
+        val deepUri = if (validPkg) {
+            when (store) {
+                "bazaar" -> "bazaar://details?id=$pkg"
+                "myket" -> "myket://details?id=$pkg"
+                "googlePlay" -> "market://details?id=$pkg"
+                else -> ""
+            }
+        } else {
+            ""
+        }
+        if (deepUri.isNotEmpty()) {
+            val launched = runCatching {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deepUri)).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+                true
+            }.getOrDefault(false)
+            if (launched) return true
+        }
+        val parsedFallback = runCatching { Uri.parse(fallbackUrl.trim()) }.getOrNull()
+        if (parsedFallback != null &&
+            parsedFallback.scheme.equals("https", ignoreCase = true) &&
+            !parsedFallback.host.isNullOrBlank()
+        ) {
+            return runCatching {
+                startActivity(
+                    Intent(Intent.ACTION_VIEW, parsedFallback).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    },
+                )
+                true
+            }.getOrDefault(false)
+        }
+        return false
+    }
+
+    private fun getOrCreateAesKey(): SecretKey {
+        val ks = KeyStore.getInstance(KEYSTORE_PROVIDER).apply { load(null) }
+        val existing = ks.getEntry(HUB_KEY_ALIAS, null) as? KeyStore.SecretKeyEntry
+        if (existing != null) return existing.secretKey
+        val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEYSTORE_PROVIDER)
+        generator.init(
+            KeyGenParameterSpec.Builder(
+                HUB_KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+            )
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .setKeySize(256)
+                .build(),
+        )
+        return generator.generateKey()
+    }
+
+    private fun saveSecret(key: String, value: String): Boolean {
+        if (key.isBlank()) return false
+        val prefs = getSharedPreferences(HUB_SECURE_PREFS, Context.MODE_PRIVATE)
+        if (value.isBlank()) {
+            prefs.edit().remove(key).apply()
+            return true
+        }
+        return runCatching {
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(Cipher.ENCRYPT_MODE, getOrCreateAesKey())
+            val iv = cipher.iv
+            val encrypted = cipher.doFinal(value.toByteArray(Charsets.UTF_8))
+            val combined = ByteArray(iv.size + encrypted.size)
+            System.arraycopy(iv, 0, combined, 0, iv.size)
+            System.arraycopy(encrypted, 0, combined, iv.size, encrypted.size)
+            prefs.edit().putString(key, Base64.encodeToString(combined, Base64.NO_WRAP)).apply()
+            true
+        }.getOrDefault(false)
+    }
+
+    private fun readSecret(key: String): String {
+        if (key.isBlank()) return ""
+        val prefs = getSharedPreferences(HUB_SECURE_PREFS, Context.MODE_PRIVATE)
+        val encoded = prefs.getString(key, null) ?: return ""
+        return runCatching {
+            val combined = Base64.decode(encoded, Base64.NO_WRAP)
+            if (combined.size <= GCM_IV_LEN) return ""
+            val iv = combined.copyOfRange(0, GCM_IV_LEN)
+            val ciphertext = combined.copyOfRange(GCM_IV_LEN, combined.size)
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(Cipher.DECRYPT_MODE, getOrCreateAesKey(), GCMParameterSpec(128, iv))
+            String(cipher.doFinal(ciphertext), Charsets.UTF_8)
+        }.getOrElse {
+            prefs.edit().remove(key).apply()
+            ""
+        }
+    }
+
     private fun turnOn(result: Result) {
         try {
             CoreService.turnOn(this)
@@ -378,6 +770,12 @@ class MainActivity : FlutterActivity() {
         }
         if (requestCode == OPEN_REQUEST) {
             opened(resultCode, data?.data)
+            return
+        }
+        if (requestCode == UNINSTALL_REQUEST) {
+            val (pkg, pending) = pendingUninstall ?: return
+            pendingUninstall = null
+            pending.success(resultCode == RESULT_OK || !isPackageInstalled(pkg))
             return
         }
         if (requestCode != VPN_REQUEST) return
@@ -443,6 +841,8 @@ class MainActivity : FlutterActivity() {
         } ?: uri.lastPathSegment ?: ""
 
     override fun onDestroy() {
+        pendingUninstall?.second?.success(false)
+        pendingUninstall = null
         // Off, nothing needs the core once the UI is gone.
         if (isFinishing && !CoreService.on) CoreService.stopCore()
         super.onDestroy()
@@ -452,7 +852,12 @@ class MainActivity : FlutterActivity() {
         private const val VPN_REQUEST = 7
         private const val SAVE_REQUEST = 8
         private const val OPEN_REQUEST = 9
+        private const val UNINSTALL_REQUEST = 10
         private const val MAX_OPEN_BYTES = 16 * 1024 * 1024
+        private const val KEYSTORE_PROVIDER = "AndroidKeyStore"
+        private const val HUB_KEY_ALIAS = "icedragon_hub_secrets_v1"
+        private const val HUB_SECURE_PREFS = "hub_secure"
+        private const val GCM_IV_LEN = 12
     }
 
     /** The service's notification needs this on Android 13 and later. */

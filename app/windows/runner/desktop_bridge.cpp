@@ -343,7 +343,7 @@ void DesktopBridge::SetAutostart(bool enabled, const std::wstring& command) {
   }
   // Legacy Run values from earlier builds.
   RegDeleteValueW(key, L"Firefox VPN");
-  RegDeleteValueW(key, L"Arman VPN");
+  RegDeleteValueW(key, L"IceDragon VPN");
   if (enabled && !command.empty()) {
     RegSetValueExW(key, L"IceDragon VPN", 0, REG_SZ,
                    reinterpret_cast<const BYTE*>(command.c_str()),

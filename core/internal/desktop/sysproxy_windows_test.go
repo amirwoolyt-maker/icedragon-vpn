@@ -10,15 +10,15 @@ import (
 
 	"golang.org/x/sys/windows/registry"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/config"
-	"github.com/armanlife/arman-vpn-client/core/internal/service"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/config"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/service"
 )
 
 // useTestProxyKeys points the system proxy code at temporary keys under
 // HKCU\Software, so the user's real proxy setting is never touched.
 func useTestProxyKeys(t *testing.T) registry.Key {
 	t.Helper()
-	base := fmt.Sprintf(`Software\ArmanVPNTest-%d`, time.Now().UnixNano())
+	base := fmt.Sprintf(`Software\IceDragonVPNTest-%d`, time.Now().UnixNano())
 	oldSettings, oldBackup, oldAnnounce := internetSettingsKey, backupKey, announceProxyChange
 	internetSettingsKey, backupKey = base+`\Internet Settings`, base+`\PreviousProxy`
 	announceProxyChange = func() {}

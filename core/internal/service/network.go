@@ -13,12 +13,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/config"
-	"github.com/armanlife/arman-vpn-client/core/internal/controlplane"
-	"github.com/armanlife/arman-vpn-client/core/internal/guardian"
-	"github.com/armanlife/arman-vpn-client/core/internal/hellosplit"
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
-	"github.com/armanlife/arman-vpn-client/core/internal/resolver"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/config"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/controlplane"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/guardian"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/hellosplit"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/resolver"
 )
 
 const apiRelayDialTimeout = 20 * time.Second

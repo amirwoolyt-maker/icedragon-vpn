@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/serverlist"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/serverlist"
 )
 
 // FastestCountry is the proxy.country value that picks the location with

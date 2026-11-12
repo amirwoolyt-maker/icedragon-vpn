@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/tun"
-	"github.com/armanlife/arman-vpn-client/core/internal/tunapi"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/tun"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/tunapi"
 )
 
 // appSource is an app's connection on the adapter, as the stack sees it.
@@ -422,7 +422,7 @@ func TestTheProgramsChangeWhileTheTUNRuns(t *testing.T) {
 	if reply := roundTrip(t, other, tunapi.Message{Type: tunapi.TypePrograms}); reply.Type != tunapi.TypeError {
 		t.Fatalf("another client changed the programs: %+v", reply)
 	}
-	if !strings.Contains(sess.trusted[1], "arman-vpn-core") {
+	if !strings.Contains(sess.trusted[1], "icedragon-vpn-core") {
 		t.Fatalf("trusted %v", sess.trusted)
 	}
 	roundTrip(t, c, tunapi.Message{Type: tunapi.TypeClose})

@@ -51,7 +51,7 @@ func TestDailyLogFiles(t *testing.T) {
 	if _, err := f.Write([]byte("second day\n")); err != nil {
 		t.Fatal(err)
 	}
-	if got := strings.Join(logNames(t, dir), " "); got != "arman-vpn-2026-03-01.log arman-vpn-2026-03-02.log" {
+	if got := strings.Join(logNames(t, dir), " "); got != "icedragon-vpn-2026-03-01.log icedragon-vpn-2026-03-02.log" {
 		t.Fatalf("files = %s", got)
 	}
 	data, _ := os.ReadFile(DayFile(dir, day(2)))
@@ -68,7 +68,7 @@ func TestLogsKeptForOneWeek(t *testing.T) {
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"arman-vpn.log", "arman-vpn.log.3", "notes.txt"} {
+	for _, name := range []string{"icedragon-vpn.log", "icedragon-vpn.log.3", "notes.txt"} {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte("x"), 0o600); err != nil {
 			t.Fatal(err)
 		}
@@ -83,8 +83,8 @@ func TestLogsKeptForOneWeek(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer f.Close()
-	want := []string{"arman-vpn-2026-03-04.log", "arman-vpn-2026-03-05.log", "arman-vpn-2026-03-06.log", "arman-vpn-2026-03-07.log",
-		"arman-vpn-2026-03-08.log", "arman-vpn-2026-03-09.log", "arman-vpn-2026-03-10.log", "notes.txt"}
+	want := []string{"icedragon-vpn-2026-03-04.log", "icedragon-vpn-2026-03-05.log", "icedragon-vpn-2026-03-06.log", "icedragon-vpn-2026-03-07.log",
+		"icedragon-vpn-2026-03-08.log", "icedragon-vpn-2026-03-09.log", "icedragon-vpn-2026-03-10.log", "notes.txt"}
 	if got := logNames(t, dir); strings.Join(got, " ") != strings.Join(want, " ") {
 		t.Fatalf("files = %v", got)
 	}
@@ -94,7 +94,7 @@ func TestLogsKeptForOneWeek(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := logNames(t, dir)
-	if len(got) != 8 || got[0] != "arman-vpn-2026-03-05.log" || got[6] != "arman-vpn-2026-03-11.log" {
+	if len(got) != 8 || got[0] != "icedragon-vpn-2026-03-05.log" || got[6] != "icedragon-vpn-2026-03-11.log" {
 		t.Fatalf("after the eighth day started: %v", got)
 	}
 }
@@ -198,8 +198,8 @@ func TestOldDayFilesAreRemovedUnderEitherName(t *testing.T) {
 	dir := t.TempDir()
 	today := time.Date(2026, 11, 4, 12, 0, 0, 0, time.Local)
 	files := map[string]bool{
-		"arman-vpn-2026-11-04.log":   true,
-		"arman-vpn-2026-10-01.log":   false,
+		"icedragon-vpn-2026-11-04.log":   true,
+		"icedragon-vpn-2026-10-01.log":   false,
 		"firefox-vpn-2026-11-03.log": true,
 		"firefox-vpn-2026-10-01.log": false,
 		"notes.txt":                  true,

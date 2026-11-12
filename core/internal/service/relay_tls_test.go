@@ -17,7 +17,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/config"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/config"
 )
 
 type relayTLSRoundTripFunc func(*http.Request) (*http.Response, error)

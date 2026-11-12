@@ -12,8 +12,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/controlplane"
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/controlplane"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
 )
 
 // exchangeSessionWithOAuthCode uses FxA's session-authenticated code grant

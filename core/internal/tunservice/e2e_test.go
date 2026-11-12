@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/egress"
-	"github.com/armanlife/arman-vpn-client/core/internal/tunapi"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/egress"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/tunapi"
 )
 
 // TestEndToEnd runs a TUN for real, on a computer whose network it may

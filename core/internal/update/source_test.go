@@ -19,7 +19,7 @@ func signVersion(r *release, v string) {
 
 func TestManifestDownloadUsesExactURLsAndSurvivesRestart(t *testing.T) {
 	r := newRelease(t, "1.2.3")
-	name := "Arman-VPN-Windows-x64.zip"
+	name := "IceDragon-VPN-Windows-x64.zip"
 	r.files[name] = r.files[AssetName(r.version)]
 	delete(r.files, AssetName(r.version))
 	signVersion(r, r.version)
@@ -87,7 +87,7 @@ func TestFixedPackageNeedsASignedMatchingVersion(t *testing.T) {
 	for _, mode := range []string{"matching", "older", "missing", "tampered", "legacy alias"} {
 		t.Run(mode, func(t *testing.T) {
 			r := newRelease(t, "1.2.3")
-			name := "Arman-VPN-Windows-x64.zip"
+			name := "IceDragon-VPN-Windows-x64.zip"
 			r.files[name] = r.files[AssetName(r.version)]
 			if mode != "legacy alias" {
 				delete(r.files, AssetName(r.version))

@@ -1,11 +1,11 @@
 // Command winres writes the Windows resources of an executable (its icon,
 // version information, and application manifest) as .syso objects that go
-// build links into the package in the current folder: ./cmd/arman-vpn-core,
-// or with -program tun ./cmd/arman-vpn-tun. scripts/build-windows.ps1 runs
+// build links into the package in the current folder: ./cmd/icedragon-vpn-core,
+// or with -program tun ./cmd/icedragon-vpn-tun. scripts/build-windows.ps1 runs
 // it before each build with the release version in APP_VERSION (else
 // version.Current):
 //
-//	APP_VERSION=1.1.0 go generate ./cmd/arman-vpn-core ./cmd/arman-vpn-tun
+//	APP_VERSION=1.1.0 go generate ./cmd/icedragon-vpn-core ./cmd/icedragon-vpn-tun
 //
 // The objects are build output, not kept in Git; a build without them has
 // no icon, version information, or manifest.
@@ -20,18 +20,18 @@ import (
 	"github.com/tc-hib/winres"
 	winversion "github.com/tc-hib/winres/version"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/desktop"
-	"github.com/armanlife/arman-vpn-client/core/internal/version"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/desktop"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/version"
 )
 
 // program is what each executable's version information says.
 type program struct{ description, name string }
 
 var programs = map[string]program{
-	"core": {"IceDragon VPN Core", "arman-vpn-core"},
+	"core": {"IceDragon VPN Core", "icedragon-vpn-core"},
 	// The administrator prompt shows this description when the app
 	// installs the service.
-	"tun": {"IceDragon VPN TUN", "arman-vpn-tun"},
+	"tun": {"IceDragon VPN TUN", "icedragon-vpn-tun"},
 }
 
 func main() {

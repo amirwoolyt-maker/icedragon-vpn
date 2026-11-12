@@ -7,7 +7,7 @@ VPN logic; it is a client of the core's dashboard API on loopback
 
 ## Desktop model (Windows)
 
-- The app starts the core as a child process, `core\arman-vpn-core.exe -app -data-dir
+- The app starts the core as a child process, `core\icedragon-vpn-core.exe -app -data-dir
   <data>` (in a `core` folder, so the app is the only program beside it), and stops it on quit (`POST /api/app/exit`, then closing its
   stdin). The core also exits when its stdin closes, so it never outlives
   the app, even after a crash. When a core already answers for the data
@@ -31,8 +31,8 @@ VPN logic; it is a client of the core's dashboard API on loopback
 
 ## Desktop model (Linux)
 
-The same as on Windows, with the Linux names: the app is `arman-vpn`
-with `core/arman-vpn-core`, and `linux/runner/desktop_bridge.cc` is the
+The same as on Windows, with the Linux names: the app is `icedragon-vpn`
+with `core/icedragon-vpn-core`, and `linux/runner/desktop_bridge.cc` is the
 native side of the same channel.
 
 - The tray icon is an AppIndicator, loaded at run time
@@ -42,15 +42,15 @@ native side of the same channel.
   click.
 - Notifications go to the desktop's notification service over D-Bus; a
   click opens the window.
-- Start at sign-in writes `~/.config/autostart/arman-vpn.desktop`.
-- One copy per user (GtkApplication `com.arman.firefoxvpn`); copies started
+- Start at sign-in writes `~/.config/autostart/icedragon-vpn.desktop`.
+- One copy per user (GtkApplication `com.icedragon.vpn`); copies started
   with `--data-dir` run beside it.
 - The core sets GNOME's proxy setting (gsettings `org.gnome.system.proxy`),
   which GNOME-based desktops and most browsers read.
 
 ## Desktop model (macOS)
 
-The same again: `Arman VPN.app` holds `arman-vpn-core` beside its
+The same again: `IceDragon VPN.app` holds `icedragon-vpn-core` beside its
 executable in `Contents/MacOS`, and `DesktopBridge` in
 `macos/Runner/MainFlutterWindow.swift` is the native side of the channel.
 
@@ -58,7 +58,7 @@ executable in `Contents/MacOS`, and `DesktopBridge` in
   is hidden the app has no Dock icon. Opening the app again (Finder, Dock,
   Spotlight) brings the window up.
 - Start at sign-in writes the LaunchAgent
-  `~/Library/LaunchAgents/com.arman.firefoxvpn.plist`.
+  `~/Library/LaunchAgents/com.icedragon.vpn.plist`.
 - No App Sandbox: the app starts its core and changes the proxy setting.
   It is signed ad hoc, not with an Apple Developer ID.
 - The core sets the web, secure web, and SOCKS proxies of every enabled
@@ -67,17 +67,17 @@ executable in `Contents/MacOS`, and `DesktopBridge` in
 
 The data folder (accounts, settings, logs) on Windows is `user-data` next
 to the app (not `data`, which holds Flutter's own files). The installer puts
-the app by default in `%LOCALAPPDATA%\Programs\Arman VPN`, a folder
+the app by default in `%LOCALAPPDATA%\Programs\IceDragon VPN`, a folder
 of the user's own; the first install lets the user choose another folder they
 can write to. A new version replaces the app where it is, keeping
-`user-data`; the portable zip holds an `Arman VPN` folder to unpack over the
+`user-data`; the portable zip holds an `IceDragon VPN` folder to unpack over the
 old one. On macOS the
-data is in `~/Library/Application Support/Arman VPN`, on Linux in
-`~/.local/share/arman-vpn`; a file named `portable` next to the app keeps
+data is in `~/Library/Application Support/IceDragon VPN`, on Linux in
+`~/.local/share/icedragon-vpn`; a file named `portable` next to the app keeps
 it in `user-data` beside it there too.
 
 Arguments: `--data-dir=<path>` (overrides the above) and `--core=<path>`
-(default: `arman-vpn-core.exe` next to the app).
+(default: `icedragon-vpn-core.exe` next to the app).
 
 - Ports: the core's defaults are 10810 (SOCKS5 and HTTP proxy) and 10820
   (its API). When the API port is taken (the core exits with
@@ -196,9 +196,9 @@ shield in white, for the app's tray (`assets/tray`) and the core's
 ## Development
 
 - Build a release folder with the core: `scripts\build-windows.ps1` from
-  the repository root (output in `dist\Arman-VPN-<version>\`); on Linux,
-  `scripts/build-linux.sh` (output in `dist/Arman-VPN-<version>-Linux-<amd64|arm64>.tar.gz`);
-  on macOS, `scripts/build-macos.sh` (output in `dist/Arman-VPN-<version>-macOS.dmg`).
+  the repository root (output in `dist\IceDragon-VPN-<version>\`); on Linux,
+  `scripts/build-linux.sh` (output in `dist/IceDragon-VPN-<version>-Linux-<amd64|arm64>.tar.gz`);
+  on macOS, `scripts/build-macos.sh` (output in `dist/IceDragon-VPN-<version>-macOS.dmg`).
 - Work on the UI without a real core or accounts:
 
   ```

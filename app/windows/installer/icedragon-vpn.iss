@@ -1,11 +1,11 @@
-﻿; The Windows installer of Arman VPN (Inno Setup 6). scripts\build-windows.ps1
+﻿; The Windows installer of IceDragon VPN (Inno Setup 6). scripts\build-windows.ps1
 ; compiles it with the built app:
 ;
 ;   ISCC /DAppVersion=1.1.9 /DSourceDir=<the app's folder> /DOutputDir=<dir>
-;        /DOutputName=<file name without .exe> arman-vpn.iss
+;        /DOutputName=<file name without .exe> icedragon-vpn.iss
 ;
 ; It installs for the current user only, without administrator rights, by
-; default into %LOCALAPPDATA%\Programs\Arman VPN (apart from
+; default into %LOCALAPPDATA%\Programs\IceDragon VPN (apart from
 ; Mozilla's own client). The first install lets the user choose another
 ; folder; it must be one the user can write to, because the app keeps its
 ; data (accounts, settings, logs) in user-data beside it. A new version
@@ -16,12 +16,12 @@
 ; its folder, which the next install offers again.
 ;
 ; The TUN mode's service is the one part that needs administrator rights:
-; Setup always runs core\arman-vpn-tun.exe install, which asks for them
+; Setup always runs core\icedragon-vpn-tun.exe install, which asks for them
 ; itself and installs the service in Program Files; the uninstall removes it
 ; again.
 
 #define AppName "IceDragon VPN"
-#define AppExe "arman-vpn.exe"
+#define AppExe "icedragon-vpn.exe"
 #define AppDir "IceDragon VPN"
 #ifndef AppVersion
   #define AppVersion "0.0.0"
@@ -184,13 +184,13 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopico
 ; prompt; declined, the app installs it the first time TUN mode is chosen.
 ; Not in a silent run: no prompt there, and an installed service updates
 ; itself from the app.
-Filename: "{app}\core\arman-vpn-tun.exe"; Parameters: "install"; Flags: waituntilterminated skipifsilent; Check: not TunServiceInstalled
+Filename: "{app}\core\icedragon-vpn-tun.exe"; Parameters: "install"; Flags: waituntilterminated skipifsilent; Check: not TunServiceInstalled
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
 
 ; The TUN service goes with the app: through its pipe, with no prompt while
 ; it runs; it does nothing when the service is not installed.
 [UninstallRun]
-Filename: "{app}\core\arman-vpn-tun.exe"; Parameters: "uninstall"; Flags: waituntilterminated; RunOnceId: "RemoveTunService"
+Filename: "{app}\core\icedragon-vpn-tun.exe"; Parameters: "uninstall"; Flags: waituntilterminated; RunOnceId: "RemoveTunService"
 
 ; The app updates itself (core\internal\update) by replacing its files, so
 ; this uninstaller does not know every file a later version brought: the
@@ -227,10 +227,10 @@ begin
 end;
 
 // TunServiceInstalled tells whether the TUN mode's Windows service is
-// installed (core\cmd\arman-vpn-tun).
+// installed (core\cmd\icedragon-vpn-tun).
 function TunServiceInstalled: Boolean;
 begin
-  Result := RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\ArmanVPNTun');
+  Result := RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\IceDragonVPNTun');
 end;
 
 // IsUnder tells whether Dir is Parent or a folder inside it.
@@ -305,7 +305,7 @@ begin
   if CurUninstallStep = usUninstall then
   begin
     RegDeleteValue(HKCU, RunKey, '{#AppName}');
-    RegDeleteValue(HKCU, RunKey, 'Arman VPN');
+    RegDeleteValue(HKCU, RunKey, 'IceDragon VPN');
     RegDeleteValue(HKCU, RunKey, 'Firefox VPN');
     if RegQueryDWordValue(HKCU, InternetKey, 'ProxyEnable', Enabled) and (Enabled = 1) and
        RegQueryStringValue(HKCU, InternetKey, 'ProxyServer', Server) and

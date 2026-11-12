@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/controlplane"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/controlplane"
 )
 
 // DefaultEndpoint is the production Guardian endpoint, matching Firefox's

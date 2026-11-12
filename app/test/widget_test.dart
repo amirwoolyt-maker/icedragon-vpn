@@ -4,23 +4,23 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:arman_vpn/app_info.dart';
-import 'package:arman_vpn/app_settings.dart';
-import 'package:arman_vpn/core/core_api.dart';
-import 'package:arman_vpn/core/core_controller.dart';
-import 'package:arman_vpn/core/models.dart';
-import 'package:arman_vpn/core/relay_test.dart';
-import 'package:arman_vpn/core/tun_service.dart';
-import 'package:arman_vpn/core/updates.dart';
-import 'package:arman_vpn/core/announcements.dart';
-import 'package:arman_vpn/core/android_core.dart';
-import 'package:arman_vpn/desktop/close_dialog.dart';
-import 'package:arman_vpn/l10n/app_localizations.dart';
-import 'package:arman_vpn/ui/app.dart';
-import 'package:arman_vpn/ui/settings_page.dart'
+import 'package:icedragon_vpn/app_info.dart';
+import 'package:icedragon_vpn/app_settings.dart';
+import 'package:icedragon_vpn/core/core_api.dart';
+import 'package:icedragon_vpn/core/core_controller.dart';
+import 'package:icedragon_vpn/core/models.dart';
+import 'package:icedragon_vpn/core/relay_test.dart';
+import 'package:icedragon_vpn/core/tun_service.dart';
+import 'package:icedragon_vpn/core/updates.dart';
+import 'package:icedragon_vpn/core/announcements.dart';
+import 'package:icedragon_vpn/core/android_core.dart';
+import 'package:icedragon_vpn/desktop/close_dialog.dart';
+import 'package:icedragon_vpn/l10n/app_localizations.dart';
+import 'package:icedragon_vpn/ui/app.dart';
+import 'package:icedragon_vpn/ui/settings_page.dart'
     show SettingsGroup, pickProgramFile;
-import 'package:arman_vpn/ui/signin_dialog.dart';
-import 'package:arman_vpn/ui/widgets.dart';
+import 'package:icedragon_vpn/ui/signin_dialog.dart';
+import 'package:icedragon_vpn/ui/widgets.dart';
 
 Map<String, Object?> _account(
   String id,
@@ -468,7 +468,7 @@ void main() {
     final core = CoreController(
       () async => throw const CoreUnavailable(
         CoreProblem.noCore,
-        'C:/x/arman-vpn-core.exe',
+        'C:/x/icedragon-vpn-core.exe',
       ),
       pollInterval: const Duration(hours: 1),
     );
@@ -479,7 +479,7 @@ void main() {
     expect(find.text("Can't reach the core"), findsOneWidget);
     expect(
       find.text(
-        'The core program was not found next to the app (C:/x/arman-vpn-core.exe).',
+        'The core program was not found next to the app (C:/x/icedragon-vpn-core.exe).',
       ),
       findsOneWidget,
     );
@@ -3174,19 +3174,19 @@ void main() {
           signatureUrl: 'https://cdn.example/signature',
           downloads: {
             'archive-x64': ReleaseDownload(
-              'Arman-VPN-Windows-x64.zip',
+              'IceDragon-VPN-Windows-x64.zip',
               'https://cdn.example/package',
             ),
             'archive': ReleaseDownload(
-              'Arman-VPN-Windows-x64.zip',
+              'IceDragon-VPN-Windows-x64.zip',
               'https://cdn.example/package',
             ),
             'amd64': ReleaseDownload(
-              'Arman-VPN-Windows-x64.zip',
+              'IceDragon-VPN-Windows-x64.zip',
               'https://cdn.example/package',
             ),
             'arm64': ReleaseDownload(
-              'Arman-VPN-Windows-x64.zip',
+              'IceDragon-VPN-Windows-x64.zip',
               'https://cdn.example/package',
             ),
           },
@@ -3194,7 +3194,7 @@ void main() {
       );
       await tester.pump();
       expect(api.downloadSources.single, {
-        'file': 'Arman-VPN-Windows-x64.zip',
+        'file': 'IceDragon-VPN-Windows-x64.zip',
         'url': 'https://cdn.example/package',
         'checksums_url': 'https://cdn.example/sums',
         'signature_url': 'https://cdn.example/signature',
@@ -3812,7 +3812,7 @@ class FakeTunService implements TunService {
   String? prompt;
 
   @override
-  String get executable => 'arman-vpn-tun.exe';
+  String get executable => 'icedragon-vpn-tun.exe';
 
   @override
   Future<TunServiceResult> install({String? prompt}) async {

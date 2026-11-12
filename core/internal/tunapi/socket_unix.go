@@ -17,8 +17,8 @@ import (
 // end); ExeName is its executable, which the app also carries beside its
 // core.
 const (
-	ServiceName = "arman-vpn-tun"
-	ExeName     = "arman-vpn-tun"
+	ServiceName = "icedragon-vpn-tun"
+	ExeName     = "icedragon-vpn-tun"
 )
 
 // ErrNoService means no service answers: it is not installed, or it is

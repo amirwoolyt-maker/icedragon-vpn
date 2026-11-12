@@ -8,10 +8,10 @@ import (
 	"time"
 	"unicode/utf16"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/config"
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
-	"github.com/armanlife/arman-vpn-client/core/internal/service"
-	"github.com/armanlife/arman-vpn-client/core/internal/version"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/config"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/service"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/version"
 
 	"fyne.io/systray"
 )

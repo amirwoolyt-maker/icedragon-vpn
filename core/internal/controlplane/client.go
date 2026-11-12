@@ -18,9 +18,9 @@ import (
 	utls "github.com/refraction-networking/utls"
 	"golang.org/x/net/http2"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/firefoxtls"
-	"github.com/armanlife/arman-vpn-client/core/internal/hellosplit"
-	"github.com/armanlife/arman-vpn-client/core/internal/resolver"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/firefoxtls"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/hellosplit"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/resolver"
 )
 
 const (

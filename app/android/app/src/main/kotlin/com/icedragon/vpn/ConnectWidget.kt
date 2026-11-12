@@ -1,4 +1,4 @@
-package com.arman.firefoxvpn
+package com.icedragon.vpn
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager

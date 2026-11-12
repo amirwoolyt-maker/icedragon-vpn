@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/config"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/config"
 )
 
 // fakeAutoConnect replaces auto-connect's test with pass (counting the

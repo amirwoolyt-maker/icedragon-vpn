@@ -16,9 +16,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/accounts"
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
-	"github.com/armanlife/arman-vpn-client/core/internal/version"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/accounts"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/version"
 )
 
 // A backup is the data folder as a zip file, in the same layout, so that it

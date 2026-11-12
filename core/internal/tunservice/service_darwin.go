@@ -11,11 +11,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/tunapi"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/tunapi"
 )
 
 // InstallDir is the installed service's folder.
-const InstallDir = "/Library/Application Support/Arman VPN TUN"
+const InstallDir = "/Library/Application Support/IceDragon VPN TUN"
 
 // jobTarget is the service in launchctl's commands.
 const jobTarget = "system/" + tunapi.LaunchdLabel

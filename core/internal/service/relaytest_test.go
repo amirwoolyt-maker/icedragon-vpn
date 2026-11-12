@@ -16,8 +16,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/config"
-	"github.com/armanlife/arman-vpn-client/core/internal/resolver"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/config"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/resolver"
 )
 
 func relayHealthFixture(t *testing.T, handler http.HandlerFunc) (*relayHealthTest, string) {
@@ -44,7 +44,7 @@ func TestRelayHealthOnlyChecksTheWorkerAndStreamsProgress(t *testing.T) {
 			t.Error("account authorization must not reach the health endpoint")
 		}
 		w.Header().Set("Content-Type", "application/json")
-		io.WriteString(w, `{"relay":"arman-vpn","version":1,"ready":true}`)
+		io.WriteString(w, `{"relay":"icedragon-vpn","version":1,"ready":true}`)
 	})
 	var progress []relayTestStep
 	result := probe.run(t.Context(), address, func(step relayTestStep) { progress = append(progress, step) })
@@ -77,7 +77,7 @@ func TestRelayHealthClassifiesResponsesWithoutEchoingBodies(t *testing.T) {
 		{"quota", 429, "", "Error code: 1027 fixture-secret", "http_429"},
 		{"redirect", 302, "", "fixture-secret", "http_302"},
 		{"old script", 200, "", "<html>fixture-secret</html>", "unsupported_health"},
-		{"not ready", 200, "", `{"relay":"arman-vpn","version":1,"ready":false}`, "not_ready"},
+		{"not ready", 200, "", `{"relay":"icedragon-vpn","version":1,"ready":false}`, "not_ready"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			calls := 0

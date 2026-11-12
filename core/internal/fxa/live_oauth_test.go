@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/guardian"
-	"github.com/armanlife/arman-vpn-client/core/internal/securefile"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/guardian"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/securefile"
 )
 
 // Explicit opt-in only: refreshes the OAuth credentials of one stored

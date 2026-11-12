@@ -6,7 +6,7 @@ The proxy carries TCP traffic, and UDP on the ports Mozilla's proxy allows, from
 
 ## Quick start
 
-1. Run the program: double-click `arman-vpn-core.exe` on Windows, or start `./arman-vpn-core` in a Linux terminal. The window shows a status screen with a numbered list of actions and runs the proxy until you quit it; if the desktop app (or a tray started with `-tray`) already runs the core for the same data folder, the window controls that one instead. A `user-data` folder is created next to the program; beside the desktop app (`arman-vpn.exe`) the core uses the app's data folder.
+1. Run the program: double-click `icedragon-vpn-core.exe` on Windows, or start `./icedragon-vpn-core` in a Linux terminal. The window shows a status screen with a numbered list of actions and runs the proxy until you quit it; if the desktop app (or a tray started with `-tray`) already runs the core for the same data folder, the window controls that one instead. A `user-data` folder is created next to the program; beside the desktop app (`icedragon-vpn.exe`) the core uses the app's data folder.
 2. Open the dashboard at <http://127.0.0.1:10820/app/> (option **1** on the status screen).
 3. On **Accounts**, choose **Add account** and sign in with a Firefox Account (email code, authenticator code, unblock code, and CAPTCHA prompts are shown when Mozilla asks for them).
 4. Point applications at the SOCKS5 proxy `127.0.0.1:10810` (it also serves HTTP proxy clients). By default (**Clear system proxy**) only applications set up by hand use it; on Windows, **Set system proxy** (the tray menu, the status screen, or the dashboard's Settings) points Windows' proxy setting at it while it runs.
@@ -19,7 +19,7 @@ Everything else (location, ports, threshold, dashboard login, transport) is on t
 ## Project layout
 
 ```text
-cmd/arman-vpn-core/   Program entry: flags, run modes, one-shot commands; Windows icon resources
+cmd/icedragon-vpn-core/   Program entry: flags, run modes, one-shot commands; Windows icon resources
 tools/winres/            Generator of the Windows icon and version resources
 internal/service/        Service supervisor, dashboard and its API, API client
 internal/service/web/    Dashboard page, styles, and script (embedded in the binary)
@@ -70,8 +70,8 @@ Build a Windows AMD64 executable (no CGO needed):
 
 ```powershell
 $env:GOOS = 'windows'; $env:GOARCH = 'amd64'; $env:CGO_ENABLED = '0'
-go generate ./cmd/arman-vpn-core   # icon and version information, after a version change
-go build -trimpath -o dist\arman-vpn-core.exe ./cmd/arman-vpn-core
+go generate ./cmd/icedragon-vpn-core   # icon and version information, after a version change
+go build -trimpath -o dist\icedragon-vpn-core.exe ./cmd/icedragon-vpn-core
 ```
 
 The ordinary test suite uses local fixtures and synthetic credentials. Real account tests require separate, explicit opt-in.

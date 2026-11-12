@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/controlplane"
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
-	"github.com/armanlife/arman-vpn-client/core/internal/securefile"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/controlplane"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/securefile"
 )
 
 // Country flags. The web folder carries the flags of Mozilla's locations

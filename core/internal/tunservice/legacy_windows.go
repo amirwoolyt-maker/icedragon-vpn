@@ -9,7 +9,7 @@ import (
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/svc/mgr"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
 )
 
 // The service of the versions before 1.0.9, when the program was called

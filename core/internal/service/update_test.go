@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/update"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/update"
 )
 
 // Only the app on this computer may download or install an update, and

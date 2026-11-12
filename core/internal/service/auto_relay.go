@@ -15,16 +15,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/config"
-	"github.com/armanlife/arman-vpn-client/core/internal/controlplane"
-	"github.com/armanlife/arman-vpn-client/core/internal/guardian"
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
-	"github.com/armanlife/arman-vpn-client/core/internal/update"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/config"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/controlplane"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/guardian"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/update"
 )
 
 const (
-	relayManifestURL    = "https://raw.githubusercontent.com/arman-org/update-manifests/main/arman-vpn-client/updates.json"
-	relayManifestMirror = "https://cdn.jsdelivr.net/gh/arman-org/update-manifests@main/arman-vpn-client/updates.json"
+	relayManifestURL    = "https://raw.githubusercontent.com/amirwoolyt-maker/icedragon-vpn/main/.github/updates.json"
+	relayManifestMirror = "https://cdn.jsdelivr.net/gh/arman-org/update-manifests@main/icedragon-vpn-client/updates.json"
 	autoRelayBudget     = 20 * time.Second
 	relayProbeTimeout   = 4 * time.Second
 	maxRelayManifest    = 512 * 1024
@@ -209,7 +209,7 @@ func (a *automaticRelays) healthy(ctx context.Context, relay *url.URL, base http
 	}
 	valid := resp.StatusCode == http.StatusOK &&
 		json.NewDecoder(io.LimitReader(resp.Body, 4096)).Decode(&report) == nil &&
-		report.Relay == "arman-vpn" && report.Version == 1 && report.Ready
+		report.Relay == "icedragon-vpn" && report.Version == 1 && report.Ready
 	logx.Info("automatic relay health host=%s http=%d ready=%t", relay.Hostname(), resp.StatusCode, valid)
 	return valid
 }

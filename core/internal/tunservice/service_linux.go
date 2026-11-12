@@ -6,11 +6,11 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/tunapi"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/tunapi"
 )
 
 // InstallDir is the installed service's folder.
-const InstallDir = "/opt/arman-vpn-tun"
+const InstallDir = "/opt/icedragon-vpn-tun"
 
 const unitName = tunapi.ServiceName + ".service"
 

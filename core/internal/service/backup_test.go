@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/fxa"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/fxa"
 )
 
 // All credentials in this file are local fixtures.
@@ -65,9 +65,9 @@ func TestBackupLeavesOutLargeAndRunFiles(t *testing.T) {
 	dir := d.paths.Dir
 	writeBackupTestFile(t, filepath.Join(dir, "config.json"), "{}")
 	writeBackupTestFile(t, filepath.Join(dir, "app-settings.json"), "{}")
-	writeBackupTestFile(t, filepath.Join(dir, "logs", "arman-vpn-2026-11-06.log"), "log")
+	writeBackupTestFile(t, filepath.Join(dir, "logs", "icedragon-vpn-2026-11-06.log"), "log")
 	writeBackupTestFile(t, filepath.Join(dir, "routing", "geosite.dat"), "lists")
-	writeBackupTestFile(t, filepath.Join(dir, "update", "Arman-VPN.zip"), "update")
+	writeBackupTestFile(t, filepath.Join(dir, "update", "IceDragon-VPN.zip"), "update")
 	writeBackupTestFile(t, filepath.Join(dir, localTokenName), "token")
 	writeBackupTestFile(t, filepath.Join(dir, statusFileName), "{}")
 

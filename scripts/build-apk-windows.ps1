@@ -54,7 +54,7 @@ if (-not $env:GOTOOLCHAIN) {
 }
 
 New-Item -ItemType Directory -Force -Path "$root\app\android\app\libs" | Out-Null
-$ldflags = "-s -w -X github.com/armanlife/arman-vpn-client/core/internal/version.Current=$version"
+$ldflags = "-s -w -X github.com/amirwoolyt-maker/icedragon-vpn/core/internal/version.Current=$version"
 
 Push-Location "$root\core"
 try {

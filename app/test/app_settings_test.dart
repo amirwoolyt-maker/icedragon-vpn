@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:arman_vpn/app_settings.dart';
-import 'package:arman_vpn/core/core_process.dart';
+import 'package:icedragon_vpn/app_settings.dart';
+import 'package:icedragon_vpn/core/core_process.dart';
 
 void main() {
   late Directory dir;
@@ -114,7 +114,7 @@ void main() {
     expect(
       CoreProcess.executableFrom(const []),
       endsWith(
-        Platform.isWindows ? r'core\arman-vpn-core.exe' : 'core/arman-vpn-core',
+        Platform.isWindows ? r'core\icedragon-vpn-core.exe' : 'core/icedragon-vpn-core',
       ),
     );
   });

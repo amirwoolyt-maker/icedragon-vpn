@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:arman_vpn/app_settings.dart';
-import 'package:arman_vpn/core/models.dart';
-import 'package:arman_vpn/l10n/app_localizations.dart';
-import 'package:arman_vpn/ui/accounts_page.dart';
-import 'package:arman_vpn/ui/format.dart';
+import 'package:icedragon_vpn/app_settings.dart';
+import 'package:icedragon_vpn/core/models.dart';
+import 'package:icedragon_vpn/l10n/app_localizations.dart';
+import 'package:icedragon_vpn/ui/accounts_page.dart';
+import 'package:icedragon_vpn/ui/format.dart';
 
 void main() {
   test('the system locale picks the app language', () {

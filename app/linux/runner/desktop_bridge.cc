@@ -65,7 +65,7 @@ struct Indicator {
   }
 };
 
-constexpr const char* kAutostartFile = "arman-vpn.desktop";
+constexpr const char* kAutostartFile = "icedragon-vpn.desktop";
 
 }  // namespace
 
@@ -169,7 +169,7 @@ static GtkWidget* build_menu(DesktopBridge* self, FlValue* items, bool rtl,
 // file path, which some trays (StatusNotifierItem hosts) do not resolve.
 // The name is armanvpntray_<file>: no theme has it, and it has no dash,
 // since KDE looks a name up in the system's theme first and drops its
-// dashed parts until one matches ("arman-vpn-off" showed Firefox's own
+// dashed parts until one matches ("icedragon-vpn-off" showed Firefox's own
 // icon). Without the library's icon folder call, the path goes.
 static std::string tray_icon(DesktopBridge* self, const gchar* path) {
   if (self->api.set_theme_path == nullptr || path[0] == '\0') {
@@ -177,7 +177,7 @@ static std::string tray_icon(DesktopBridge* self, const gchar* path) {
   }
   if (self->icon_dir.empty()) {
     g_autofree gchar* dir = g_build_filename(g_get_user_runtime_dir(),
-                                             "arman-vpn-tray", nullptr);
+                                             "icedragon-vpn-tray", nullptr);
     g_mkdir_with_parents(dir, 0700);
     self->icon_dir = dir;
     self->api.set_theme_path(self->indicator, dir);
@@ -392,7 +392,7 @@ DesktopBridge* desktop_bridge_new(FlView* view, GtkWindow* window) {
                                             self, nullptr);
   if (self->api.Load()) {
     self->indicator = self->api.create(
-        "arman-vpn", "network-vpn", kCategoryApplicationStatus);
+        "icedragon-vpn", "network-vpn", kCategoryApplicationStatus);
   }
   self->bus = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
   if (self->bus) {

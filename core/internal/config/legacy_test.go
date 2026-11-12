@@ -9,7 +9,7 @@ import (
 // The app's data folder of a version before 1.0.9 moves to the new name,
 // with its files, once: not over a new folder, and not for other folders.
 func TestTheOldDataFolderMovesToTheNewName(t *testing.T) {
-	for _, names := range [][2]string{{"Firefox VPN Client", "Arman VPN"}, {"firefox-vpn-client", "arman-vpn"}} {
+	for _, names := range [][2]string{{"Firefox VPN Client", "IceDragon VPN"}, {"firefox-vpn-client", "icedragon-vpn"}} {
 		base := t.TempDir()
 		old, dir := filepath.Join(base, names[0]), filepath.Join(base, names[1])
 		os.MkdirAll(filepath.Join(old, "accounts"), 0o700)

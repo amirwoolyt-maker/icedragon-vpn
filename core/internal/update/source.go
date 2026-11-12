@@ -21,7 +21,7 @@ type Source struct {
 
 const packageFile = "package.json"
 const versionPrefix = "# IceDragon VPN version: "
-const legacyVersionPrefix = "# Arman VPN version: "
+const legacyVersionPrefix = "# IceDragon VPN version: "
 
 func (m *Manager) defaultSource(v string) Source {
 	base := m.baseURL + "v" + v + "/"

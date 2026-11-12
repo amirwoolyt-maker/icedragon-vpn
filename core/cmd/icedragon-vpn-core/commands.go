@@ -12,13 +12,13 @@ import (
 
 	"golang.org/x/term"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/accounts"
-	"github.com/armanlife/arman-vpn-client/core/internal/config"
-	"github.com/armanlife/arman-vpn-client/core/internal/fxa"
-	"github.com/armanlife/arman-vpn-client/core/internal/guardian"
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
-	"github.com/armanlife/arman-vpn-client/core/internal/proxy"
-	"github.com/armanlife/arman-vpn-client/core/internal/service"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/accounts"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/config"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/fxa"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/guardian"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/proxy"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/service"
 )
 
 // runAddAccount signs in interactively and stores the account at the end
@@ -117,7 +117,7 @@ func writeAccountList(out io.Writer, p paint, list []accounts.Account, activeID 
 	const rule = "────────────────────────────────────────────────────────────────"
 	fmt.Fprintf(out, "\n  %s\n  %s\n", p.bold("IceDragon VPN accounts"), p.dim(rule))
 	if len(list) == 0 {
-		fmt.Fprintf(out, "    No accounts yet. Add one: %s\n\n", p.cyan("arman-vpn add-account"))
+		fmt.Fprintf(out, "    No accounts yet. Add one: %s\n\n", p.cyan("icedragon-vpn add-account"))
 		return
 	}
 	width := 0
@@ -384,7 +384,7 @@ func promptCredentials() (string, string) {
 }
 
 // runStatus prints the running service's state in a few aligned lines
-// (arman-vpn status adds the service's own lines above them): the proxy,
+// (icedragon-vpn status adds the service's own lines above them): the proxy,
 // the active account, and its data left.
 func runStatus(paths service.DataPaths, out io.Writer) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -442,7 +442,7 @@ func statusLines(st service.TrayStatus, now time.Time) [][2]string {
 			}
 		}
 	} else if st.Accounts["total"] == 0 {
-		lines = append(lines, [2]string{"Account", "none yet: arman-vpn add-account"})
+		lines = append(lines, [2]string{"Account", "none yet: icedragon-vpn add-account"})
 	}
 	return lines
 }

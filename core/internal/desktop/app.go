@@ -12,10 +12,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
-	"github.com/armanlife/arman-vpn-client/core/internal/service"
-	"github.com/armanlife/arman-vpn-client/core/internal/update"
-	"github.com/armanlife/arman-vpn-client/core/internal/version"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/service"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/update"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/version"
 )
 
 // The app mode (-app) is the core process of the desktop app: the app
@@ -101,7 +101,7 @@ func ReportAppError(w io.Writer, err error) int {
 	f := classifyAppError(err)
 	fmt.Fprintf(w, "%s%s %s\n", appErrorPrefix, f.code, oneLine(f.detail))
 	if f.code == AppErrorAlreadyRunning {
-		fmt.Fprintf(w, "arman-vpn-core: %s\n", oneLine(err.Error()))
+		fmt.Fprintf(w, "icedragon-vpn-core: %s\n", oneLine(err.Error()))
 	}
 	return f.exit
 }

@@ -18,12 +18,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/config"
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
-	"github.com/armanlife/arman-vpn-client/core/internal/netstate"
-	"github.com/armanlife/arman-vpn-client/core/internal/securefile"
-	"github.com/armanlife/arman-vpn-client/core/internal/service"
-	"github.com/armanlife/arman-vpn-client/core/internal/tun"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/config"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/netstate"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/securefile"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/service"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/tun"
 )
 
 var (

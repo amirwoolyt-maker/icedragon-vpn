@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/accounts"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/accounts"
 )
 
 // All credentials in this file are local fixtures; the control plane

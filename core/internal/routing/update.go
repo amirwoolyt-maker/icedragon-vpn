@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/securefile"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/securefile"
 )
 
 // Default list sources, both from Chocolate4U/Iran-v2ray-rules; together

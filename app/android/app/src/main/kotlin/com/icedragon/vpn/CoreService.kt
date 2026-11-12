@@ -1,4 +1,4 @@
-package com.arman.firefoxvpn
+package com.icedragon.vpn
 
 import android.app.Notification
 import android.app.NotificationChannel

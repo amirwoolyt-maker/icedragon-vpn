@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:arman_vpn/app_info.dart';
-import 'package:arman_vpn/app_settings.dart';
-import 'package:arman_vpn/core/updates.dart';
-import 'package:arman_vpn/core/announcements.dart';
+import 'package:icedragon_vpn/app_info.dart';
+import 'package:icedragon_vpn/app_settings.dart';
+import 'package:icedragon_vpn/core/updates.dart';
+import 'package:icedragon_vpn/core/announcements.dart';
 
 Map<String, Object?> record(
   String base, {
@@ -55,22 +55,22 @@ Future<String> fixture(
 Map<String, Object?> compactManifest(String base) {
   const files = {
     'android': {
-      'universal': 'Arman-VPN-Android-universal.apk',
-      'arm64-v8a': 'Arman-VPN-Android-arm64-v8a.apk',
-      'armeabi-v7a': 'Arman-VPN-Android-armeabi-v7a.apk',
-      'x86_64': 'Arman-VPN-Android-x86_64.apk',
+      'universal': 'IceDragon-VPN-Android-universal.apk',
+      'arm64-v8a': 'IceDragon-VPN-Android-arm64-v8a.apk',
+      'armeabi-v7a': 'IceDragon-VPN-Android-armeabi-v7a.apk',
+      'x86_64': 'IceDragon-VPN-Android-x86_64.apk',
     },
     'windows': {
-      'installer-x64': 'Arman-VPN-Windows-Setup-x64.exe',
-      'archive-x64': 'Arman-VPN-Windows-x64.zip',
+      'installer-x64': 'IceDragon-VPN-Windows-Setup-x64.exe',
+      'archive-x64': 'IceDragon-VPN-Windows-x64.zip',
     },
     'linux': {
-      'amd64': 'Arman-VPN-Linux-amd64.tar.gz',
-      'arm64': 'Arman-VPN-Linux-arm64.tar.gz',
+      'amd64': 'IceDragon-VPN-Linux-amd64.tar.gz',
+      'arm64': 'IceDragon-VPN-Linux-arm64.tar.gz',
     },
     'macos': {
-      'installer': 'Arman-VPN-macOS.dmg',
-      'archive': 'Arman-VPN-macOS.tar.gz',
+      'installer': 'IceDragon-VPN-macOS.dmg',
+      'archive': 'IceDragon-VPN-macOS.tar.gz',
     },
   };
   Map<String, Object?> platform(String os, String version) => {
@@ -157,13 +157,13 @@ void main() {
     () async {
       final assets = await fixture({
         for (final file in [
-          'Arman-VPN-Windows-x64.zip',
-          'Arman-VPN-Linux-amd64.tar.gz',
-          'Arman-VPN-macOS.tar.gz',
-          'Arman-VPN-Android-universal.apk',
+          'IceDragon-VPN-Windows-x64.zip',
+          'IceDragon-VPN-Linux-amd64.tar.gz',
+          'IceDragon-VPN-macOS.tar.gz',
+          'IceDragon-VPN-Android-universal.apk',
         ])
           'HEAD /v1.0.15/$file': (200, ''),
-        'HEAD /v1.0.16/Arman-VPN-Android-universal.apk': (200, ''),
+        'HEAD /v1.0.16/IceDragon-VPN-Android-universal.apk': (200, ''),
       });
       final manifest = compactManifest(assets);
       final requests = <String>[];
@@ -189,7 +189,7 @@ void main() {
       ))!;
       expect(
         await downloadUrl(latest, os: 'android', abi: 'arm64-v8a'),
-        '$assets/v1.0.16/Arman-VPN-Android-arm64-v8a.apk',
+        '$assets/v1.0.16/IceDragon-VPN-Android-arm64-v8a.apk',
       );
       expect(requests, List.filled(5, 'GET /updates.json'));
     },

@@ -18,7 +18,7 @@ import (
 
 	"golang.org/x/net/http2"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
 )
 
 // cuttableConn carries its connection until cut, then carries nothing,

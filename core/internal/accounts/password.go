@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/fxa"
-	"github.com/armanlife/arman-vpn-client/core/internal/securefile"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/fxa"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/securefile"
 )
 
 // The Firefox Account password is kept so that an account whose tokens

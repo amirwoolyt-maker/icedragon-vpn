@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/securefile"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/securefile"
 )
 
 const (

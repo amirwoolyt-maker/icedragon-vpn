@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/config"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/config"
 )
 
 func TestFreeListenIfBusyReassignsOccupiedDefaultPort(t *testing.T) {

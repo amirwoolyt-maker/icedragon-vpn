@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/config"
-	"github.com/armanlife/arman-vpn-client/core/internal/proxy"
-	"github.com/armanlife/arman-vpn-client/core/internal/resolver"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/config"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/proxy"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/resolver"
 )
 
 const dnsTestTimeout = 8 * time.Second

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/version"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/version"
 )
 
 // projectURL is where people find the app this service belongs to.

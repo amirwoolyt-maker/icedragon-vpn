@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/serverlist"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/serverlist"
 )
 
 // The server list is saved when it is fetched, shown at once on the next

@@ -21,7 +21,7 @@
 // its bundle, whose Contents is replaced. For a copy that Setup
 // installed, it also sets the version in Windows' list of installed apps;
 // the uninstaller removes the app's files whichever version put them there
-// ([UninstallDelete] in app/windows/installer/arman-vpn.iss). The new
+// ([UninstallDelete] in app/windows/installer/icedragon-vpn.iss). The new
 // Setup is not run: when it fails, Inno Setup's rollback removes the files
 // it added but does not restore the ones it replaced (tried), which can
 // leave half of each version. The copy writes what happened to result.json
@@ -61,9 +61,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
-	"github.com/armanlife/arman-vpn-client/core/internal/signing"
-	"github.com/armanlife/arman-vpn-client/core/internal/version"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/signing"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/version"
 )
 
 // The states of Status.
@@ -93,8 +93,8 @@ type appPackage struct {
 // windowsPackage is the Windows app's zip.
 var windowsPackage = appPackage{
 	name:   func(v string) string { return "IceDragon-VPN-" + v + "-Windows-x64.zip" },
-	app:    "arman-vpn.exe",
-	core:   "core/arman-vpn-core.exe",
+	app:    "icedragon-vpn.exe",
+	core:   "core/icedragon-vpn-core.exe",
 	unpack: unzip,
 }
 

@@ -10,10 +10,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/securefile"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/securefile"
 )
 
-// The log folder holds one file per local day, arman-vpn-YYYY-MM-DD.log,
+// The log folder holds one file per local day, icedragon-vpn-YYYY-MM-DD.log,
 // for the last keepLogDays days: when the eighth day starts, the oldest file
 // is deleted. A day's file stops growing at maxDayBytes (a safety limit that
 // only verbose logging under heavy traffic reaches). Tests change these.
@@ -29,7 +29,7 @@ var (
 const fileCheckInterval = 10 * time.Second
 
 const (
-	logFilePrefix = "arman-vpn"
+	logFilePrefix = "icedragon-vpn"
 	// The day files' name before 1.0.9, when the program was called
 	// Firefox VPN; they go as the others do.
 	legacyLogFilePrefix = "firefox-vpn"

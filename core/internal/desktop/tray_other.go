@@ -5,7 +5,7 @@ package desktop
 import (
 	"errors"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/service"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/service"
 )
 
 func RunTray(service.DataPaths, bool) error {

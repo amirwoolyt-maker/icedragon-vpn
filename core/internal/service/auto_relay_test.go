@@ -16,9 +16,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/config"
-	"github.com/armanlife/arman-vpn-client/core/internal/controlplane"
-	"github.com/armanlife/arman-vpn-client/core/internal/guardian"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/config"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/controlplane"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/guardian"
 )
 
 func TestAutomaticRelayKeepsCustomControlPlaneIsolated(t *testing.T) {
@@ -149,7 +149,7 @@ func newRelayPoolFixture(t *testing.T) *relayPoolFixture {
 				status = 200
 			}
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(map[string]any{"relay": "arman-vpn", "version": 1, "ready": status == 200})
+			json.NewEncoder(w).Encode(map[string]any{"relay": "icedragon-vpn", "version": 1, "ready": status == 200})
 			return
 		}
 		if r.URL.Query().Get("url") != "https://vpn.mozilla.org/api/v1/fpn/token" {

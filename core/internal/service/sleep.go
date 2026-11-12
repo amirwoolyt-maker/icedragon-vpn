@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/accounts"
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
-	"github.com/armanlife/arman-vpn-client/core/internal/proxy"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/accounts"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/proxy"
 )
 
 // Sleep: an engine without a controller listens on proxy.listen but holds

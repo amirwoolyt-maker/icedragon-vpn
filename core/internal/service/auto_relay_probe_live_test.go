@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/config"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/config"
 )
 
 // This opt-in smoke test sends only local worker health requests. It never

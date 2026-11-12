@@ -96,7 +96,7 @@ jobs:
       - name: Build Windows app & installer
         shell: pwsh
         env:
-          ARMAN_VPN_SIGNING_KEY: ${{ secrets.FIREFOX_VPN_SIGNING_KEY }}
+          FIREFOX_VPN_SIGNING_KEY: ${{ secrets.FIREFOX_VPN_SIGNING_KEY }}
         run: .\scripts\build-windows.ps1
       - uses: actions/upload-artifact@v4
         with:
@@ -139,7 +139,7 @@ jobs:
           sudo apt-get install -y -qq clang cmake ninja-build pkg-config libgtk-3-dev curl xz-utils zip unzip libglu1-mesa
       - name: Build Linux desktop bundle
         env:
-          ARMAN_VPN_SIGNING_KEY: ${{ secrets.FIREFOX_VPN_SIGNING_KEY }}
+          FIREFOX_VPN_SIGNING_KEY: ${{ secrets.FIREFOX_VPN_SIGNING_KEY }}
         run: bash scripts/build-linux.sh
       - name: Build Linux headless core
         if: matrix.arch == 'amd64'
@@ -149,7 +149,7 @@ jobs:
           name: linux-desktop-${{ matrix.arch }}
           path: |
             dist/IceDragon-VPN-*-Linux-*.tar.gz
-            dist/arman-vpn-core-linux-*.tar.gz
+            dist/icedragon-vpn-core-linux-*.tar.gz
           if-no-files-found: error
 
   macos:
@@ -168,7 +168,7 @@ jobs:
           cache: true
       - name: Build macOS DMG & update archive
         env:
-          ARMAN_VPN_SIGNING_KEY: ${{ secrets.FIREFOX_VPN_SIGNING_KEY }}
+          FIREFOX_VPN_SIGNING_KEY: ${{ secrets.FIREFOX_VPN_SIGNING_KEY }}
         run: bash scripts/build-macos.sh
       - uses: actions/upload-artifact@v4
         with:
@@ -234,7 +234,7 @@ jobs:
         run: |
           v='${{ needs.test.outputs.version }}'
           mkdir -p app/android/app/libs
-          flags="-s -w -X github.com/armanlife/arman-vpn-client/core/internal/version.Current=$v"
+          flags="-s -w -X github.com/amirwoolyt-maker/icedragon-vpn/core/internal/version.Current=$v"
           (cd core && gomobile bind -target=android -androidapi 24 -trimpath \
             -ldflags "$flags" \
             -o ../app/android/app/libs/core.aar ./mobile)
@@ -280,7 +280,7 @@ jobs:
               cp "$f" "IceDragon-VPN-${f#IceDragon-VPN-${v}-}"
             fi
           done
-          sha256sum IceDragon-VPN-* arman-vpn-core-linux-* > SHA256SUMS.txt
+          sha256sum IceDragon-VPN-* icedragon-vpn-core-linux-* > SHA256SUMS.txt
           printf '# IceDragon VPN version: %s\n' "$v" >> SHA256SUMS.txt
           ls -lh
       - name: Publish GitHub Release

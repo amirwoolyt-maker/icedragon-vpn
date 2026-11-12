@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/controlplane"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/controlplane"
 )
 
 type roundTripFunc func(*http.Request) (*http.Response, error)

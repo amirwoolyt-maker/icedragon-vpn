@@ -24,7 +24,7 @@ import (
 
 	"golang.org/x/net/proxy"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/egress"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/egress"
 )
 
 const (

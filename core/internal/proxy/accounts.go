@@ -10,10 +10,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/accounts"
-	"github.com/armanlife/arman-vpn-client/core/internal/fxa"
-	"github.com/armanlife/arman-vpn-client/core/internal/guardian"
-	"github.com/armanlife/arman-vpn-client/core/internal/logx"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/accounts"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/fxa"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/guardian"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/logx"
 )
 
 // unavailableAccountRetry spaces retries of an account Guardian rejected

@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/armanlife/arman-vpn-client/core/internal/controlplane"
-	"github.com/armanlife/arman-vpn-client/core/internal/netcheck"
-	"github.com/armanlife/arman-vpn-client/core/internal/proxy"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/controlplane"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/netcheck"
+	"github.com/amirwoolyt-maker/icedragon-vpn/core/internal/proxy"
 )
 
 // All values in this file are local fixtures; the control plane transport

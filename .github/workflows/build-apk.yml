@@ -165,7 +165,7 @@ jobs:
         run: |
           v='${{ needs.test.outputs.version }}'
           mkdir -p app/android/app/libs
-          flags="-s -w -X github.com/armanlife/arman-vpn-client/core/internal/version.Current=$v"
+          flags="-s -w -X github.com/amirwoolyt-maker/icedragon-vpn/core/internal/version.Current=$v"
           (cd core && gomobile bind -target=android -androidapi 24 -trimpath \
             -ldflags "$flags" \
             -o ../app/android/app/libs/core.aar ./mobile)
