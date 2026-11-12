@@ -291,7 +291,7 @@ func (s *dashboardServer) guard(next http.Handler) http.Handler {
 				writeError(w, http.StatusUnsupportedMediaType, "requests must be JSON")
 				return
 			}
-			if origin := r.Header.Get("Origin"); origin != "" && !originMatchesHost(origin, r.Host) {
+			if origin := r.Header.Get("Origin"); origin != "" && !originMatchesHost(origin, r.Host) && !(local && isExtensionOrigin(origin)) {
 				writeError(w, http.StatusForbidden, "cross-origin request refused")
 				return
 			}
@@ -630,6 +630,22 @@ func hostIsAddress(host string) bool {
 func originMatchesHost(origin, host string) bool {
 	u, err := url.Parse(origin)
 	return err == nil && strings.EqualFold(u.Host, host)
+}
+
+// isExtensionOrigin reports whether origin belongs to a browser WebExtension
+// context (never http/https pages). Combined with X-Local-Token verification,
+// this lets Chrome/Edge/Firefox extensions talk to the local API safely.
+func isExtensionOrigin(origin string) bool {
+	u, err := url.Parse(origin)
+	if err != nil || u.Host == "" {
+		return false
+	}
+	switch strings.ToLower(u.Scheme) {
+	case "chrome-extension", "moz-extension", "safari-web-extension", "extension":
+		return true
+	default:
+		return false
+	}
 }
 
 // displayAddr turns an unspecified listen address into a usable URL host.

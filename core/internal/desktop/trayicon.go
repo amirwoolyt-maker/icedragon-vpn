@@ -5,7 +5,7 @@ import (
 	"runtime"
 )
 
-// AppIconICO is the program's icon, the fox shield, in the sizes Windows
+// AppIconICO is the program's icon, the IceDragon emblem, in the sizes Windows
 // uses, the small ones sharpened (made by app/tool/app_icons.py from the
 // same art as the app's icons): the executable's resources (tools/winres).
 //
