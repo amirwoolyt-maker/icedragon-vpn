@@ -183,14 +183,13 @@ See [Routing](../core/doc/CONFIGURATION.md#routing) for the selection rules.
 
 ## Icons
 
-Every icon of the program comes from `tool/app_icon.png` (the fox shield,
-1024 px, transparent): `python tool/app_icons.py` (Pillow) writes the
-Android launcher icon (adaptive, over a blue gradient, and the older PNG),
-the Windows `app_icon.ico`, the web dashboard's `icon.png`, and the core's
-`appicon.ico` (its executable). The same script draws
-the tray icons, which show the connection state and are not made from the
-art (16 px cannot show it): a disk in the state's color with the logo's
-shield in white, for the app's tray (`assets/tray`) and the core's
+Every icon of the program comes from `assets/master_icon.png` (the official
+IceDragon emblem, 1024 px): `python tool/app_icons.py` (Pillow) writes the
+Android launcher icon (adaptive foreground/background, splash, and legacy PNG),
+the Windows `app_icon.ico`, the Linux `app_icon.png`, macOS `AppIcon.appiconset`,
+the web dashboard's `icon.png`, and the core's `appicon.ico` (its executable).
+The same script draws the tray icons, which show the connection state and are
+generated with status indicators for the app's tray (`assets/tray`) and the core's
 (`core/internal/desktop/tray`).
 
 ## Development
