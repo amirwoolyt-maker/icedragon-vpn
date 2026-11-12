@@ -1,45 +1,45 @@
-/* Arman VPN dashboard. Dark by default; light follows the system or the
+/* IceDragon VPN dashboard. Dark by default; light follows the system or the
    theme switch (data-theme on <html>). */
 :root {
-  --bg: #0b0d12;
-  --bg-grad: radial-gradient(1200px 600px at 85% -10%, rgba(143, 107, 255, .10), transparent 60%),
-             radial-gradient(900px 500px at -10% 110%, rgba(255, 113, 57, .07), transparent 60%);
-  --surface: #12151d;
-  --surface-2: #171b25;
-  --surface-3: #1e2330;
-  --border: #242a38;
-  --border-strong: #2f3647;
-  --text: #e7e9f0;
-  --muted: #8a92a6;
-  --faint: #5d667b;
-  --accent: #8f6bff;
-  --accent-2: #ff7139;
-  --accent-soft: rgba(143, 107, 255, .14);
+  --bg: #0a0d1d;
+  --bg-grad: radial-gradient(1200px 600px at 85% -10%, rgba(129, 107, 255, .14), transparent 60%),
+             radial-gradient(900px 500px at -10% 110%, rgba(0, 210, 255, .09), transparent 60%);
+  --surface: #12172d;
+  --surface-2: #171e3a;
+  --surface-3: #1f274b;
+  --border: #232b4d;
+  --border-strong: #2e3861;
+  --text: #f9faff;
+  --muted: #9ea8ce;
+  --faint: #646c92;
+  --accent: #816bff;
+  --accent-2: #00d2ff;
+  --accent-soft: rgba(129, 107, 255, .16);
   --on-accent: #ffffff;
-  --ok: #34d399;
-  --ok-soft: rgba(52, 211, 153, .13);
+  --ok: #00e5a3;
+  --ok-soft: rgba(0, 229, 163, .13);
   --sleep: #a5b4fc;
   --sleep-soft: rgba(165, 180, 252, .13);
-  --warn: #fbbf24;
-  --warn-soft: rgba(251, 191, 36, .13);
+  --warn: #ffb547;
+  --warn-soft: rgba(255, 181, 71, .14);
   --alert: #fb923c;
   --alert-soft: rgba(251, 146, 60, .14);
-  --bad: #f87171;
-  --bad-soft: rgba(248, 113, 113, .13);
-  --info: #60a5fa;
-  --bar: #222837;
-  --shadow: 0 1px 0 rgba(255, 255, 255, .03) inset, 0 8px 24px rgba(0, 0, 0, .25);
+  --bad: #ff5c7a;
+  --bad-soft: rgba(255, 92, 122, .14);
+  --info: #38b6ff;
+  --bar: #202850;
+  --shadow: 0 1px 0 rgba(255, 255, 255, .04) inset, 0 8px 24px rgba(0, 0, 0, .28);
   --radius: 14px;
   --radius-sm: 9px;
   --sans: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
   --mono: "JetBrains Mono", "Cascadia Mono", ui-monospace, Consolas, Menlo, monospace;
-  --gradient: linear-gradient(135deg, #ff9a3c 0%, #ff3d77 52%, #8f6bff 100%);
+  --gradient: linear-gradient(135deg, #00d2ff 0%, #816bff 58%, #00e5a3 100%);
   color-scheme: dark;
 }
 :root[data-theme="light"] {
   --bg: #f4f5f9;
-  --bg-grad: radial-gradient(1200px 600px at 85% -10%, rgba(143, 107, 255, .10), transparent 60%),
-             radial-gradient(900px 500px at -10% 110%, rgba(255, 113, 57, .06), transparent 60%);
+  --bg-grad: radial-gradient(1200px 600px at 85% -10%, rgba(129, 107, 255, .10), transparent 60%),
+             radial-gradient(900px 500px at -10% 110%, rgba(0, 210, 255, .08), transparent 60%);
   --surface: #ffffff;
   --surface-2: #f7f8fb;
   --surface-3: #eef0f5;
@@ -48,8 +48,9 @@
   --text: #141824;
   --muted: #5e667a;
   --faint: #9aa2b4;
-  --accent: #6d45f0;
-  --accent-soft: rgba(109, 69, 240, .10);
+  --accent: #6a5cf0;
+  --accent-2: #0099cc;
+  --accent-soft: rgba(106, 92, 240, .10);
   --ok: #0f9d6b;
   --ok-soft: rgba(15, 157, 107, .10);
   --sleep: #6366f1;
