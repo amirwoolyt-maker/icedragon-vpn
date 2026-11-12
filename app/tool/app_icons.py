@@ -204,10 +204,21 @@ def generate_extension(master):
         icon_off.save(os.path.join(EXTENSION, f'icon-off{s}.png'), optimize=True)
 
 
+def make_rounded_tray(img, radius_ratio=0.22):
+    """Apply rounded corners with transparent background to tray icon."""
+    w, h = img.size
+    mask = Image.new('L', (w, h), 0)
+    draw = ImageDraw.Draw(mask)
+    draw.rounded_rectangle([0, 0, w - 1, h - 1], radius=round(w * radius_ratio), fill=255)
+    out = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    out.paste(img, (0, 0), mask)
+    return out
+
+
 def generate_tray(master):
     # 6. Tray icons
-    # Base 256px for drawing tray badges cleanly before scaling down
-    base = resize_image(master, 256)
+    # Base 256px with rounded transparent corners for clean tray badges
+    base = make_rounded_tray(resize_image(master, 256))
     base_gray = make_grayscale(base)
     base_faded = make_faded(base)
 
