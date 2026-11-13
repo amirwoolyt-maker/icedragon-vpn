@@ -1497,287 +1497,92 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Future<String?> _loadExtensionToken() async {
-    try {
-      final status = _core.status;
-      final dirPath = (status?.dataDir.isNotEmpty == true)
-          ? status!.dataDir
-          : CoreLocator.dataDir([]);
-      final sep = Platform.pathSeparator;
-      final activeId = status?.activeAccount?.id;
-
-      if (activeId != null && activeId.isNotEmpty) {
-        final credFile =
-            File('$dirPath${sep}accounts$sep$activeId${sep}credentials.json');
-        if (credFile.existsSync()) {
-          final data = jsonDecode(await credFile.readAsString());
-          if (data is Map && data['refresh_token'] is String) {
-            return data['refresh_token'] as String;
-          }
-        }
-      }
-
-      final accountsDir = Directory('$dirPath${sep}accounts');
-      if (accountsDir.existsSync()) {
-        for (final entity in accountsDir.listSync()) {
-          if (entity is Directory) {
-            final credFile = File('${entity.path}${sep}credentials.json');
-            if (credFile.existsSync()) {
-              final data = jsonDecode(await credFile.readAsString());
-              if (data is Map && data['refresh_token'] is String) {
-                return data['refresh_token'] as String;
-              }
-            }
-          }
-        }
-      }
-    } catch (_) {}
-    return null;
-  }
-
   Widget _extension(AppLocalizations l) {
     final theme = Theme.of(context);
     final extL10n = _ExtensionL10n.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          extL10n.subtitle,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Glassy Frosted Card for Tutorial
-        ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF111827).withOpacity(0.65)
-                    : Colors.white.withOpacity(0.85),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFF00D2FF).withOpacity(0.35),
-                  width: 1.2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF00D2FF).withOpacity(0.08),
-                    blurRadius: 18,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF00D2FF).withOpacity(0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.auto_awesome_rounded,
-                          size: 20,
-                          color: Color(0xFF00D2FF),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        extL10n.guideTitle,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  _stepRow(
-                    context,
-                    number: '1',
-                    title: extL10n.step1Title,
-                    desc: extL10n.step1Desc,
-                  ),
-                  const SizedBox(height: 16),
-                  _stepRow(
-                    context,
-                    number: '2',
-                    title: extL10n.step2Title,
-                    desc: extL10n.step2Desc,
-                  ),
-                  const SizedBox(height: 16),
-                  _stepRow(
-                    context,
-                    number: '3',
-                    title: extL10n.step3Title,
-                    desc: extL10n.step3Desc,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Token Box Card
         Panel(
-          title: extL10n.tokenTitle,
-          icon: Icons.key_rounded,
-          child: FutureBuilder<String?>(
-            future: _loadExtensionToken(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-              final token = snapshot.data;
-              if (token == null || token.isEmpty) {
-                return Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.errorContainer.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: theme.colorScheme.error.withOpacity(0.4),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline_rounded,
-                        color: theme.colorScheme.error,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          extL10n.noAccountWarning,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.error,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              final masked = token.length > 20
-                  ? '${token.substring(0, 8)}••••••••••••••••${token.substring(token.length - 8)}'
-                  : token;
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF0B0F19)
-                          : const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: theme.colorScheme.outlineVariant.withOpacity(0.5),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.vpn_key_outlined,
-                          size: 18,
-                          color: Color(0xFF00D2FF),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: SelectableText(
-                            masked,
-                            style: TextStyle(
-                              fontFamily: 'monospace',
-                              fontSize: 12,
-                              color: theme.colorScheme.onSurface,
-                              letterSpacing: 0.6,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      backgroundColor: const Color(0xFF0066FF),
-                    ),
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: token));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(extL10n.copiedToast),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          backgroundColor: const Color(0xFF10B981),
-                          duration: const Duration(seconds: 3),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.copy_rounded, size: 18),
-                    label: Text(
-                      extL10n.copyTokenBtn,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              );
-            },
+          title: extL10n.guideTitle,
+          icon: Icons.menu_book_outlined,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _romanStepItem(
+                context,
+                roman: 'I',
+                title: extL10n.step1Title,
+                desc: extL10n.step1Desc,
+              ),
+              const Divider(height: 20),
+              _romanStepItem(
+                context,
+                roman: 'II',
+                title: extL10n.step2Title,
+                desc: extL10n.step2Desc,
+              ),
+              const Divider(height: 20),
+              _romanStepItem(
+                context,
+                roman: 'III',
+                title: extL10n.step3Title,
+                desc: extL10n.step3Desc,
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 16),
-
-        // Local Proxy Info Row
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.4),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: theme.colorScheme.outlineVariant.withOpacity(0.4),
-            ),
-          ),
-          child: Row(
+        Panel(
+          title: extL10n.statusTitle,
+          icon: Icons.lan_outlined,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.check_circle_rounded,
-                size: 18,
-                color: Color(0xFF10B981),
+              Text(
+                extL10n.statusDesc,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  extL10n.localProxyInfo,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.4,
                   ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: SelectableText(
+                        '127.0.0.1:10810 (SOCKS5 / HTTP)',
+                        style: TextStyle(fontFamily: 'monospace', fontSize: 13),
+                      ),
+                    ),
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        foregroundColor: theme.colorScheme.primary,
+                      ),
+                      onPressed: () {
+                        Clipboard.setData(
+                          const ClipboardData(text: '127.0.0.1:10810'),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(extL10n.copiedToast),
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.copy_rounded, size: 16),
+                      label: Text(extL10n.copyPortBtn),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -1787,9 +1592,9 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _stepRow(
+  Widget _romanStepItem(
     BuildContext context, {
-    required String number,
+    required String roman,
     required String title,
     required String desc,
   }) {
@@ -1797,28 +1602,15 @@ class _SettingsPageState extends State<SettingsPage> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 26,
-          height: 26,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF0066FF), Color(0xFF00D2FF)],
-            ),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF00D2FF).withOpacity(0.3),
-                blurRadius: 6,
-              ),
-            ],
-          ),
+        SizedBox(
+          width: 28,
           child: Text(
-            number,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
+            roman,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+              fontFamily: 'serif',
+              color: theme.colorScheme.primary,
             ),
           ),
         ),
@@ -1830,7 +1622,7 @@ class _SettingsPageState extends State<SettingsPage> {
               Text(
                 title,
                 style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 3),
@@ -1838,7 +1630,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 desc,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
-                  height: 1.4,
+                  height: 1.35,
                 ),
               ),
             ],
@@ -3548,19 +3340,27 @@ class _ExtensionL10n {
   };
 
   String get step2Title => switch (lang) {
-    'fa' => 'کپی کد ورود یا اجرای برنامه',
-    'ar' => 'نسخ رمز الدخول أو تشغيل التطبيق',
-    'ru' => 'Скопируйте токен или запустите приложение',
-    'tr' => 'Giriş Kodunu Kopyalayın veya Uygulamayı Açık Tutun',
-    _ => 'Copy Login Token or Run App',
+    'fa' => 'روشن بودن اپلیکیشن دسکتاپ',
+    'ar' => 'إبقاء التطبيق قيد التشغيل',
+    'ru' => 'Запустите приложение IceDragon',
+    'tr' => 'IceDragon Uygulamasını Açık Tutun',
+    'zh' => '保持桌面应用运行',
+    'de' => 'Desktop-App aktiv halten',
+    'fr' => 'Garder l\'application active',
+    'es' => 'Mantener la aplicación activa',
+    _ => 'Keep IceDragon App Running',
   };
 
   String get step2Desc => switch (lang) {
-    'fa' => 'با اجرای همین برنامه دسکتاپ، افزونه به صورت خودکار متصل می‌شود؛ یا می‌توانید کد توکن زیر را کپی کنید.',
-    'ar' => 'عند تشغيل تطبيق سطح المكتب، تتصل الإضافة تلقائيًا؛ أو يمكنك نسخ رمز الدخول أدناه.',
-    'ru' => 'При запущенном приложении расширение подключается автоматически, или скопируйте токен ниже.',
-    'tr' => 'Masaüstü uygulaması çalışırken eklenti otomatik bağlanır veya aşağıdaki kodu kopyalayabilirsiniz.',
-    _ => 'With this desktop app running, the extension connects automatically; or you can copy the token below.',
+    'fa' => 'نیازی به هیچ کد ورود یا توکنی نیست! با روشن بودن برنامه، افزونه به طور کاملاً خودکار و مستقل متصل می‌شود.',
+    'ar' => 'لا حاجة لأي رمز دخول أو إعدادات! تتصل الإضافة تلقائيًا بالكامل طالما أن هذا التطبيق قيد التشغيل.',
+    'ru' => 'Никаких токенов не требуется! Расширение подключается полностью автоматически при запущенном приложении.',
+    'tr' => 'Herhangi bir giriş koduna gerek yok! Uygulama açık olduğu sürece eklenti otomatik olarak bağlanır.',
+    'zh' => '无需任何登录令牌或设置！只要此应用处于运行状态，扩展程序就会完全自动连接。',
+    'de' => 'Kein Token oder Setup erforderlich! Die Erweiterung verbindet sich völlig automatisch.',
+    'fr' => 'Aucun jeton requis ! L\'extension se connecte automatiquement tant que l\'application est active.',
+    'es' => '¡No se requiere ningún token! La extensión se conecta automáticamente mientras la app esté abierta.',
+    _ => 'No login token or setup needed! The extension connects completely automatically while this app is running.',
   };
 
   String get step3Title => switch (lang) {
@@ -3568,6 +3368,10 @@ class _ExtensionL10n {
     'ar' => 'اتصال آمن وسريع',
     'ru' => 'Безопасное и быстрое подключение',
     'tr' => 'Güvenli ve Hızlı Bağlantı',
+    'zh' => '安全快速连接',
+    'de' => 'Sicher und schnell verbinden',
+    'fr' => 'Connexion sécurisée et rapide',
+    'es' => 'Conexión segura y rápida',
     _ => 'Connect and Enjoy',
   };
 
@@ -3576,46 +3380,58 @@ class _ExtensionL10n {
     'ar' => 'انقر على زر الطاقة في الإضافة لتمرير حركة مرور المتصفح فقط بأمان وسرعة.',
     'ru' => 'Нажмите кнопку питания в расширении, чтобы проксировать только трафик браузера.',
     'tr' => 'Yalnızca tarayıcı trafiğinizi yönlendirmek için eklentideki güç düğmesine tıklayın.',
+    'zh' => '点击扩展程序中的电源按钮，仅代理浏览器流量并畅享网络。',
+    'de' => 'Klicken Sie auf den Power-Button in der Extension, um nur Browser-Traffic zu tunneln.',
+    'fr' => 'Cliquez sur le bouton d\'alimentation de l\'extension pour router uniquement le trafic du navigateur.',
+    'es' => 'Haz clic en el botón de encendido de la extensión para enrutar solo el tráfico del navegador.',
     _ => 'Click the power button in the extension to route only your browser traffic securely.',
   };
 
-  String get tokenTitle => switch (lang) {
-    'fa' => 'کد ورود به افزونه (Extension Token)',
-    'ar' => 'رمز الدخول إلى الإضافة (Token)',
-    'ru' => 'Токен для расширения (Extension Token)',
-    'tr' => 'Eklenti Giriş Kodu (Token)',
-    _ => 'Extension Login Token',
+  String get statusTitle => switch (lang) {
+    'fa' => 'پروکسی محلی فعال و آماده اتصال',
+    'ar' => 'البروكسي المحلي نشط وجاهز للاتصال',
+    'ru' => 'Локальный прокси активен и готов',
+    'tr' => 'Yerel Proxy Aktif ve Bağlantıya Hazır',
+    'zh' => '本地代理已激活并就绪',
+    'de' => 'Lokaler Proxy aktiv & bereit',
+    'fr' => 'Proxy local actif et prêt',
+    'es' => 'Proxy local activo y listo',
+    _ => 'Local Proxy Active & Ready',
   };
 
-  String get copyTokenBtn => switch (lang) {
-    'fa' => 'کپی کد ورود به افزونه',
-    'ar' => 'نسخ رمز الدخول للإضافة',
-    'ru' => 'Скопировать токен расширения',
-    'tr' => 'Eklenti Kodunu Kopyala',
-    _ => 'Copy Extension Token',
+  String get statusDesc => switch (lang) {
+    'fa' => 'اتصال خودکار بدون نیاز به توکن • ترافیک فقط از داخل مرورگر عبور می‌کند',
+    'ar' => 'اتصال تلقائي دون الحاجة لرمز • يمرر حركة مرور المتصفح فقط دون المساس بالنظام',
+    'ru' => 'Автоподключение без токенов • Проксирует только трафик браузера',
+    'tr' => 'Token olmadan otomatik bağlantı • Yalnızca tarayıcı trafiği yönlendirilir',
+    'zh' => '无需令牌自动连接 • 仅代理浏览器流量，系统其余部分不受影响',
+    'de' => 'Automatische Verbindung ohne Token • Leitet nur Browser-Datenverkehr weiter',
+    'fr' => 'Connexion automatique sans jeton • Reste transparent pour le reste du système',
+    'es' => 'Conexión automática sin token • Solo enruta el tráfico del navegador',
+    _ => 'Auto-connects without tokens • Routes only browser traffic',
+  };
+
+  String get copyPortBtn => switch (lang) {
+    'fa' => 'کپی آدرس',
+    'ar' => 'نسخ العنوان',
+    'ru' => 'Копировать',
+    'tr' => 'Kopyala',
+    'zh' => '复制地址',
+    'de' => 'Kopieren',
+    'fr' => 'Copier',
+    'es' => 'Copiar',
+    _ => 'Copy Address',
   };
 
   String get copiedToast => switch (lang) {
-    'fa' => 'کد ورود به افزونه در کلیپ‌بورد کپی شد!',
-    'ar' => 'تم نسخ رمز الدخول إلى الحافظة!',
-    'ru' => 'Токен расширения скопирован в буфер обмена!',
-    'tr' => 'Eklenti kodu panoya kopyalandı!',
-    _ => 'Extension token copied to clipboard!',
-  };
-
-  String get noAccountWarning => switch (lang) {
-    'fa' => 'ابتدا در برنامه وارد یک حساب کاربری شوید تا کد توکن تولید شود.',
-    'ar' => 'يرجى تسجيل الدخول إلى حساب أولاً لإنشاء رمز الدخول.',
-    'ru' => 'Сначала войдите в аккаунт в приложении, чтобы сгенерировать токен.',
-    'tr' => 'Belirteç kodu oluşturmak için lütfen önce bir hesapla giriş yapın.',
-    _ => 'Please sign in to an account in the app first to generate an extension token.',
-  };
-
-  String get localProxyInfo => switch (lang) {
-    'fa' => 'آدرس محلی پروکسی مرورگر: 127.0.0.1:10810',
-    'ar' => 'عنوان البروكسي المحلي للمتصفح: 127.0.0.1:10810',
-    'ru' => 'Локальный адрес прокси браузера: 127.0.0.1:10810',
-    'tr' => 'Yerel tarayıcı proxy adresi: 127.0.0.1:10810',
-    _ => 'Local browser proxy address: 127.0.0.1:10810',
+    'fa' => 'آدرس پروکسی در کلیپ‌بورد کپی شد!',
+    'ar' => 'تم نسخ عنوان البروكسي إلى الحافظة!',
+    'ru' => 'Адрес прокси скопирован в буфер обмена!',
+    'tr' => 'Proxy adresi panoya kopyalandı!',
+    'zh' => '代理地址已复制到剪贴板！',
+    'de' => 'Proxy-Adresse in die Zwischenablage kopiert!',
+    'fr' => 'Adresse du proxy copiée dans le presse-papiers !',
+    'es' => '¡Dirección del proxy copiada al portapapeles!',
+    _ => 'Proxy address copied to clipboard!',
   };
 }

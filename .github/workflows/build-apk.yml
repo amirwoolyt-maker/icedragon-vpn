@@ -29,7 +29,7 @@ env:
 
 jobs:
   test:
-    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[with-desktop]') }}
+    if: ${{ github.event_name != 'push' || (!contains(github.event.head_commit.message, '[with-desktop]') && !contains(github.event.head_commit.message, '[test-desktop]')) }}
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.version.outputs.version }}

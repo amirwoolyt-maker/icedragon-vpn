@@ -257,6 +257,10 @@ class _ShellState extends State<Shell> {
                         _page = _Page.settings;
                         _settingsOpening = SettingsSection.upstreamProxy;
                       }),
+                      onOpenExtension: () => setState(() {
+                        _page = _Page.settings;
+                        _settingsOpening = SettingsSection.extension;
+                      }),
                     ),
                     _Page.servers => ServersPage(
                       core: core,

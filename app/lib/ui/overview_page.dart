@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +39,7 @@ class OverviewPage extends StatelessWidget {
     this.onOpenConnection,
     this.onOpenUpstreamProxy,
     this.onOpenSettings,
+    this.onOpenExtension,
     this.phone = false,
   });
 
@@ -57,6 +59,9 @@ class OverviewPage extends StatelessWidget {
   final VoidCallback? onOpenUpstreamProxy;
   final VoidCallback? onOpenSettings;
 
+  /// Opens the browser extension section in settings.
+  final VoidCallback? onOpenExtension;
+
   @override
   Widget build(BuildContext context) {
     final status = core.status!;
@@ -72,6 +77,7 @@ class OverviewPage extends StatelessWidget {
         onOpenConnection: onOpenConnection,
         onOpenUpstreamProxy: onOpenUpstreamProxy,
         onOpenSettings: onOpenSettings,
+        onOpenExtension: onOpenExtension,
       );
     }
     return _DesktopHome(
@@ -83,6 +89,7 @@ class OverviewPage extends StatelessWidget {
       onOpenAccounts: onOpenAccounts,
       onOpenConnection: onOpenConnection,
       onOpenUpstreamProxy: onOpenUpstreamProxy,
+      onOpenExtension: onOpenExtension,
     );
   }
 }
@@ -285,6 +292,7 @@ class _DesktopHome extends StatelessWidget {
     this.onOpenAccounts,
     this.onOpenConnection,
     this.onOpenUpstreamProxy,
+    this.onOpenExtension,
   });
 
   final CoreController core;
@@ -297,6 +305,7 @@ class _DesktopHome extends StatelessWidget {
   final VoidCallback? onOpenAccounts;
   final VoidCallback? onOpenConnection;
   final VoidCallback? onOpenUpstreamProxy;
+  final VoidCallback? onOpenExtension;
 
   /// The connection mode shown as chosen; changing it (chooseConnectionMode)
   /// keeps the proxy running and connected.
@@ -456,6 +465,13 @@ class _DesktopHome extends StatelessWidget {
                   ),
                 ),
               const Spacer(),
+              if (onOpenExtension != null) ...[
+                _ExtensionPill(
+                  palette: p,
+                  onTap: onOpenExtension!,
+                ),
+                const SizedBox(width: 8),
+              ],
               if (status.totalAccounts > 0)
                 _HomePill(
                   palette: p,
@@ -771,6 +787,74 @@ class _DesktopHome extends StatelessWidget {
                 ),
         ),
       ],
+    );
+  }
+}
+
+/// Frosted pill next to Auto-Fix navigating directly to the browser extension settings.
+class _ExtensionPill extends StatelessWidget {
+  const _ExtensionPill({required this.palette, required this.onTap});
+
+  final _HomePalette palette;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final lang = Localizations.localeOf(context).languageCode;
+    final label = switch (lang) {
+      'fa' => 'افزونه',
+      'ar' => 'إضافة',
+      'ru' => 'Расширение',
+      'tr' => 'Eklenti',
+      'zh' => '扩展',
+      _ => 'Extension',
+    };
+    final tooltip = switch (lang) {
+      'fa' => 'افزونه مرورگر IceDragon',
+      'ar' => 'إضافة متصفح IceDragon',
+      _ => 'IceDragon Browser Extension',
+    };
+
+    return _HomePill(
+      palette: palette,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(999),
+          onTap: onTap,
+          child: Tooltip(
+            message: tooltip,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.extension_rounded,
+                  size: 16,
+                  color: palette.second,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: palette.text,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  'NEW',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontSize: 8,
+                    fontWeight: FontWeight.w900,
+                    color: palette.second,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1181,6 +1265,7 @@ class _PhoneHome extends StatelessWidget {
     this.onOpenConnection,
     this.onOpenUpstreamProxy,
     this.onOpenSettings,
+    this.onOpenExtension,
   });
 
   final CoreController core;
@@ -1194,6 +1279,7 @@ class _PhoneHome extends StatelessWidget {
   final VoidCallback? onOpenConnection;
   final VoidCallback? onOpenUpstreamProxy;
   final VoidCallback? onOpenSettings;
+  final VoidCallback? onOpenExtension;
 
   bool get _switchSystemProxy =>
       status.systemProxySupported &&
@@ -1375,6 +1461,19 @@ class _PhoneHome extends StatelessWidget {
                     ),
                   ],
                   const Spacer(),
+                  if (onOpenExtension != null)
+                    IconButton(
+                      tooltip: Localizations.localeOf(context).languageCode == 'fa'
+                          ? 'افزونه مرورگر'
+                          : 'Browser Extension',
+                      visualDensity: VisualDensity.compact,
+                      onPressed: onOpenExtension,
+                      icon: const Icon(
+                        Icons.extension_rounded,
+                        size: 20,
+                        color: Color(0xFF00E5FF),
+                      ),
+                    ),
                   if (status.totalAccounts > 0)
                     IconButton(
                       tooltip: ms.smartDoctor,
