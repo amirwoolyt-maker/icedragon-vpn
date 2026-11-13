@@ -1667,7 +1667,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   height: 1.35,
                 ),
               ),
-              if (action != null) action,
+              ?action,
             ],
           ),
         ),
