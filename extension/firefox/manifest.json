@@ -1,0 +1,28 @@
+{
+  "manifest_version": 2,
+  "name": "IceDragon VPN",
+  "short_name": "IceDragon",
+  "version": "3.0.0",
+  "description": "Browser-only proxy for the IceDragon app: routes this browser through the local IceDragon core, with whitelist/blacklist routing.",
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "32": "assets/icons/icon32.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
+  "browser_action": {
+    "default_title": "IceDragon VPN",
+    "default_popup": "ui/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon-off16.png",
+      "32": "assets/icons/icon-off32.png",
+      "48": "assets/icons/icon-off48.png"
+    }
+  },
+  "options_ui": { "page": "ui/options.html", "open_in_tab": true },
+  "background": { "page": "background/background.html" },
+  "permissions": ["proxy", "storage", "alarms", "privacy", "activeTab", "<all_urls>"],
+  "browser_specific_settings": {
+    "gecko": { "id": "icedragon-standalone@icedragon.dev", "strict_min_version": "115.0" }
+  }
+}

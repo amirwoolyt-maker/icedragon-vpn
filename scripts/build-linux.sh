@@ -64,6 +64,11 @@ install -m 0644 "$root/LICENSE" "$app/LICENSE"
 ln -s icedragon-vpn "$app/firefox-vpn"
 ln -s icedragon-vpn-core "$app/core/firefox-vpn-core"
 
+if [ -d "$root/extension/chrome" ]; then
+  mkdir -p "$app/extension"
+  cp -r "$root/extension/chrome" "$root/extension/firefox" "$app/extension/"
+fi
+
 mkdir -p "$root/dist"
 out="$root/dist/IceDragon-VPN-$version-Linux-$arch.tar.gz"
 tar -czf "$out" -C "$stage" --owner=0 --group=0 icedragon-vpn

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>IceDragon VPN - Settings</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="options">
+  <h1>IceDragon VPN <small class="muted" data-i18n="settings"></small></h1>
+
+  <section class="card">
+    <div class="seg" id="modes" style="flex-direction:row">
+      <button data-mode="global" data-i18n="modeGlobal"></button>
+      <button data-mode="whitelist" data-i18n="modeWhite"></button>
+      <button data-mode="blacklist" data-i18n="modeBlack"></button>
+    </div>
+  </section>
+
+  <section class="grid2">
+    <div class="card">
+      <h2 data-i18n="whitelist"></h2>
+      <textarea id="wl" spellcheck="false" placeholder="*.youtube.com&#10;telegram.org"></textarea>
+    </div>
+    <div class="card">
+      <h2 data-i18n="blacklist"></h2>
+      <textarea id="bl" spellcheck="false" placeholder="*.ir&#10;mybank.com"></textarea>
+    </div>
+  </section>
+  <p class="muted" data-i18n="listHint"></p>
+  <button id="save" class="btn primary" style="max-width:200px" data-i18n="save"></button>
+  <p id="msg" class="muted"></p>
+
+  <section class="card">
+    <label class="chk"><input type="checkbox" id="webrtc"> <span data-i18n="webrtc"></span></label>
+    <label class="chk"><input type="checkbox" id="auto"> <span data-i18n="autoConnect"></span></label>
+    <label class="chk"><span data-i18n="language"></span>
+      <select id="lang"><option value="en">English</option><option value="fa">فارسی</option></select>
+    </label>
+  </section>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

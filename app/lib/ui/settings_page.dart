@@ -1512,6 +1512,21 @@ class _SettingsPageState extends State<SettingsPage> {
                 roman: 'I',
                 title: extL10n.step1Title,
                 desc: extL10n.step1Desc,
+                action: Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                    ),
+                    icon: const Icon(Icons.folder_open_rounded, size: 16),
+                    label: Text(extL10n.openFolderBtn),
+                    onPressed: _openExtensionFolder,
+                  ),
+                ),
               ),
               const Divider(height: 20),
               _romanStepItem(
@@ -1590,11 +1605,32 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  void _openExtensionFolder() {
+    try {
+      final appDir = File(Platform.resolvedExecutable).parent.path;
+      final extDir = Directory('$appDir${Platform.pathSeparator}extension');
+      if (extDir.existsSync()) {
+        if (Platform.isWindows) {
+          Process.run('explorer.exe', [extDir.path]);
+          return;
+        } else if (Platform.isMacOS) {
+          Process.run('open', [extDir.path]);
+          return;
+        } else {
+          Process.run('xdg-open', [extDir.path]);
+          return;
+        }
+      }
+    } catch (_) {}
+    _core.openFolder();
+  }
+
   Widget _romanStepItem(
     BuildContext context, {
     required String roman,
     required String title,
     required String desc,
+    Widget? action,
   }) {
     final theme = Theme.of(context);
     return Row(
@@ -1631,6 +1667,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   height: 1.35,
                 ),
               ),
+              if (action != null) action,
             ],
           ),
         ),
@@ -3320,6 +3357,18 @@ class _ExtensionL10n {
     'ru' => 'Загрузите файл расширения IceDragon из папки приложения в Chrome или Firefox.',
     'tr' => 'Uygulama klasöründeki IceDragon eklenti dosyasını Chrome veya Firefox\'a yükleyin.',
     _ => 'Load the IceDragon extension from the app folder into Chrome or Firefox.',
+  };
+
+  String get openFolderBtn => switch (lang) {
+    'fa' => 'باز کردن پوشه افزونه',
+    'ar' => 'فتح مجلد الإضافة',
+    'ru' => 'Открыть папку расширения',
+    'tr' => 'Eklenti Klasörünü Aç',
+    'zh' => '打开扩展文件夹',
+    'de' => 'Erweiterungsordner öffnen',
+    'fr' => 'Ouvrir le dossier de l\'extension',
+    'es' => 'Abrir carpeta de la extensión',
+    _ => 'Open Extension Folder',
   };
 
   String get step2Title => switch (lang) {

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=360">
+  <title>IceDragon</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="popup">
+  <header class="hdr">
+    <div class="brand"><img src="../assets/icons/icon48.png" alt=""><span>Ice<b>Dragon</b></span></div>
+    <span id="pill" class="pill off"><i></i><span id="pill-text" data-i18n="disconnected"></span></span>
+    <button id="btn-settings" class="icon-btn" title="Settings" aria-label="Settings">&#9881;</button>
+  </header>
+
+  <main id="view-main">
+    <section class="hero">
+      <button id="power" class="power off" aria-label="Connect">
+        <svg viewBox="0 0 24 24" width="56" height="56"><path d="M12 3v9M6.4 6.6a8 8 0 1 0 11.2 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <div id="status-text" class="status-text" data-i18n="disconnected"></div>
+      <div id="status-sub" class="muted" data-i18n="tapConnect"></div>
+      <div class="meters">
+        <div><span class="k" data-i18n="time"></span><b id="timer">00:00:00</b></div>
+        <div><span class="k">IP</span><b id="server-host">-</b></div>
+      </div>
+      <p id="conn-err" class="err" hidden></p>
+    </section>
+
+    <section id="core-card" class="card loc" style="cursor:default">
+      <span id="loc-flag" class="flag"></span>
+      <span class="loc-text"><b id="loc-name">-</b><small id="loc-city" class="muted"></small></span>
+    </section>
+
+    <section id="quota-card" class="card quota" hidden>
+      <div class="row">
+        <span><span data-i18n="quota"></span> <b id="quota-left">-</b></span>
+      </div>
+      <div class="bar"><div id="quota-bar"></div></div>
+      <small id="quota-reset" class="muted"></small>
+    </section>
+
+    <section class="card">
+      <div class="seg" id="modes">
+        <button data-mode="global" data-i18n="modeGlobal"></button>
+        <button data-mode="whitelist" data-i18n="modeWhite"></button>
+        <button data-mode="blacklist" data-i18n="modeBlack"></button>
+      </div>
+      <button id="btn-add" class="btn ghost" data-i18n="addSite"></button>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

@@ -77,6 +77,15 @@ try {
     & "$PSScriptRoot\build-windows-tun.ps1" -Version $version -Out "$out\core" -PublicKey $public
 } finally { Pop-Location }
 
+# Bundle the browser extension into the app
+$extDir = "$root\extension"
+if (Test-Path "$extDir\chrome") {
+    $outExt = "$out\extension"
+    New-Item -ItemType Directory -Force $outExt | Out-Null
+    Copy-Item "$extDir\chrome" "$outExt\chrome" -Recurse -Force
+    Copy-Item "$extDir\firefox" "$outExt\firefox" -Recurse -Force
+}
+
 # A clean copy named as the user sees it, for the zip and the installer.
 $stage = "$root\dist\.stage-$version"
 $app = "$stage\IceDragon VPN"
