@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1499,7 +1497,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _extension(AppLocalizations l) {
     final theme = Theme.of(context);
-    final extL10n = _ExtensionL10n.of(context);
+    final extL10n = _ExtensionL10n.ofLang(l.localeName);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -3283,17 +3281,10 @@ class _ExtensionL10n {
   _ExtensionL10n(this.lang);
   final String lang;
 
-  static _ExtensionL10n of(BuildContext context) {
-    final code = Localizations.localeOf(context).languageCode;
-    return _ExtensionL10n(code);
-  }
-
   static _ExtensionL10n ofLang(String localeName) {
     final code = localeName.split('_').first.toLowerCase();
     return _ExtensionL10n(code);
   }
-
-  bool get isFa => lang == 'fa';
 
   String get title => switch (lang) {
     'fa' => 'افزونه مرورگر',
@@ -3305,14 +3296,6 @@ class _ExtensionL10n {
     'fr' => 'Extension de navigateur',
     'es' => 'Extensión de navegador',
     _ => 'Browser Extension',
-  };
-
-  String get subtitle => switch (lang) {
-    'fa' => 'فیلترشکن اختصاصی فقط برای مرورگر، بدون درگیر کردن ویندوز',
-    'ar' => 'بروكسي خاص بالمتصفح فقط دون التأثير على النظام',
-    'ru' => 'Прокси только для браузера без влияния на систему',
-    'tr' => 'Sistemi etkilemeden yalnızca tarayıcı için özel proxy',
-    _ => 'Dedicated browser-only proxy without affecting the rest of your system',
   };
 
   String get guideTitle => switch (lang) {

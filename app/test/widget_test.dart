@@ -1452,7 +1452,7 @@ void main() {
       'If Mozilla is blocked, Relay server, TLS fragmentation, '
       'Upstream proxy',
     );
-    expect(texts(2), 'App, Advanced, Logs');
+    expect(texts(2), 'App, Browser Extension, NEW, Advanced, Logs');
 
     // Logs, in the side menu too, open that same page.
     await tester.tap(
