@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -84,6 +86,7 @@ enum SettingsSection {
   dns,
   routing,
   tun,
+  extension,
   advanced,
 }
 
@@ -116,11 +119,18 @@ List<(String, List<SettingsEntry>)> settingsGroups(
       (SettingsSection.upstreamProxy, Icons.lan_outlined, l.upstreamProxy),
     ],
   ),
-  // The app's port and the web dashboard: computers only.
+  // The app's port, the browser extension, and the web dashboard: computers only.
   if (!Platform.isAndroid)
     (
       l.groupApp,
-      [(SettingsSection.advanced, Icons.build_outlined, l.sectionAdvanced)],
+      [
+        (
+          SettingsSection.extension,
+          Icons.extension_rounded,
+          _ExtensionL10n.ofLang(l.localeName).title,
+        ),
+        (SettingsSection.advanced, Icons.build_outlined, l.sectionAdvanced),
+      ],
     ),
 ];
 
@@ -353,10 +363,24 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (context, _) {
         if (open == null) {
           final onOpenLogs = widget.onOpenLogs;
-          Widget row(IconData icon, String name, VoidCallback onTap) =>
+          Widget row(
+            IconData icon,
+            String name,
+            VoidCallback onTap, {
+            bool isNew = false,
+          }) =>
               ListTile(
                 leading: Icon(icon),
-                title: Text(name),
+                title: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(name),
+                    if (isNew) ...[
+                      const SizedBox(width: 8),
+                      const _NewBadge(),
+                    ],
+                  ],
+                ),
                 // Mirrors itself in right-to-left languages.
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: onTap,
@@ -370,7 +394,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: title,
                   tiles: [
                     for (final (section, icon, name) in entries)
-                      row(icon, name, () => setState(() => _open = section)),
+                      row(
+                        icon,
+                        name,
+                        () => setState(() => _open = section),
+                        isNew: section == SettingsSection.extension,
+                      ),
                     if (onOpenLogs != null &&
                         entries.last.$1 == SettingsSection.advanced)
                       row(Icons.receipt_long_outlined, l.navLogs, onOpenLogs),
@@ -417,6 +446,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   const SizedBox(width: 4),
                   Text(title, style: theme.textTheme.headlineSmall),
+                  if (open == SettingsSection.extension) ...[
+                    const SizedBox(width: 8),
+                    const _NewBadge(),
+                  ],
                 ],
               ),
             if (!fixed) const SizedBox(height: 16),
@@ -433,6 +466,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 SettingsSection.routing => _routing(l),
                 SettingsSection.tun => _tun(l),
                 SettingsSection.dns => _dns(l),
+                SettingsSection.extension => _extension(l),
                 _ => _advanced(l),
               },
           ],
@@ -1459,6 +1493,357 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
         ],
+      ],
+    );
+  }
+
+  Future<String?> _loadExtensionToken() async {
+    try {
+      final status = _core.status;
+      final dirPath = (status?.dataDir.isNotEmpty == true)
+          ? status!.dataDir
+          : CoreLocator.dataDir([]);
+      final sep = Platform.pathSeparator;
+      final activeId = status?.activeAccount?.id;
+
+      if (activeId != null && activeId.isNotEmpty) {
+        final credFile =
+            File('$dirPath${sep}accounts$sep$activeId${sep}credentials.json');
+        if (credFile.existsSync()) {
+          final data = jsonDecode(await credFile.readAsString());
+          if (data is Map && data['refresh_token'] is String) {
+            return data['refresh_token'] as String;
+          }
+        }
+      }
+
+      final accountsDir = Directory('$dirPath${sep}accounts');
+      if (accountsDir.existsSync()) {
+        for (final entity in accountsDir.listSync()) {
+          if (entity is Directory) {
+            final credFile = File('${entity.path}${sep}credentials.json');
+            if (credFile.existsSync()) {
+              final data = jsonDecode(await credFile.readAsString());
+              if (data is Map && data['refresh_token'] is String) {
+                return data['refresh_token'] as String;
+              }
+            }
+          }
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Widget _extension(AppLocalizations l) {
+    final theme = Theme.of(context);
+    final extL10n = _ExtensionL10n.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          extL10n.subtitle,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Glassy Frosted Card for Tutorial
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF111827).withOpacity(0.65)
+                    : Colors.white.withOpacity(0.85),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFF00D2FF).withOpacity(0.35),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00D2FF).withOpacity(0.08),
+                    blurRadius: 18,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF00D2FF).withOpacity(0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.auto_awesome_rounded,
+                          size: 20,
+                          color: Color(0xFF00D2FF),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        extL10n.guideTitle,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  _stepRow(
+                    context,
+                    number: '1',
+                    title: extL10n.step1Title,
+                    desc: extL10n.step1Desc,
+                  ),
+                  const SizedBox(height: 16),
+                  _stepRow(
+                    context,
+                    number: '2',
+                    title: extL10n.step2Title,
+                    desc: extL10n.step2Desc,
+                  ),
+                  const SizedBox(height: 16),
+                  _stepRow(
+                    context,
+                    number: '3',
+                    title: extL10n.step3Title,
+                    desc: extL10n.step3Desc,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Token Box Card
+        Panel(
+          title: extL10n.tokenTitle,
+          icon: Icons.key_rounded,
+          child: FutureBuilder<String?>(
+            future: _loadExtensionToken(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              final token = snapshot.data;
+              if (token == null || token.isEmpty) {
+                return Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.errorContainer.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: theme.colorScheme.error.withOpacity(0.4),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        color: theme.colorScheme.error,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          extL10n.noAccountWarning,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final masked = token.length > 20
+                  ? '${token.substring(0, 8)}••••••••••••••••${token.substring(token.length - 8)}'
+                  : token;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF0B0F19)
+                          : const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.vpn_key_outlined,
+                          size: 18,
+                          color: Color(0xFF00D2FF),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: SelectableText(
+                            masked,
+                            style: TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 12,
+                              color: theme.colorScheme.onSurface,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      backgroundColor: const Color(0xFF0066FF),
+                    ),
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: token));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(extL10n.copiedToast),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          backgroundColor: const Color(0xFF10B981),
+                          duration: const Duration(seconds: 3),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.copy_rounded, size: 18),
+                    label: Text(
+                      extL10n.copyTokenBtn,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Local Proxy Info Row
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withOpacity(0.4),
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                size: 18,
+                color: Color(0xFF10B981),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  extL10n.localProxyInfo,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _stepRow(
+    BuildContext context, {
+    required String number,
+    required String title,
+    required String desc,
+  }) {
+    final theme = Theme.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 26,
+          height: 26,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0066FF), Color(0xFF00D2FF)],
+            ),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF00D2FF).withOpacity(0.3),
+                blurRadius: 6,
+              ),
+            ],
+          ),
+          child: Text(
+            number,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                desc,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -3064,4 +3449,173 @@ class _LanPreviewRowState extends State<_LanPreviewRow> {
             ),
     );
   }
+}
+
+class _NewBadge extends StatelessWidget {
+  const _NewBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0066FF), Color(0xFF00D2FF)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF00D2FF).withOpacity(0.4),
+            blurRadius: 6,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: const Text(
+        'NEW',
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+          color: Colors.white,
+          letterSpacing: 0.6,
+          height: 1.1,
+        ),
+      ),
+    );
+  }
+}
+
+class _ExtensionL10n {
+  _ExtensionL10n(this.lang);
+  final String lang;
+
+  static _ExtensionL10n of(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    return _ExtensionL10n(code);
+  }
+
+  static _ExtensionL10n ofLang(String localeName) {
+    final code = localeName.split('_').first.toLowerCase();
+    return _ExtensionL10n(code);
+  }
+
+  bool get isFa => lang == 'fa';
+
+  String get title => switch (lang) {
+    'fa' => 'افزونه مرورگر',
+    'ar' => 'إضافة المتصفح',
+    'ru' => 'Расширение для браузера',
+    'tr' => 'Tarayıcı Eklentisi',
+    'zh' => '浏览器扩展',
+    'de' => 'Browser-Erweiterung',
+    'fr' => 'Extension de navigateur',
+    'es' => 'Extensión de navegador',
+    _ => 'Browser Extension',
+  };
+
+  String get subtitle => switch (lang) {
+    'fa' => 'فیلترشکن اختصاصی فقط برای مرورگر، بدون درگیر کردن ویندوز',
+    'ar' => 'بروكسي خاص بالمتصفح فقط دون التأثير على النظام',
+    'ru' => 'Прокси только для браузера без влияния на систему',
+    'tr' => 'Sistemi etkilemeden yalnızca tarayıcı için özel proxy',
+    _ => 'Dedicated browser-only proxy without affecting the rest of your system',
+  };
+
+  String get guideTitle => switch (lang) {
+    'fa' => 'راهنمای راه‌اندازی گام‌به‌گام',
+    'ar' => 'دليل الإعداد خطوة بخطوة',
+    'ru' => 'Пошаговое руководство по настройке',
+    'tr' => 'Adım Adım Kurulum Kılavuzu',
+    _ => 'Step-by-Step Setup Guide',
+  };
+
+  String get step1Title => switch (lang) {
+    'fa' => 'نصب افزونه در مرورگر',
+    'ar' => 'تثبيت الإضافة في المتصفح',
+    'ru' => 'Установите расширение в браузер',
+    'tr' => 'Eklentiyi Tarayıcıya Yükleyin',
+    _ => 'Install Extension in Browser',
+  };
+
+  String get step1Desc => switch (lang) {
+    'fa' => 'فایل افزونه IceDragon را از پوشه برنامه بردارید و در مرورگر Chrome یا Firefox لود کنید.',
+    'ar' => 'قم بتحميل ملف إضافة IceDragon من مجلد التطبيق في متصفح Chrome أو Firefox.',
+    'ru' => 'Загрузите файл расширения IceDragon из папки приложения в Chrome или Firefox.',
+    'tr' => 'Uygulama klasöründeki IceDragon eklenti dosyasını Chrome veya Firefox\'a yükleyin.',
+    _ => 'Load the IceDragon extension from the app folder into Chrome or Firefox.',
+  };
+
+  String get step2Title => switch (lang) {
+    'fa' => 'کپی کد ورود یا اجرای برنامه',
+    'ar' => 'نسخ رمز الدخول أو تشغيل التطبيق',
+    'ru' => 'Скопируйте токен или запустите приложение',
+    'tr' => 'Giriş Kodunu Kopyalayın veya Uygulamayı Açık Tutun',
+    _ => 'Copy Login Token or Run App',
+  };
+
+  String get step2Desc => switch (lang) {
+    'fa' => 'با اجرای همین برنامه دسکتاپ، افزونه به صورت خودکار متصل می‌شود؛ یا می‌توانید کد توکن زیر را کپی کنید.',
+    'ar' => 'عند تشغيل تطبيق سطح المكتب، تتصل الإضافة تلقائيًا؛ أو يمكنك نسخ رمز الدخول أدناه.',
+    'ru' => 'При запущенном приложении расширение подключается автоматически, или скопируйте токен ниже.',
+    'tr' => 'Masaüstü uygulaması çalışırken eklenti otomatik bağlanır veya aşağıdaki kodu kopyalayabilirsiniz.',
+    _ => 'With this desktop app running, the extension connects automatically; or you can copy the token below.',
+  };
+
+  String get step3Title => switch (lang) {
+    'fa' => 'اتصال امن و سریع',
+    'ar' => 'اتصال آمن وسريع',
+    'ru' => 'Безопасное и быстрое подключение',
+    'tr' => 'Güvenli ve Hızlı Bağlantı',
+    _ => 'Connect and Enjoy',
+  };
+
+  String get step3Desc => switch (lang) {
+    'fa' => 'روی دکمه پاور در افزونه کلیک کنید تا فقط ترافیک مرورگر با دور زدن فیلترینگ آزاد شود.',
+    'ar' => 'انقر على زر الطاقة في الإضافة لتمرير حركة مرور المتصفح فقط بأمان وسرعة.',
+    'ru' => 'Нажмите кнопку питания в расширении, чтобы проксировать только трафик браузера.',
+    'tr' => 'Yalnızca tarayıcı trafiğinizi yönlendirmek için eklentideki güç düğmesine tıklayın.',
+    _ => 'Click the power button in the extension to route only your browser traffic securely.',
+  };
+
+  String get tokenTitle => switch (lang) {
+    'fa' => 'کد ورود به افزونه (Extension Token)',
+    'ar' => 'رمز الدخول إلى الإضافة (Token)',
+    'ru' => 'Токен для расширения (Extension Token)',
+    'tr' => 'Eklenti Giriş Kodu (Token)',
+    _ => 'Extension Login Token',
+  };
+
+  String get copyTokenBtn => switch (lang) {
+    'fa' => 'کپی کد ورود به افزونه',
+    'ar' => 'نسخ رمز الدخول للإضافة',
+    'ru' => 'Скопировать токен расширения',
+    'tr' => 'Eklenti Kodunu Kopyala',
+    _ => 'Copy Extension Token',
+  };
+
+  String get copiedToast => switch (lang) {
+    'fa' => 'کد ورود به افزونه در کلیپ‌بورد کپی شد!',
+    'ar' => 'تم نسخ رمز الدخول إلى الحافظة!',
+    'ru' => 'Токен расширения скопирован в буфер обмена!',
+    'tr' => 'Eklenti kodu panoya kopyalandı!',
+    _ => 'Extension token copied to clipboard!',
+  };
+
+  String get noAccountWarning => switch (lang) {
+    'fa' => 'ابتدا در برنامه وارد یک حساب کاربری شوید تا کد توکن تولید شود.',
+    'ar' => 'يرجى تسجيل الدخول إلى حساب أولاً لإنشاء رمز الدخول.',
+    'ru' => 'Сначала войдите в аккаунт в приложении, чтобы сгенерировать токен.',
+    'tr' => 'Belirteç kodu oluşturmak için lütfen önce bir hesapla giriş yapın.',
+    _ => 'Please sign in to an account in the app first to generate an extension token.',
+  };
+
+  String get localProxyInfo => switch (lang) {
+    'fa' => 'آدرس محلی پروکسی مرورگر: 127.0.0.1:10810',
+    'ar' => 'عنوان البروكسي المحلي للمتصفح: 127.0.0.1:10810',
+    'ru' => 'Локальный адрес прокси браузера: 127.0.0.1:10810',
+    'tr' => 'Yerel tarayıcı proxy adresi: 127.0.0.1:10810',
+    _ => 'Local browser proxy address: 127.0.0.1:10810',
+  };
 }
