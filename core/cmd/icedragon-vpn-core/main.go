@@ -53,7 +53,6 @@ func main() {
 	setupServer := flag.String("setup-server", "", "Open the dashboard and the proxy to the network (the dashboard login for USERNAME, \"-\" for a random one, and a random proxy login, each with a random password), print the logins, then exit (install.sh runs it on a new server)")
 	tray := flag.Bool("tray", false, "Show the tray icon; runs the service in-process unless one is already running")
 	app := flag.Bool("app", false, "Run the service for the desktop app (no tray icon or status screen); stops when standard input ends")
-	nativeMessaging := flag.Bool("native-messaging", false, "Serve browser extension Native Messaging over standard input/output, then exit")
 	applyUpdate := flag.Bool("update", false, "Install the desktop app's downloaded update (the app's core starts a copy of itself with it; the log goes to the log file)")
 	showVersion := flag.Bool("version", false, "Print the version and exit")
 	plain := flag.Bool("plain", false, "Print the log instead of the status screen")
@@ -70,7 +69,7 @@ func main() {
 		}
 		return
 	}
-	if flag.NArg() > 0 && !*nativeMessaging {
+	if flag.NArg() > 0 {
 		fmt.Fprintf(os.Stderr, "unexpected arguments: %s\n", strings.Join(flag.Args(), " "))
 		flag.Usage()
 		os.Exit(2)
@@ -83,12 +82,11 @@ func main() {
 		status:          *status,
 		setLogin:        *setLogin,
 		setupServer:     *setupServer,
-		tray:            *tray,
-		app:             *app,
-		nativeMessaging: *nativeMessaging,
-		update:          *applyUpdate,
-		plain:           *plain,
-		verbose:         *verbose,
+		tray:         *tray,
+		app:          *app,
+		update:       *applyUpdate,
+		plain:        *plain,
+		verbose:      *verbose,
 	}); err != nil {
 		logx.Error("%s", logx.Err(err))
 		if *app {
@@ -108,25 +106,24 @@ type commandOptions struct {
 	status          bool
 	setLogin        bool
 	setupServer     string
-	tray            bool
-	app             bool
-	nativeMessaging bool
-	update          bool
-	plain           bool
-	verbose         bool
+	tray         bool
+	app          bool
+	update       bool
+	plain        bool
+	verbose      bool
 }
 
 // runCommand runs the requested one-shot command, or the service when no
 // command is given.
 func runCommand(opts commandOptions) error {
 	commands := 0
-	for _, set := range []bool{opts.addAccount, opts.listAccounts, opts.status, opts.setLogin, opts.setupServer != "", opts.tray, opts.app, opts.nativeMessaging, opts.update} {
+	for _, set := range []bool{opts.addAccount, opts.listAccounts, opts.status, opts.setLogin, opts.setupServer != "", opts.tray, opts.app, opts.update} {
 		if set {
 			commands++
 		}
 	}
 	if commands > 1 {
-		return errors.New("use only one of -add-account, -list-accounts, -status, -panel, -setup-server, -tray, -app, -native-messaging, -update")
+		return errors.New("use only one of -add-account, -list-accounts, -status, -panel, -setup-server, -tray, -app, -update")
 	}
 	if opts.app && opts.plain {
 		return errors.New("-plain applies to the terminal; -app logs to the log file only")
@@ -136,9 +133,6 @@ func runCommand(opts commandOptions) error {
 		return err
 	}
 	switch {
-	case opts.nativeMessaging:
-		logx.EnableFile(paths.LogDir, false)
-		return service.RunNativeMessaging(paths, os.Stdin, os.Stdout)
 	case opts.addAccount:
 		return runAddAccount(paths)
 	case opts.status:
