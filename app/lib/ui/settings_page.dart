@@ -3257,7 +3257,7 @@ class _NewBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF00D2FF).withOpacity(0.4),
+            color: const Color(0xFF00D2FF).withValues(alpha: 0.4),
             blurRadius: 6,
             offset: const Offset(0, 1),
           ),
