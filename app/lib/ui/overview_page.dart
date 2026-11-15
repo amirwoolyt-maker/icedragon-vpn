@@ -618,14 +618,15 @@ class _DesktopHome extends StatelessWidget {
               busy: core.switchingProxy,
               tooltip: dnsMode ? ms.modeDnsHint : on ? l.tapToDisconnect : l.tapToConnect,
               // No account yet: the accounts page, which explains them.
-              onPressed: dnsMode
-                  ? () => runShowingErrors(
-                      context,
-                      () => _setDnsMode(context, false),
-                    )
-                  : status.totalAccounts == 0
-                  ? _openAccounts(context, core, settings, onOpenAccounts)
-                  : runShowingErrors(context, () => _power(!on)),
+              onPressed: () {
+                if (dnsMode) {
+                  runShowingErrors(context, () => _setDnsMode(context, false));
+                } else if (status.totalAccounts == 0) {
+                  _openAccounts(context, core, settings, onOpenAccounts);
+                } else {
+                  runShowingErrors(context, () => _power(!on));
+                }
+              },
           ),
         ),
         const SizedBox(height: 10),
@@ -893,7 +894,7 @@ class _DesktopHome extends StatelessWidget {
             core: core,
             onTap: () => _chooseHomeDns(context, core, settings),
           )
-        else if (status.totalAccounts > 0 && !short) ...[
+        else if (status.totalAccounts > 0) ...[
           _QuickLocationChips(
             core: core,
             settings: settings,
@@ -1098,7 +1099,6 @@ class _HomeDnsCardState extends State<_HomeDnsCard> {
   Widget build(BuildContext context) {
     final p = widget.palette;
     final theme = Theme.of(context);
-    final l = AppLocalizations.of(context);
     final ping = _pingMs;
     return _HomeCard(
       palette: p,
