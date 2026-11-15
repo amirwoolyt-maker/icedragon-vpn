@@ -270,7 +270,6 @@ class _ProBadge extends StatelessWidget {
 
 class _PlanCard extends StatelessWidget {
   const _PlanCard({
-    super.key,
     required this.title,
     required this.badge,
     required this.price,

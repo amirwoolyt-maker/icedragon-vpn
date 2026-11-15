@@ -267,9 +267,9 @@ class MobileStrings {
   };
 
   String get dnsModeEnabled => switch (lang) {
-    'fa' => 'حالت DNS روشن است',
-    'ar' => 'وضع DNS قيد التشغيل',
-    _ => 'DNS mode is on',
+    'fa' => 'DNS روشن',
+    'ar' => 'DNS قيد التشغيل',
+    _ => 'DNS on',
   };
 
   String get proTitle => switch (lang) {
@@ -390,12 +390,6 @@ class MobileStrings {
     'fa' => 'قیمت‌گذاری پلن هنوز تنظیم نشده است.',
     'ar' => 'لم يتم إعداد أسعار الخطط بعد.',
     _ => 'Plan pricing has not been configured yet.',
-  };
-
-  String get dnsModeEnabled => switch (lang) {
-    'fa' => 'DNS روشن',
-    'ar' => 'DNS قيد التشغيل',
-    _ => 'DNS on',
   };
 
   String get dnsModeDisabled => switch (lang) {
