@@ -83,6 +83,7 @@ class AppSettings extends ChangeNotifier {
 
   /// Home-screen presentation mode; DNS does not start the VPN tunnel.
   String homeConnectionMode = 'vpn';
+  bool homeDnsEnabled = false;
   String homeDnsName = '';
   List<String> homeDnsServers = const [];
 
@@ -261,6 +262,7 @@ class AppSettings extends ChangeNotifier {
           ];
         }
         if (j['home_connection_mode'] == 'dns') s.homeConnectionMode = 'dns';
+        s.homeDnsEnabled = j['home_dns_enabled'] == true;
         if (j['home_dns_name'] case final String name) s.homeDnsName = name;
         if (j['home_dns_servers'] case final List<Object?> servers) {
           s.homeDnsServers = servers.whereType<String>().toList();
@@ -299,6 +301,7 @@ class AppSettings extends ChangeNotifier {
     List<String>? favoriteCountries,
     List<Map<String, Object?>>? customDnsProviders,
     String? homeConnectionMode,
+    bool? homeDnsEnabled,
     String? homeDnsName,
     List<String>? homeDnsServers,
     bool? showSpeedChart,
@@ -306,6 +309,7 @@ class AppSettings extends ChangeNotifier {
     this.favoriteCountries = favoriteCountries ?? this.favoriteCountries;
     this.customDnsProviders = customDnsProviders ?? this.customDnsProviders;
     this.homeConnectionMode = homeConnectionMode ?? this.homeConnectionMode;
+    this.homeDnsEnabled = homeDnsEnabled ?? this.homeDnsEnabled;
     this.homeDnsName = homeDnsName ?? this.homeDnsName;
     this.homeDnsServers = homeDnsServers ?? this.homeDnsServers;
     this.showSpeedChart = showSpeedChart ?? this.showSpeedChart;
@@ -363,6 +367,7 @@ class AppSettings extends ChangeNotifier {
           'favorite_countries': favoriteCountries,
           'custom_dns_providers': customDnsProviders,
           'home_connection_mode': homeConnectionMode,
+          'home_dns_enabled': homeDnsEnabled,
           'home_dns_name': homeDnsName,
           'home_dns_servers': homeDnsServers,
           'show_speed_chart': showSpeedChart,

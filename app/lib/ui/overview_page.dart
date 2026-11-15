@@ -102,6 +102,7 @@ Future<void> _chooseHomeDns(
       homeDnsName: chosen.name,
       homeDnsServers: chosen.servers,
       homeConnectionMode: 'dns',
+      homeDnsEnabled: true,
     );
   });
 }
@@ -414,9 +415,7 @@ class _DesktopHome extends StatelessWidget {
       await _chooseHomeDns(context, core, settings);
       return;
     }
-    await runShowingErrors(context, () async {
-      settings.update(homeConnectionMode: on ? 'dns' : 'vpn');
-    });
+    settings.update(homeConnectionMode: 'dns', homeDnsEnabled: on);
   }
 
   @override
@@ -516,6 +515,7 @@ class _DesktopHome extends StatelessWidget {
     // The last connect was given up: why, until the next one.
     final gaveUp = !on && status.connectFailure.isNotEmpty;
     final dnsMode = settings.homeConnectionMode == 'dns';
+    final dnsOn = dnsMode && settings.homeDnsEnabled;
     final connected = !dnsMode && on && _running && !confirming;
     final accent = dnsMode ? p.second : _accent(p);
     final ip = !showIp
@@ -631,14 +631,14 @@ class _DesktopHome extends StatelessWidget {
         Center(
             child: _PowerOrb(
               palette: p,
-              on: dnsMode || on,
+              on: dnsMode ? dnsOn : on,
               accent: accent,
               busy: core.switchingProxy,
               tooltip: dnsMode ? ms.modeDnsHint : on ? l.tapToDisconnect : l.tapToConnect,
               // No account yet: the accounts page, which explains them.
               onPressed: () {
                 if (dnsMode) {
-                  runShowingErrors(context, () => _setDnsMode(context, false));
+                  runShowingErrors(context, () => _setDnsMode(context, !dnsOn));
                 } else if (status.totalAccounts == 0) {
                   _openAccounts(context, core, settings, onOpenAccounts);
                 } else {
@@ -650,7 +650,7 @@ class _DesktopHome extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           dnsMode
-              ? ms.dnsModeEnabled
+              ? dnsOn ? ms.dnsModeEnabled : ms.dnsModeDisabled
               : confirming
               ? l.stateConnecting
               : connected
@@ -659,7 +659,7 @@ class _DesktopHome extends StatelessWidget {
           textAlign: TextAlign.center,
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w800,
-            color: on ? accent : p.text,
+            color: (dnsMode ? dnsOn : on) ? accent : p.text,
           ),
         ),
         const SizedBox(height: 8),
@@ -776,7 +776,7 @@ class _DesktopHome extends StatelessWidget {
                 (gaveUp && isLocationRefused(status.connectFailure))))
           _RecommendedLocationButton(core: core),
         if (connected && mismatch != null) _ExitMismatchNote(text: mismatch),
-        if (status.systemProxySet && status.systemProxyTakenBy != null)
+                  if (!dnsMode && status.systemProxySet && status.systemProxyTakenBy != null)
           _SystemProxyTakenNote(core: core, by: status.systemProxyTakenBy!),
         if (!dnsMode && status.state.proxyPortBlocked) ...[
           const SizedBox(height: 12),
@@ -816,9 +816,7 @@ class _DesktopHome extends StatelessWidget {
                       if (mode == 'dns') {
                         await _setDnsMode(context, true);
                       } else {
-                        if (dnsMode) {
-                          settings.update(homeConnectionMode: 'vpn');
-                        }
+                        if (dnsMode) settings.update(homeConnectionMode: 'vpn');
                         await chooseConnectionMode(context, core, mode);
                       }
                     },
@@ -905,14 +903,18 @@ class _DesktopHome extends StatelessWidget {
           connected: connected,
           palette: p,
         ),
-        if (dnsMode)
+        if (dnsMode) ...[
           _HomeDnsCard(
             palette: p,
             settings: settings,
             core: core,
             onTap: () => _chooseHomeDns(context, core, settings),
-          )
-        else if (status.totalAccounts > 0) ...[
+            active: dnsOn,
+            showStatus: dnsOn,
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (!dnsMode && status.totalAccounts > 0) ...[
           _QuickLocationChips(
             core: core,
             settings: settings,
@@ -924,7 +926,7 @@ class _DesktopHome extends StatelessWidget {
           const SizedBox(height: 12),
         ],
         // Side by side when there is room.
-        if (!dnsMode) LayoutBuilder(
+        LayoutBuilder(
           builder: (context, box) => box.maxWidth >= 560
               ? IntrinsicHeight(
                   child: Row(
@@ -1044,19 +1046,20 @@ class _ProPill extends StatelessWidget {
 }
 
 class _DnsPill extends StatelessWidget {
-  const _DnsPill({required this.palette, required this.onTap});
+  const _DnsPill({
+    required this.palette,
+    required this.onTap,
+    this.compact = false,
+  });
 
   final _HomePalette palette;
   final VoidCallback onTap;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final label = switch (Localizations.localeOf(context).languageCode) {
-      'fa' => 'DNS',
-      'ar' => 'DNS',
-      _ => 'DNS',
-    };
+    final strings = MobileStrings.of(context);
     return _HomePill(
       palette: palette,
       child: Material(
@@ -1065,19 +1068,21 @@ class _DnsPill extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           onTap: onTap,
           child: Tooltip(
-            message: MobileStrings.of(context).dnsProviderHint,
+            message: strings.dnsQuickSelect,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.dns_rounded, size: 16, color: palette.second),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: palette.text,
-                    fontWeight: FontWeight.w700,
+                Icon(Icons.dns_rounded, size: 16, color: palette.muted),
+                if (!compact) ...[
+                  const SizedBox(width: 6),
+                  Text(
+                    strings.dnsQuickSelect,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: palette.text,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -1093,15 +1098,70 @@ class _HomeDnsCard extends StatefulWidget {
     required this.settings,
     required this.core,
     required this.onTap,
+    required this.active,
+    this.showStatus = true,
   });
 
   final _HomePalette palette;
   final AppSettings settings;
   final CoreController core;
   final VoidCallback onTap;
+  final bool active;
+  final bool showStatus;
 
   @override
   State<_HomeDnsCard> createState() => _HomeDnsCardState();
+}
+
+class _QuickDnsChip extends StatelessWidget {
+  const _QuickDnsChip({
+    required this.palette,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final _HomePalette palette;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = MobileStrings.of(context);
+    final theme = Theme.of(context);
+    final color = selected ? palette.idle : palette.muted;
+    return Material(
+      color: selected ? palette.idle.withValues(alpha: 0.22) : palette.card,
+      shape: StadiumBorder(
+        side: BorderSide(
+          color: selected ? palette.idle.withValues(alpha: 0.7) : palette.cardBorder,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          unawaited(HapticFeedback.selectionClick());
+          onTap();
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.dns_rounded, size: 15, color: color),
+              const SizedBox(width: 6),
+              Text(
+                strings.modeDns,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: selected ? palette.text : palette.muted,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _HomeDnsCardState extends State<_HomeDnsCard> {
@@ -1154,7 +1214,11 @@ class _HomeDnsCardState extends State<_HomeDnsCard> {
         constraints: const BoxConstraints(minHeight: 84),
         child: Row(
           children: [
-            Icon(Icons.dns_rounded, size: 34, color: p.second),
+            Icon(
+              Icons.dns_rounded,
+              size: 34,
+              color: widget.active ? p.connected : p.muted,
+            ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -1176,14 +1240,15 @@ class _HomeDnsCardState extends State<_HomeDnsCard> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  Text(
-                    ping == null
-                        ? MobileStrings.of(context).dnsProviderHint
-                        : MobileStrings.of(context).dnsProviderPing(ping),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(color: p.muted),
-                  ),
+                  if (widget.showStatus)
+                    Text(
+                      ping == null
+                          ? MobileStrings.of(context).dnsProviderHint
+                          : MobileStrings.of(context).dnsProviderPing(ping),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(color: p.muted),
+                    ),
                 ],
               ),
             ),
@@ -1626,14 +1691,21 @@ class _PhoneHome extends StatelessWidget {
       !status.connectPending &&
       status.connectFailure.isEmpty;
 
+  bool get _dnsMode => settings.homeConnectionMode == 'dns';
+
+  Future<void> _chooseDns(BuildContext context) =>
+      _chooseHomeDns(context, core, settings);
+
   Future<void> _toggle(bool on) async {
     unawaited(HapticFeedback.mediumImpact());
-    if (_switchSystemProxy) {
+    if (_dnsMode) {
+      settings.update(homeDnsEnabled: !settings.homeDnsEnabled);
+    } else if (_switchSystemProxy) {
       await core.setSystemProxy(on ? 'clear' : 'set');
     } else {
       await core.setOn(!on);
     }
-    if (!on) _testAfterPowerOn(core);
+    if (!on && !_dnsMode) _testAfterPowerOn(core);
   }
 
   @override
@@ -1689,7 +1761,11 @@ class _PhoneHome extends StatelessWidget {
     );
     // A computer's narrow window: on while the system proxy or TUN mode
     // carries the apps.
-    final on = _switchSystemProxy
+    final dnsMode = _dnsMode;
+    final dnsOn = dnsMode && settings.homeDnsEnabled;
+    final on = dnsMode
+        ? dnsOn
+        : _switchSystemProxy
         ? status.systemProxySet || status.tunMode
         : status.proxyOn;
     final proxy = status.proxy;
@@ -1709,7 +1785,7 @@ class _PhoneHome extends StatelessWidget {
     final failure = failing ? failureText(l, proxy, test) : null;
     // The last connect was given up: why, until the next one.
     final gaveUp = !on && status.connectFailure.isNotEmpty;
-    final connected =
+    final connected = !dnsMode &&
         on && running && (status.computerUsesVpn || !canSwitch) && !confirming;
     final ip = !showIp
         ? ''
@@ -1717,7 +1793,9 @@ class _PhoneHome extends StatelessWidget {
         ? status.exit!.ipv4
         : status.exit?.ipv6 ?? '';
     final proxyOnly = Platform.isAndroid && AndroidCore.mode.value == 'proxy';
-    final accent = !on
+    final accent = dnsMode
+        ? p.second
+        : !on
         ? p.idle
         : confirming
         ? p.busy
@@ -1726,15 +1804,21 @@ class _PhoneHome extends StatelessWidget {
             Phase.error => p.error,
             _ => p.busy,
           };
-    final label = confirming ? l.stateConnecting : look.label;
+    final ms = MobileStrings.of(context);
+    final label = dnsMode
+        ? dnsOn ? ms.dnsModeEnabled : ms.dnsModeDisabled
+        : confirming
+        ? l.stateConnecting
+        : look.label;
     // A TV's remote presses OK; a phone is tapped.
     final tv = Platform.isAndroid && AndroidCore.isTv;
-    final press = on
+    final press = dnsMode
+        ? ms.modeDnsHint
+        : on
         ? (tv ? l.tapToDisconnectTv : l.tapToDisconnectPhone)
         : (tv ? l.tapToConnectTv : l.tapToConnectPhone);
     final place = homeLocation(l, status, connected: connected);
     final mismatch = exitMismatchText(l, status);
-    final ms = MobileStrings.of(context);
     final top = MediaQuery.paddingOf(context).top;
     return Stack(
       children: [
@@ -1826,7 +1910,11 @@ class _PhoneHome extends StatelessWidget {
                       ),
                     ),
                   if (onOpenDns != null)
-                    _DnsPill(palette: p, onTap: onOpenDns!),
+                    _DnsPill(
+                      palette: p,
+                      onTap: onOpenDns!,
+                      compact: true,
+                    ),
                   if (onOpenPro != null)
                     _ProPill(palette: p, onTap: onOpenPro!),
                   if (onOpenSettings != null)
@@ -1856,7 +1944,9 @@ class _PhoneHome extends StatelessWidget {
                   tooltip: press,
                   // No account yet: the accounts page, which explains
                   // them and links to Mozilla's sign-up.
-                  onPressed: () => status.totalAccounts == 0
+                  onPressed: () => dnsMode
+                      ? runShowingErrors(context, () => _toggle(on))
+                      : status.totalAccounts == 0
                       ? _openAccounts(context, core, settings, onOpenAccounts)
                       : runShowingErrors(context, () => _toggle(on)),
                 ),
@@ -1867,7 +1957,7 @@ class _PhoneHome extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: on ? accent : p.text,
+                  color: (dnsMode ? dnsOn : on) ? accent : p.text,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1918,7 +2008,7 @@ class _PhoneHome extends StatelessWidget {
                       ),
                   ],
                 )
-              else if (failing || noNetwork || gaveUp) ...[
+              else if (!dnsMode && (failing || noNetwork || gaveUp)) ...[
                 // Not connecting stands out from the ordinary hints.
                 problem(
                   _ProblemBox(
@@ -1952,7 +2042,7 @@ class _PhoneHome extends StatelessWidget {
                     ),
                   ),
                 ],
-              ] else
+              ] else if (!dnsMode)
                 // A start failure's hint is general; the core's reason is
                 // on a long press.
                 Tooltip(
@@ -2010,7 +2100,7 @@ class _PhoneHome extends StatelessWidget {
                 _RecommendedLocationButton(core: core),
               if (connected && mismatch != null)
                 problem(_ExitMismatchNote(text: mismatch)),
-              if (canSwitch &&
+              if (!dnsMode && canSwitch &&
                   status.systemProxySet &&
                   status.systemProxyTakenBy != null)
                 problem(
@@ -2061,7 +2151,8 @@ class _PhoneHome extends StatelessWidget {
                 const SizedBox(height: 10),
               ],
               _UpdateNotice(core: core, settings: settings, palette: p),
-              _UdpNotice(status: status, settings: settings, palette: p),
+              if (!dnsMode)
+                _UdpNotice(status: status, settings: settings, palette: p),
               _Notices(notices: homeNotices(status.notices)),
               _LowQuotaNotice(
                 core: core,
@@ -2070,7 +2161,7 @@ class _PhoneHome extends StatelessWidget {
                 connected: connected,
                 palette: p,
               ),
-              if (short)
+              if (short && !dnsMode)
                 IntrinsicHeight(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2097,7 +2188,25 @@ class _PhoneHome extends StatelessWidget {
                   ),
                 )
               else ...[
-                if (status.totalAccounts > 0) ...[
+                if (dnsMode) ...[
+                  _QuickDnsChip(
+                    palette: p,
+                    selected: dnsOn,
+                    onTap: () => unawaited(_toggle(!dnsOn)),
+                  ),
+                  const SizedBox(height: 10),
+                  _HomeDnsCard(
+                    palette: p,
+                    settings: settings,
+                    core: core,
+                    onTap: () => _chooseDns(context),
+                    active: dnsOn,
+                    showStatus: dnsOn,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                if (!dnsMode &&
+                    (status.totalAccounts > 0 || onOpenDns != null)) ...[
                   _QuickLocationChips(
                     core: core,
                     settings: settings,
@@ -2105,6 +2214,12 @@ class _PhoneHome extends StatelessWidget {
                     palette: p,
                     accent: accent,
                     onOpenServers: onOpenServers,
+                    dnsSelected: false,
+                    onChooseDns: onOpenDns == null
+                        ? null
+                        : () {
+                            _chooseDns(context);
+                          },
                   ),
                   const SizedBox(height: 10),
                 ],
@@ -3312,6 +3427,8 @@ class _QuickLocationChips extends StatefulWidget {
     required this.selection,
     required this.palette,
     required this.accent,
+    this.dnsSelected = false,
+    this.onChooseDns,
     this.onOpenServers,
   });
 
@@ -3320,6 +3437,8 @@ class _QuickLocationChips extends StatefulWidget {
   final String selection;
   final _HomePalette palette;
   final Color accent;
+  final bool dnsSelected;
+  final VoidCallback? onChooseDns;
   final VoidCallback? onOpenServers;
 
   @override
@@ -3376,6 +3495,7 @@ class _QuickLocationChipsState extends State<_QuickLocationChips> {
     final accent = widget.accent;
     final core = widget.core;
     final onOpenServers = widget.onOpenServers;
+    final onChooseDns = widget.onChooseDns;
 
     Widget chip({
       required String label,
@@ -3436,6 +3556,13 @@ class _QuickLocationChipsState extends State<_QuickLocationChips> {
         child: ListView(
           scrollDirection: Axis.horizontal,
           children: [
+            if (onChooseDns != null)
+              _QuickDnsChip(
+                palette: palette,
+                selected: widget.dnsSelected,
+                onTap: onChooseDns,
+              ),
+            if (onChooseDns != null) const SizedBox(width: 8),
             chip(
               label: ms.quickFastest,
               selected: chosen == 'fastest',

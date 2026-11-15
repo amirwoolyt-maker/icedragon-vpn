@@ -392,6 +392,36 @@ class MobileStrings {
     _ => 'Plan pricing has not been configured yet.',
   };
 
+  String get dnsModeEnabled => switch (lang) {
+    'fa' => 'DNS روشن',
+    'ar' => 'DNS قيد التشغيل',
+    _ => 'DNS on',
+  };
+
+  String get dnsModeDisabled => switch (lang) {
+    'fa' => 'DNS خاموش',
+    'ar' => 'DNS متوقف',
+    _ => 'DNS off',
+  };
+
+  String get proPlanMonthlyDetail => switch (lang) {
+    'fa' => 'دسترسی Pro برای یک ماه. تمدید خودکار در حال حاضر فعال نیست.',
+    'ar' => 'وصول Pro لمدة شهر واحد. التجديد التلقائي غير متاح حالياً.',
+    _ => 'Pro access for one month. Auto-renewal is not available yet.',
+  };
+
+  String get proPlanYearlyDetail => switch (lang) {
+    'fa' => 'دسترسی Pro برای یک سال با قیمت کمتر نسبت به پرداخت ماهانه.',
+    'ar' => 'وصول Pro لمدة عام بسعر أقل من الدفع الشهري.',
+    _ => 'One year of Pro access at a lower rate than monthly billing.',
+  };
+
+  String get proPlanLifetimeDetail => switch (lang) {
+    'fa' => 'پرداخت یک‌باره برای دسترسی مادام‌العمر Pro.',
+    'ar' => 'دفعة واحدة للحصول على وصول Pro مدى الحياة.',
+    _ => 'A one-time payment for lifetime Pro access.',
+  };
+
   String get dnsAddProvider => switch (lang) {
     'fa' => 'افزودن DNS سفارشی',
     'ar' => 'إضافة DNS مخصص',
