@@ -538,8 +538,7 @@ class _DesktopHome extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if ((connected && proxy != null && proxy.transport.isNotEmpty) ||
-            status.totalAccounts > 0 ||
-            onOpenDns != null) ...[
+            status.totalAccounts > 0) ...[
           Row(
             children: [
               if (connected && proxy != null && proxy.transport.isNotEmpty)
@@ -602,10 +601,6 @@ class _DesktopHome extends StatelessWidget {
                     ),
                   ),
                 ),
-              if (onOpenDns != null) ...[
-                if (status.totalAccounts > 0) const SizedBox(width: 8),
-                _DnsPill(palette: p, onTap: onOpenDns!),
-              ],
             ],
           ),
           const SizedBox(height: 6),
