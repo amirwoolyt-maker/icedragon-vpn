@@ -236,6 +236,114 @@ class MobileStrings {
     _ => 'Live speed chart on Home',
   };
 
+  String get dnsProviderHint => switch (lang) {
+    'fa' => 'این DNS فقط برای نام‌هایی است که خود هستهٔ VPN جست‌وجو می‌کند؛ DNS دستگاه تغییر نمی‌کند.',
+    'ar' => 'يُستخدم DNS هذا لأسماء نطاقات نواة VPN فقط؛ لا يتغير DNS الجهاز.',
+    _ => 'These resolvers are used for names looked up by the VPN core only; device DNS is unchanged.',
+  };
+
+  String get modeDns => switch (lang) {
+    'fa' => 'حالت DNS',
+    'ar' => 'وضع DNS',
+    _ => 'DNS Mode',
+  };
+
+  String get modeDnsHint => switch (lang) {
+    'fa' => 'DNS انتخاب‌شده فقط برای جست‌وجوهای هستهٔ VPN است؛ DNS دستگاه تغییر نمی‌کند و تونل VPN روشن نمی‌شود.',
+    'ar' => 'يُستخدم DNS المختار لاستعلامات نواة VPN فقط؛ لا يتغير DNS الجهاز ولا يبدأ نفق VPN.',
+    _ => 'Selected DNS is used only for VPN-core lookups; device DNS is unchanged and the VPN tunnel stays off.',
+  };
+
+  String get dnsQuickSelect => switch (lang) {
+    'fa' => 'انتخاب DNS',
+    'ar' => 'اختيار DNS',
+    _ => 'Choose DNS provider',
+  };
+
+  String dnsProviderPing(int ms) => switch (lang) {
+    'fa' => 'پینگ DNS: $ms میلی‌ثانیه',
+    'ar' => 'زمن استجابة DNS: $ms مللي ثانية',
+    _ => 'DNS ping: $ms ms',
+  };
+
+  String get dnsModeEnabled => switch (lang) {
+    'fa' => 'حالت DNS روشن است',
+    'ar' => 'وضع DNS قيد التشغيل',
+    _ => 'DNS mode is on',
+  };
+
+  String get dnsAddProvider => switch (lang) {
+    'fa' => 'افزودن DNS سفارشی',
+    'ar' => 'إضافة DNS مخصص',
+    _ => 'Add custom provider',
+  };
+
+  String get dnsEditProvider => switch (lang) {
+    'fa' => 'ویرایش ارائه‌دهنده',
+    'ar' => 'تعديل المزوّد',
+    _ => 'Edit provider',
+  };
+
+  String get dnsProviderName => switch (lang) {
+    'fa' => 'نام',
+    'ar' => 'الاسم',
+    _ => 'Name',
+  };
+
+  String get dnsProviderNameRequired => switch (lang) {
+    'fa' => 'نام را وارد کنید',
+    'ar' => 'أدخل الاسم',
+    _ => 'Enter a name',
+  };
+
+  String get dnsProviderServers => switch (lang) {
+    'fa' => 'آدرس سرورها',
+    'ar' => 'عناوين الخوادم',
+    _ => 'Server addresses',
+  };
+
+  String get dnsProviderServersHint => switch (lang) {
+    'fa' => 'هر آدرس در یک خط؛ IP یا URL رمزگذاری‌شده',
+    'ar' => 'عنوان واحد في كل سطر؛ IP أو URL مشفر',
+    _ => 'One per line; IP address or encrypted DNS URL',
+  };
+
+  String get dnsProviderServersRequired => switch (lang) {
+    'fa' => 'حداقل یک سرور وارد کنید',
+    'ar' => 'أدخل خادماً واحداً على الأقل',
+    _ => 'Enter at least one server',
+  };
+
+  String get dnsProviderServerInvalid => switch (lang) {
+    'fa' => 'آدرس سرور معتبر نیست',
+    'ar' => 'عنوان الخادم غير صالح',
+    _ => 'Invalid server address',
+  };
+
+  String get dnsUseProvider => switch (lang) {
+    'fa' => 'استفاده',
+    'ar' => 'استخدام',
+    _ => 'Use',
+  };
+
+  String get dnsBenchmark => switch (lang) {
+    'fa' => 'تست',
+    'ar' => 'اختبار',
+    _ => 'Benchmark',
+  };
+
+  String dnsBenchmarkResult(int ms) => switch (lang) {
+    'fa' => 'میانگین زمان پاسخ هسته: $ms میلی‌ثانیه',
+    'ar' => 'متوسط زمن استجابة النواة: $ms مللي ثانية',
+    _ => 'Average VPN-core lookup: $ms ms',
+  };
+
+  String get dnsBenchmarkFailed => switch (lang) {
+    'fa' => 'هیچ نامی با این DNS پاسخ نداد.',
+    'ar' => 'لم تُحل أي أسماء باستخدام DNS هذا.',
+    _ => 'No test names resolved through this provider.',
+  };
+
   String get quickToolsTitle => switch (lang) {
     'fa' => 'ابزارهای سریع',
     'ar' => 'أدوات سريعة',

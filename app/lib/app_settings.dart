@@ -77,6 +77,15 @@ class AppSettings extends ChangeNotifier {
   /// Pinned favorite server country codes for 1-tap switching on mobile home.
   List<String> favoriteCountries = const [];
 
+  /// User-named DNS resolvers available in Settings. These configure the
+  /// core's own resolver, not the operating system's resolver.
+  List<Map<String, Object?>> customDnsProviders = const [];
+
+  /// Home-screen presentation mode; DNS does not start the VPN tunnel.
+  String homeConnectionMode = 'vpn';
+  String homeDnsName = '';
+  List<String> homeDnsServers = const [];
+
   /// Shows the live download/upload speed chart card on mobile home.
   bool showSpeedChart = true;
 
@@ -235,6 +244,27 @@ class AppSettings extends ChangeNotifier {
               if (code.trim().isNotEmpty) code.trim().toUpperCase(),
           ];
         }
+        if (j['custom_dns_providers'] case final List<Object?> v) {
+          s.customDnsProviders = [
+            for (final item in v)
+              if (item is Map<String, Object?> &&
+                  item['name'] is String &&
+                  item['servers'] is List<Object?>)
+                {
+                  'name': item['name']! as String,
+                  'servers': [
+                    for (final server in item['servers']! as List<Object?>)
+                      if (server is String && server.trim().isNotEmpty)
+                        server.trim(),
+                  ],
+                },
+          ];
+        }
+        if (j['home_connection_mode'] == 'dns') s.homeConnectionMode = 'dns';
+        if (j['home_dns_name'] case final String name) s.homeDnsName = name;
+        if (j['home_dns_servers'] case final List<Object?> servers) {
+          s.homeDnsServers = servers.whereType<String>().toList();
+        }
         s.showSpeedChart = j['show_speed_chart'] != false;
       }
     } on FileSystemException {
@@ -267,9 +297,17 @@ class AppSettings extends ChangeNotifier {
     bool? udpNotice,
     Set<String>? hiddenConnectionColumns,
     List<String>? favoriteCountries,
+    List<Map<String, Object?>>? customDnsProviders,
+    String? homeConnectionMode,
+    String? homeDnsName,
+    List<String>? homeDnsServers,
     bool? showSpeedChart,
   }) {
     this.favoriteCountries = favoriteCountries ?? this.favoriteCountries;
+    this.customDnsProviders = customDnsProviders ?? this.customDnsProviders;
+    this.homeConnectionMode = homeConnectionMode ?? this.homeConnectionMode;
+    this.homeDnsName = homeDnsName ?? this.homeDnsName;
+    this.homeDnsServers = homeDnsServers ?? this.homeDnsServers;
     this.showSpeedChart = showSpeedChart ?? this.showSpeedChart;
     this.hiddenConnectionColumns =
         hiddenConnectionColumns ?? this.hiddenConnectionColumns;
@@ -323,6 +361,10 @@ class AppSettings extends ChangeNotifier {
           'udp_notice': udpNotice,
           'hidden_connection_columns': hiddenConnectionColumns.toList(),
           'favorite_countries': favoriteCountries,
+          'custom_dns_providers': customDnsProviders,
+          'home_connection_mode': homeConnectionMode,
+          'home_dns_name': homeDnsName,
+          'home_dns_servers': homeDnsServers,
           'show_speed_chart': showSpeedChart,
         }),
       );

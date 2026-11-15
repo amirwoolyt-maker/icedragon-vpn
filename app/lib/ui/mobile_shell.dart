@@ -105,6 +105,14 @@ class _MobileShellState extends State<MobileShell> {
         section: SettingsSection.connection,
       ),
     );
+    void openDns() => _push(
+      l.sectionDns,
+      () => SettingsPage(
+        core: core,
+        settings: settings,
+        section: SettingsSection.dns,
+      ),
+    );
     void openUpstreamProxy() => _push(
       l.upstreamProxy,
       () => SettingsPage(
@@ -123,6 +131,7 @@ class _MobileShellState extends State<MobileShell> {
                 onOpenAccounts: openAccounts,
                 onOpenConnection: openConnection,
                 onOpenUpstreamProxy: openUpstreamProxy,
+                onOpenDns: openDns,
                 onOpenSettings: () => setState(() => _tab = 1),
                 phone: true,
               )

@@ -257,6 +257,10 @@ class _ShellState extends State<Shell> {
                         _page = _Page.settings;
                         _settingsOpening = SettingsSection.upstreamProxy;
                       }),
+                      onOpenDns: () => setState(() {
+                        _page = _Page.settings;
+                        _settingsOpening = SettingsSection.dns;
+                      }),
                       onOpenExtension: () => setState(() {
                         _page = _Page.settings;
                         _settingsOpening = SettingsSection.extension;

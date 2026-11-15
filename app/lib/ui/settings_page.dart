@@ -42,7 +42,60 @@ const _dnsPresets = <String, List<String>>{
   'google': ['https://8.8.8.8/dns-query', 'https://8.8.4.4/dns-query'],
   'quad9': ['https://9.9.9.9/dns-query', 'https://149.112.112.112/dns-query'],
   'cloudflare_dot': ['tls://1.1.1.1', 'tls://1.0.0.1'],
+  'opendns': ['208.67.222.222', '208.67.220.220'],
+  'cleanbrowsing': ['185.228.168.9', '185.228.169.9'],
+  'shecan': ['178.22.122.100', '185.51.200.2'],
+  'electro': ['78.157.42.100', '78.157.42.101'],
+  'begzar': ['185.55.226.26', '185.55.225.25'],
+  'radar_game': ['10.202.10.10'],
 };
+
+bool _validDnsServer(String server) {
+  try {
+    final separator = server.indexOf('://');
+    if (separator >= 0) {
+      final scheme = server.substring(0, separator).toLowerCase();
+      if (!const {'https', 'tls', 'udp', 'tcp'}.contains(scheme)) return false;
+      final uri = Uri.tryParse(server);
+      if (uri == null ||
+          uri.host.isEmpty ||
+          uri.userInfo.isNotEmpty ||
+          (uri.hasPort && (uri.port < 1 || uri.port > 65535))) {
+        return false;
+      }
+      if (scheme == 'udp' || scheme == 'tcp') {
+        return InternetAddress.tryParse(uri.host) != null &&
+            uri.path.isEmpty &&
+            !uri.hasQuery &&
+            !uri.hasFragment;
+      }
+      return scheme != 'tls' ||
+          (uri.path.isEmpty && !uri.hasQuery && !uri.hasFragment);
+    }
+
+    if (InternetAddress.tryParse(server) != null) return true;
+    final bracketed = RegExp(r'^\[([^\]]+)\](?::(\d+))?$').firstMatch(server);
+    if (bracketed != null) {
+      final address = InternetAddress.tryParse(bracketed.group(1)!);
+      final port = bracketed.group(2);
+      return address?.type == InternetAddressType.IPv6 &&
+          (port == null || _validDnsPort(port));
+    }
+    final hostPort = RegExp(r'^([^:]+):(\d+)$').firstMatch(server);
+    if (hostPort == null ||
+        InternetAddress.tryParse(hostPort.group(1)!) == null) {
+      return false;
+    }
+    return _validDnsPort(hostPort.group(2)!);
+  } on FormatException {
+    return false;
+  }
+}
+
+bool _validDnsPort(String value) {
+  final port = int.tryParse(value);
+  return port != null && port >= 1 && port <= 65535;
+}
 
 /// The app's preferences and the core's settings (config.json, edited
 /// through the API so that every field the app does not show is kept).
@@ -1338,6 +1391,12 @@ class _SettingsPageState extends State<SettingsPage> {
       'google': 'Google',
       'quad9': 'Quad9',
       'cloudflare_dot': 'Cloudflare (DNS over TLS)',
+      'opendns': 'OpenDNS',
+      'cleanbrowsing': 'CleanBrowsing',
+      'shecan': 'Shecan',
+      'electro': 'Electro',
+      'begzar': 'Begzar',
+      'radar_game': 'Radar Game',
       'custom': l.dnsCustom,
     };
     return Panel(
@@ -1392,10 +1451,65 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           const Divider(height: 24),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              MobileStrings.of(context).dnsProviderHint,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          for (final provider in widget.settings.customDnsProviders)
+            _SavedDnsProvider(
+              name: provider['name'] as String,
+              servers: [
+                for (final server in provider['servers'] as List<Object?>)
+                  '$server',
+              ],
+              active: servers.join(',') ==
+                  (provider['servers'] as List<Object?>).join(','),
+              onApply: () => _save({
+                ['dns', 'servers']: [
+                  for (final server in provider['servers'] as List<Object?>)
+                    '$server',
+                ],
+              }),
+              onEdit: () => _editDnsProvider(provider),
+              onRemove: () => _removeDnsProvider(provider),
+              core: _core,
+            ),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              onPressed: _saving ? null : () => _editDnsProvider(null),
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: Text(MobileStrings.of(context).dnsAddProvider),
+            ),
+          ),
+          const Divider(height: 24),
           _DnsTest(core: _core, servers: servers),
         ],
       ),
     );
+  }
+
+  Future<void> _editDnsProvider(Map<String, Object?>? existing) async {
+    final picked = await showDialog<Map<String, Object?>>(
+      context: context,
+      builder: (_) => _DnsProviderDialog(provider: existing),
+    );
+    if (picked == null || !mounted) return;
+    final providers = [...widget.settings.customDnsProviders];
+    if (existing != null) providers.remove(existing);
+    providers.add(picked);
+    widget.settings.update(customDnsProviders: providers);
+  }
+
+  Future<void> _removeDnsProvider(Map<String, Object?> provider) async {
+    final providers = [...widget.settings.customDnsProviders]..remove(provider);
+    widget.settings.update(customDnsProviders: providers);
   }
 
   /// After how long without traffic the connection to Mozilla sleeps.
@@ -2975,6 +3089,238 @@ class _DestinationTestState extends State<_DestinationTest> {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _DnsProviderDialog extends StatefulWidget {
+  const _DnsProviderDialog({this.provider});
+
+  final Map<String, Object?>? provider;
+
+  @override
+  State<_DnsProviderDialog> createState() => _DnsProviderDialogState();
+}
+
+class _DnsProviderDialogState extends State<_DnsProviderDialog> {
+  late final _name = TextEditingController(
+    text: widget.provider?['name'] as String? ?? '',
+  );
+  late final _servers = TextEditingController(
+    text: [
+      for (final server
+          in (widget.provider?['servers'] as List<Object?>? ?? const []))
+        '$server',
+    ].join('\n'),
+  );
+  final _form = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _servers.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = MobileStrings.of(context);
+    return AlertDialog(
+      icon: const Icon(Icons.dns_rounded),
+      title: Text(widget.provider == null
+          ? strings.dnsAddProvider
+          : strings.dnsEditProvider),
+      content: SizedBox(
+        width: 400,
+        child: Form(
+          key: _form,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _name,
+                autofocus: true,
+                decoration: InputDecoration(labelText: strings.dnsProviderName),
+                validator: (value) => (value ?? '').trim().isEmpty
+                    ? strings.dnsProviderNameRequired
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _servers,
+                minLines: 2,
+                maxLines: 5,
+                textDirection: TextDirection.ltr,
+                decoration: InputDecoration(
+                  labelText: strings.dnsProviderServers,
+                  hintText: 'https://1.1.1.1/dns-query\n tls://1.1.1.1',
+                  helperText: strings.dnsProviderServersHint,
+                ),
+                validator: (value) {
+                  final servers = _lines(value ?? '');
+                  if (servers.isEmpty) return strings.dnsProviderServersRequired;
+                  for (final server in servers) {
+                    if (!_validDnsServer(server)) {
+                      return strings.dnsProviderServerInvalid;
+                    }
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(AppLocalizations.of(context).cancel),
+        ),
+        FilledButton(
+          onPressed: () {
+            if (!_form.currentState!.validate()) return;
+            Navigator.pop(context, <String, Object?>{
+              'name': _name.text.trim(),
+              'servers': _lines(_servers.text),
+            });
+          },
+          child: Text(AppLocalizations.of(context).save),
+        ),
+      ],
+    );
+  }
+}
+
+class _SavedDnsProvider extends StatefulWidget {
+  const _SavedDnsProvider({
+    required this.name,
+    required this.servers,
+    required this.active,
+    required this.onApply,
+    required this.onEdit,
+    required this.onRemove,
+    required this.core,
+  });
+
+  final String name;
+  final List<String> servers;
+  final bool active;
+  final VoidCallback onApply;
+  final VoidCallback onEdit;
+  final VoidCallback onRemove;
+  final CoreController core;
+
+  @override
+  State<_SavedDnsProvider> createState() => _SavedDnsProviderState();
+}
+
+class _SavedDnsProviderState extends State<_SavedDnsProvider> {
+  bool _testing = false;
+  int? _averageMs;
+  String? _error;
+
+  Future<void> _benchmark() async {
+    setState(() {
+      _testing = true;
+      _error = null;
+      _averageMs = null;
+    });
+    try {
+      final results = await widget.core.call(
+        (api) => api.testDns(widget.servers),
+      );
+      final times = [
+        for (final result in results)
+          if (result.error.isEmpty) result.ms,
+      ];
+      if (!mounted) return;
+      setState(() {
+        if (times.isEmpty) {
+          _error = MobileStrings.of(context).dnsBenchmarkFailed;
+        } else {
+          _averageMs = times.reduce((a, b) => a + b) ~/ times.length;
+        }
+      });
+    } on CoreApiException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } on CoreUnavailable catch (e) {
+      if (mounted) {
+        setState(() => _error = describeProblem(AppLocalizations.of(context), e));
+      }
+    } finally {
+      if (mounted) setState(() => _testing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = MobileStrings.of(context);
+    final theme = Theme.of(context);
+    final average = _averageMs;
+    final error = _error;
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 8, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  widget.active ? Icons.check_circle_rounded : Icons.dns_outlined,
+                  size: 18,
+                  color: widget.active ? StatusColors.good : null,
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: Text(widget.name, style: theme.textTheme.titleSmall)),
+                IconButton(
+                  tooltip: strings.dnsEditProvider,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: widget.onEdit,
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                ),
+                IconButton(
+                  tooltip: AppLocalizations.of(context).remove,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: widget.onRemove,
+                  icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                ),
+              ],
+            ),
+            Text(
+              ltr(widget.servers.join(' · ')),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            Wrap(
+              spacing: 8,
+              children: [
+                TextButton.icon(
+                  onPressed: widget.active ? null : widget.onApply,
+                  icon: const Icon(Icons.check_rounded, size: 16),
+                  label: Text(strings.dnsUseProvider),
+                ),
+                TextButton.icon(
+                  onPressed: _testing ? null : _benchmark,
+                  icon: _testing
+                      ? const SizedBox.square(
+                          dimension: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.speed_rounded, size: 16),
+                  label: Text(strings.dnsBenchmark),
+                ),
+              ],
+            ),
+            if (average != null)
+              Text(strings.dnsBenchmarkResult(average), style: theme.textTheme.bodySmall),
+            if (error != null)
+              Text(error, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+          ],
+        ),
+      ),
     );
   }
 }
