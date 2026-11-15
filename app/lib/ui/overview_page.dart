@@ -2189,12 +2189,6 @@ class _PhoneHome extends StatelessWidget {
                 )
               else ...[
                 if (dnsMode) ...[
-                  _QuickDnsChip(
-                    palette: p,
-                    selected: dnsOn,
-                    onTap: () => unawaited(_toggle(!dnsOn)),
-                  ),
-                  const SizedBox(height: 10),
                   _HomeDnsCard(
                     palette: p,
                     settings: settings,
@@ -3556,13 +3550,6 @@ class _QuickLocationChipsState extends State<_QuickLocationChips> {
         child: ListView(
           scrollDirection: Axis.horizontal,
           children: [
-            if (onChooseDns != null)
-              _QuickDnsChip(
-                palette: palette,
-                selected: widget.dnsSelected,
-                onTap: onChooseDns,
-              ),
-            if (onChooseDns != null) const SizedBox(width: 8),
             chip(
               label: ms.quickFastest,
               selected: chosen == 'fastest',
@@ -3615,6 +3602,14 @@ class _QuickLocationChipsState extends State<_QuickLocationChips> {
                   color: palette.muted,
                 ),
                 onTap: onOpenServers,
+              ),
+            ],
+            if (onChooseDns != null) ...[
+              const SizedBox(width: 8),
+              _QuickDnsChip(
+                palette: palette,
+                selected: widget.dnsSelected,
+                onTap: onChooseDns,
               ),
             ],
           ],
