@@ -13,6 +13,7 @@ import 'announcement_panel.dart';
 import 'accounts_page.dart';
 import 'logs_page.dart';
 import 'overview_page.dart';
+import 'pro_page.dart';
 import 'servers_page.dart';
 import 'settings_page.dart';
 import 'widgets.dart';
@@ -113,6 +114,22 @@ class _MobileShellState extends State<MobileShell> {
         section: SettingsSection.dns,
       ),
     );
+    void openPro() => Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        pageBuilder: (_, _, _) => Scaffold(
+          appBar: AppBar(title: Text(MobileStrings.of(context).proTitle)),
+          body: const SafeArea(top: false, child: ProPage()),
+        ),
+        transitionsBuilder: (_, animation, _, child) => FadeTransition(
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+          child: SlideTransition(
+            position: Tween(begin: const Offset(0, 0.025), end: Offset.zero)
+                .animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+            child: child,
+          ),
+        ),
+      ),
+    );
     void openUpstreamProxy() => _push(
       l.upstreamProxy,
       () => SettingsPage(
@@ -132,6 +149,7 @@ class _MobileShellState extends State<MobileShell> {
                 onOpenConnection: openConnection,
                 onOpenUpstreamProxy: openUpstreamProxy,
                 onOpenDns: openDns,
+                onOpenPro: openPro,
                 onOpenSettings: () => setState(() => _tab = 1),
                 phone: true,
               )

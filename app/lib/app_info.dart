@@ -19,6 +19,12 @@ const githubRepo = 'amirwoolyt-maker/icedragon-vpn';
 const telegramChannelUrl = 'https://t.me/icedragon_lair';
 const telegramChannelHandle = '@icedragon_lair';
 
+/// Configure the official Telegram bot URL at build time when it is ready.
+const proPurchaseUrl = String.fromEnvironment(
+  'PRO_PURCHASE_URL',
+  defaultValue: telegramChannelUrl,
+);
+
 const updateManifestUrl =
     'https://raw.githubusercontent.com/amirwoolyt-maker/icedragon-vpn/main/.github/updates.json';
 const updateManifestMirror =

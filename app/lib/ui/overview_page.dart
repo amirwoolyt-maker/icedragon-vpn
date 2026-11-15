@@ -119,6 +119,7 @@ class OverviewPage extends StatelessWidget {
     this.onOpenConnection,
     this.onOpenUpstreamProxy,
     this.onOpenDns,
+    this.onOpenPro,
     this.onOpenSettings,
     this.onOpenExtension,
     this.phone = false,
@@ -139,6 +140,7 @@ class OverviewPage extends StatelessWidget {
   final VoidCallback? onOpenConnection;
   final VoidCallback? onOpenUpstreamProxy;
   final VoidCallback? onOpenDns;
+  final VoidCallback? onOpenPro;
   final VoidCallback? onOpenSettings;
 
   /// Opens the browser extension section in settings.
@@ -159,6 +161,7 @@ class OverviewPage extends StatelessWidget {
         onOpenConnection: onOpenConnection,
         onOpenUpstreamProxy: onOpenUpstreamProxy,
         onOpenDns: onOpenDns,
+        onOpenPro: onOpenPro,
         onOpenSettings: onOpenSettings,
         onOpenExtension: onOpenExtension,
       );
@@ -173,6 +176,7 @@ class OverviewPage extends StatelessWidget {
       onOpenConnection: onOpenConnection,
       onOpenUpstreamProxy: onOpenUpstreamProxy,
       onOpenDns: onOpenDns,
+      onOpenPro: onOpenPro,
       onOpenExtension: onOpenExtension,
     );
   }
@@ -377,6 +381,7 @@ class _DesktopHome extends StatelessWidget {
     this.onOpenConnection,
     this.onOpenUpstreamProxy,
     this.onOpenDns,
+    this.onOpenPro,
     this.onOpenExtension,
   });
 
@@ -391,6 +396,7 @@ class _DesktopHome extends StatelessWidget {
   final VoidCallback? onOpenConnection;
   final VoidCallback? onOpenUpstreamProxy;
   final VoidCallback? onOpenDns;
+  final VoidCallback? onOpenPro;
   final VoidCallback? onOpenExtension;
 
   /// The connection mode shown as chosen; changing it (chooseConnectionMode)
@@ -538,7 +544,8 @@ class _DesktopHome extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if ((connected && proxy != null && proxy.transport.isNotEmpty) ||
-            status.totalAccounts > 0) ...[
+            status.totalAccounts > 0 ||
+            onOpenPro != null) ...[
           Row(
             children: [
               if (connected && proxy != null && proxy.transport.isNotEmpty)
@@ -601,6 +608,10 @@ class _DesktopHome extends StatelessWidget {
                     ),
                   ),
                 ),
+              if (onOpenPro != null) ...[
+                const SizedBox(width: 8),
+                _ProPill(palette: p, onTap: onOpenPro!),
+              ],
             ],
           ),
           const SizedBox(height: 6),
@@ -989,6 +1000,35 @@ class _ExtensionPill extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ProPill extends StatelessWidget {
+  const _ProPill({required this.palette, required this.onTap});
+
+  final _HomePalette palette;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: MobileStrings.of(context).proTitle,
+    child: Material(
+      color: palette.card,
+      shape: const StadiumBorder(side: BorderSide(color: Color(0x88FFB300))),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+          child: Icon(
+            Icons.workspace_premium_rounded,
+            size: 19,
+            color: Color(0xFFFFC247),
+            shadows: [Shadow(color: Color(0x99FF9800), blurRadius: 9)],
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class _DnsPill extends StatelessWidget {
@@ -1549,6 +1589,7 @@ class _PhoneHome extends StatelessWidget {
     this.onOpenConnection,
     this.onOpenUpstreamProxy,
     this.onOpenDns,
+    this.onOpenPro,
     this.onOpenSettings,
     this.onOpenExtension,
   });
@@ -1564,6 +1605,7 @@ class _PhoneHome extends StatelessWidget {
   final VoidCallback? onOpenConnection;
   final VoidCallback? onOpenUpstreamProxy;
   final VoidCallback? onOpenDns;
+  final VoidCallback? onOpenPro;
   final VoidCallback? onOpenSettings;
   final VoidCallback? onOpenExtension;
 
@@ -1773,6 +1815,8 @@ class _PhoneHome extends StatelessWidget {
                     ),
                   if (onOpenDns != null)
                     _DnsPill(palette: p, onTap: onOpenDns!),
+                  if (onOpenPro != null)
+                    _ProPill(palette: p, onTap: onOpenPro!),
                   if (onOpenSettings != null)
                     IconButton(
                       tooltip: l.navSettings,

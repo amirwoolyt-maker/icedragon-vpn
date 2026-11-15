@@ -9,6 +9,7 @@ import '../core/core_api.dart';
 import '../core/core_controller.dart';
 import '../core/models.dart';
 import '../l10n/app_localizations.dart';
+import '../mobile/mobile_strings.dart';
 import '../mobile/mobile_theme.dart';
 import 'about_page.dart';
 import 'announcement_panel.dart';
@@ -18,6 +19,7 @@ import 'format.dart';
 import 'logs_page.dart';
 import 'mobile_shell.dart';
 import 'overview_page.dart';
+import 'pro_page.dart';
 import 'port_dialog.dart';
 import 'servers_page.dart';
 import 'settings_page.dart';
@@ -261,6 +263,38 @@ class _ShellState extends State<Shell> {
                         _page = _Page.settings;
                         _settingsOpening = SettingsSection.dns;
                       }),
+                      onOpenPro: () => Navigator.of(context).push(
+                        PageRouteBuilder<void>(
+                          pageBuilder: (context, _, _) => Scaffold(
+                            appBar: AppBar(
+                              title: Text(MobileStrings.of(context).proTitle),
+                            ),
+                            body: const SafeArea(
+                              top: false,
+                              child: ProPage(),
+                            ),
+                          ),
+                          transitionsBuilder: (_, animation, _, child) =>
+                              FadeTransition(
+                                opacity: CurvedAnimation(
+                                  parent: animation,
+                                  curve: Curves.easeOutCubic,
+                                ),
+                                child: SlideTransition(
+                                  position: Tween(
+                                    begin: const Offset(0, 0.025),
+                                    end: Offset.zero,
+                                  ).animate(
+                                    CurvedAnimation(
+                                      parent: animation,
+                                      curve: Curves.easeOutCubic,
+                                    ),
+                                  ),
+                                  child: child,
+                                ),
+                              ),
+                        ),
+                      ),
                       onOpenExtension: () => setState(() {
                         _page = _Page.settings;
                         _settingsOpening = SettingsSection.extension;

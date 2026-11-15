@@ -180,7 +180,7 @@ jobs:
 
   android:
     needs: test
-    if: ${{ (github.event_name == 'push' && contains(github.event.head_commit.message, '[with-desktop]')) || (github.event_name == 'workflow_dispatch' && inputs.publish_release) }}
+    if: ${{ (github.event_name == 'push' && (contains(github.event.head_commit.message, '[with-desktop]') || contains(github.event.head_commit.message, '[test-desktop]'))) || (github.event_name == 'workflow_dispatch' && inputs.publish_release) }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4

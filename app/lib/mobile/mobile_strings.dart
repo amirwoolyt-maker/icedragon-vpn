@@ -272,6 +272,126 @@ class MobileStrings {
     _ => 'DNS mode is on',
   };
 
+  String get proTitle => switch (lang) {
+    'fa' => 'IceDragon Pro',
+    'ar' => 'IceDragon Pro',
+    _ => 'IceDragon Pro',
+  };
+
+  String get proSubtitle => switch (lang) {
+    'fa' => 'ابزارهای پیشرفتهٔ DNS و کنترل بیشتر',
+    'ar' => 'أدوات DNS متقدمة وتحكم أكبر',
+    _ => 'Advanced DNS tools and more control',
+  };
+
+  String get proAvailable => switch (lang) {
+    'fa' => 'قابلیت‌های پیشنهادی Pro',
+    'ar' => 'مزايا Pro القادمة',
+    _ => 'Planned Pro features',
+  };
+
+  String get proFeatureSplitDns => switch (lang) {
+    'fa' => 'انتخاب DNS جداگانه برای هر برنامه',
+    'ar' => 'اختيار DNS منفصل لكل تطبيق',
+    _ => 'Per-app DNS selection',
+  };
+
+  String get proFeatureUnlimitedTests => switch (lang) {
+    'fa' => 'تست نامحدود پینگ و سرعت سرورها',
+    'ar' => 'اختبارات غير محدودة لسرعة الخوادم',
+    _ => 'Unlimited server ping and speed tests',
+  };
+
+  String get proFeatureCustomDns => switch (lang) {
+    'fa' => 'افزودن DNS سفارشی نامحدود',
+    'ar' => 'إضافة عدد غير محدود من خوادم DNS المخصصة',
+    _ => 'Unlimited custom DNS providers',
+  };
+
+  String get proFeatureAutoSwitch => switch (lang) {
+    'fa' => 'جابجایی خودکار به سریع‌ترین DNS',
+    'ar' => 'التبديل تلقائياً إلى أسرع DNS',
+    _ => 'Automatic switch to the fastest DNS',
+  };
+
+  String get proFeatureAppLock => switch (lang) {
+    'fa' => 'قفل برنامه با اثر انگشت یا PIN',
+    'ar' => 'قفل التطبيق ببصمة الإصبع أو PIN',
+    _ => 'Fingerprint or PIN app lock',
+  };
+
+  String get proFeatureBackup => switch (lang) {
+    'fa' => 'پشتیبان‌گیری و بازیابی تنظیمات',
+    'ar' => 'نسخ احتياطي واستعادة الإعدادات',
+    _ => 'Settings backup and restore',
+  };
+
+  String get proFeatureTile => switch (lang) {
+    'fa' => 'کلید سریع در پنل اعلان‌ها',
+    'ar' => 'زر سريع في لوحة الإشعارات',
+    _ => 'Quick Settings notification tile',
+  };
+
+  String get proMonthly => switch (lang) {
+    'fa' => 'ماهانه',
+    'ar' => 'شهري',
+    _ => 'Monthly',
+  };
+
+  String get proYearly => switch (lang) {
+    'fa' => 'سالانه',
+    'ar' => 'سنوي',
+    _ => 'Yearly',
+  };
+
+  String get proLifetime => switch (lang) {
+    'fa' => 'مادام‌العمر',
+    'ar' => 'مدى الحياة',
+    _ => 'Lifetime',
+  };
+
+  String get proMostPopular => switch (lang) {
+    'fa' => 'محبوب‌ترین',
+    'ar' => 'الأكثر شيوعاً',
+    _ => 'Most popular',
+  };
+
+  String get proBestValue => switch (lang) {
+    'fa' => 'بهترین ارزش',
+    'ar' => 'أفضل قيمة',
+    _ => 'Best value',
+  };
+
+  String get proBuy => switch (lang) {
+    'fa' => 'ادامه در تلگرام',
+    'ar' => 'المتابعة إلى Telegram',
+    _ => 'Continue to Telegram',
+  };
+
+  String get proRedeem => switch (lang) {
+    'fa' => 'کد فعال‌سازی',
+    'ar' => 'رمز التفعيل',
+    _ => 'Activation code',
+  };
+
+  String get proRestore => switch (lang) {
+    'fa' => 'بازیابی خرید / ورود با کد',
+    'ar' => 'استعادة الشراء / تسجيل الدخول برمز',
+    _ => 'Restore purchase / sign in with code',
+  };
+
+  String get proBackendUnavailable => switch (lang) {
+    'fa' => 'اعتبارسنجی لایسنس و بازیابی ابری هنوز به سرویس امن متصل نشده است.',
+    'ar' => 'لم يتم ربط التحقق من الترخيص والاستعادة السحابية بخدمة آمنة بعد.',
+    _ => 'License validation and cloud restore are not connected to a trusted service yet.',
+  };
+
+  String get proPlanNotConfigured => switch (lang) {
+    'fa' => 'قیمت‌گذاری پلن هنوز تنظیم نشده است.',
+    'ar' => 'لم يتم إعداد أسعار الخطط بعد.',
+    _ => 'Plan pricing has not been configured yet.',
+  };
+
   String get dnsAddProvider => switch (lang) {
     'fa' => 'افزودن DNS سفارشی',
     'ar' => 'إضافة DNS مخصص',
