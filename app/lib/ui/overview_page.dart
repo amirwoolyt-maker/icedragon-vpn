@@ -569,49 +569,61 @@ class _DesktopHome extends StatelessWidget {
                   ),
                 ),
               const Spacer(),
-              if (onOpenExtension != null) ...[
-                _ExtensionPill(
-                  palette: p,
-                  onTap: onOpenExtension!,
-                ),
-                const SizedBox(width: 8),
-              ],
-              if (status.totalAccounts > 0)
-                _HomePill(
-                  palette: p,
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(999),
-                      onTap: () => showConnectionDoctorSheet(context, core),
-                      child: Tooltip(
-                        message: ms.smartDoctor,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.auto_fix_high_rounded,
-                              size: 16,
-                              color: p.second,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              ms.smartDoctorShort,
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: p.text,
-                                fontWeight: FontWeight.w700,
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (onOpenExtension != null) ...[
+                        _ExtensionPill(
+                          palette: p,
+                          onTap: onOpenExtension!,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      if (status.totalAccounts > 0)
+                        _HomePill(
+                          palette: p,
+                          child: Material(
+                            type: MaterialType.transparency,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(999),
+                              onTap: () => showConnectionDoctorSheet(context, core),
+                              child: Tooltip(
+                                message: ms.smartDoctor,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.auto_fix_high_rounded,
+                                      size: 16,
+                                      color: p.second,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      ms.smartDoctorShort,
+                                      style: theme.textTheme.labelMedium?.copyWith(
+                                        color: p.text,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
+                      if (onOpenPro != null) ...[
+                        if (status.totalAccounts > 0 || onOpenExtension != null)
+                          const SizedBox(width: 8),
+                        _ProPill(palette: p, onTap: onOpenPro!),
+                      ],
+                    ],
                   ),
                 ),
-              if (onOpenPro != null) ...[
-                const SizedBox(width: 8),
-                _ProPill(palette: p, onTap: onOpenPro!),
-              ],
+              ),
             ],
           ),
           const SizedBox(height: 6),
