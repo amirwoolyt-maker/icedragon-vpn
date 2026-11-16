@@ -1570,7 +1570,13 @@ class _PhoneHome extends StatelessWidget {
         : _HomePalette.day;
     final page = AnnotatedRegion<SystemUiOverlayStyle>(
       value: (p.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
-          .copyWith(statusBarColor: Colors.transparent),
+          .copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: const Color(0xFF060812),
+            systemNavigationBarDividerColor: Colors.transparent,
+            systemNavigationBarIconBrightness: Brightness.light,
+            systemNavigationBarContrastEnforced: false,
+          ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -2044,14 +2050,13 @@ class _PhoneHome extends StatelessWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    ActionChip(
-                      backgroundColor: p.card,
-                      surfaceTintColor: Colors.transparent,
-                      side: BorderSide(color: p.cardBorder),
-                      labelStyle: TextStyle(color: p.text),
-                      avatar: const Icon(Icons.auto_awesome_rounded, size: 18),
-                      label: Text(ms.quickAuto),
-                      onPressed: () => runShowingErrors(context, () async {
+                    _HomeQuickChip(
+                      palette: p,
+                      accent: p.idle,
+                      selected: settings.homeDnsName == _homeDnsPresets.keys.first,
+                      leading: Icon(Icons.auto_awesome_rounded, size: 14, color: p.muted),
+                      label: ms.quickAuto,
+                      onTap: () => runShowingErrors(context, () async {
                         final servers = _homeDnsPresets.values.first;
                         await _saveHomeDns(core, servers);
                         settings.update(
@@ -2061,14 +2066,13 @@ class _PhoneHome extends StatelessWidget {
                         );
                       }),
                     ),
-                    ActionChip(
-                      backgroundColor: p.card,
-                      surfaceTintColor: Colors.transparent,
-                      side: BorderSide(color: p.cardBorder),
-                      labelStyle: TextStyle(color: p.text),
-                      avatar: const Icon(Icons.bolt_rounded, size: 18),
-                      label: Text(ms.quickFastest),
-                      onPressed: () => _chooseHomeDns(
+                    _HomeQuickChip(
+                      palette: p,
+                      accent: p.idle,
+                      selected: false,
+                      leading: Icon(Icons.bolt_rounded, size: 15, color: p.muted),
+                      label: ms.quickFastest,
+                      onTap: () => _chooseHomeDns(
                         context,
                         core,
                         settings,
@@ -3322,6 +3326,76 @@ class _LowQuotaNoticeState extends State<_LowQuotaNotice> {
 /// Horizontal quick-pick bar for Auto (Recommended), Fastest, and any pinned
 /// favorite countries right on the phone Home screen, showing cached real
 /// latency (ms) next to favorite countries once measured.
+class _HomeQuickChip extends StatelessWidget {
+  const _HomeQuickChip({
+    required this.palette,
+    required this.accent,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.leading,
+    this.textDirection,
+    this.pingMs,
+  });
+
+  final _HomePalette palette;
+  final Color accent;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final Widget leading;
+  final TextDirection? textDirection;
+  final int? pingMs;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final ping = pingMs;
+    return Material(
+      color: selected ? accent.withValues(alpha: 0.22) : palette.card,
+      shape: StadiumBorder(
+        side: BorderSide(
+          color: selected ? accent.withValues(alpha: 0.65) : palette.cardBorder,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              leading,
+              const SizedBox(width: 6),
+              Text(
+                label,
+                textDirection: textDirection,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: selected ? palette.text : palette.muted,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                ),
+              ),
+              if (ping != null && ping > 0) ...[
+                const SizedBox(width: 5),
+                Text(
+                  '${ping}ms',
+                  textDirection: TextDirection.ltr,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: delayColor(ping),
+                    fontWeight: FontWeight.w800,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _QuickLocationChips extends StatefulWidget {
   const _QuickLocationChips({
     required this.core,
@@ -3386,7 +3460,6 @@ class _QuickLocationChipsState extends State<_QuickLocationChips> {
   @override
   Widget build(BuildContext context) {
     final ms = MobileStrings.of(context);
-    final theme = Theme.of(context);
     final chosen = widget.selection.trim().toLowerCase();
     final favorites = widget.settings.favoriteCountries;
     final palette = widget.palette;
@@ -3401,49 +3474,15 @@ class _QuickLocationChipsState extends State<_QuickLocationChips> {
       required Widget leading,
       TextDirection? textDirection,
       int? pingMs,
-    }) => Material(
-      color: selected ? accent.withValues(alpha: 0.22) : palette.card,
-      shape: StadiumBorder(
-        side: BorderSide(
-          color: selected
-              ? accent.withValues(alpha: 0.65)
-              : palette.cardBorder,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              leading,
-              const SizedBox(width: 6),
-              Text(
-                label,
-                textDirection: textDirection,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: selected ? palette.text : palette.muted,
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                ),
-              ),
-              if (pingMs != null && pingMs > 0) ...[
-                const SizedBox(width: 5),
-                Text(
-                  '${pingMs}ms',
-                  textDirection: TextDirection.ltr,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: delayColor(pingMs),
-                    fontWeight: FontWeight.w800,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
+    }) => _HomeQuickChip(
+      palette: palette,
+      accent: accent,
+      label: label,
+      selected: selected,
+      onTap: onTap,
+      leading: leading,
+      textDirection: textDirection,
+      pingMs: pingMs,
     );
 
     return ValueListenableBuilder<Map<String, int>>(

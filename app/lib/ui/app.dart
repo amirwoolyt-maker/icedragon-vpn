@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../app_settings.dart';
@@ -123,9 +124,20 @@ class VpnApp extends StatelessWidget {
         return Theme(
           data: _theme(dark ? Brightness.dark : Brightness.light, locale),
           // A clear ring around what a remote or the keyboard chose.
-          child: FocusRing(
-            atStart: Platform.isAndroid && AndroidCore.isTv,
-            child: child!,
+          child: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: const SystemUiOverlayStyle(
+              systemNavigationBarColor: Color(0xFF060812),
+              systemNavigationBarDividerColor: Colors.transparent,
+              systemNavigationBarIconBrightness: Brightness.light,
+              systemNavigationBarContrastEnforced: false,
+            ),
+            child: ColoredBox(
+              color: DarkGlassPalette.bgBottom,
+              child: FocusRing(
+                atStart: Platform.isAndroid && AndroidCore.isTv,
+                child: child!,
+              ),
+            ),
           ),
         );
       },
