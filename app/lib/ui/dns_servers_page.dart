@@ -128,17 +128,17 @@ class _DnsServersPageState extends State<DnsServersPage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  FilledButton.tonalIcon(
+                  _DnsActionButton(
                     onPressed: busy ? null : () => _choose(widget.providers.first),
                     icon: const Icon(Icons.auto_awesome_rounded),
                     label: Text(strings.quickAuto),
                   ),
-                  FilledButton.tonalIcon(
+                  _DnsActionButton(
                     onPressed: busy ? null : () => _test(chooseFastest: true),
                     icon: const Icon(Icons.bolt_rounded),
                     label: Text(strings.quickFastest),
                   ),
-                  OutlinedButton.icon(
+                  _DnsActionButton(
                     onPressed: busy ? null : () => _test(),
                     icon: const Icon(Icons.speed_rounded),
                     label: Text(l.testDns),
@@ -148,12 +148,28 @@ class _DnsServersPageState extends State<DnsServersPage> {
               const SizedBox(height: 12),
               Text(strings.dnsProviderHint),
               if (_testing) const LinearProgressIndicator(),
+              const SizedBox(height: 8),
               for (final provider in widget.providers)
                 if (provider.name.toLowerCase().contains(_query))
                   Card(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    clipBehavior: Clip.antiAlias,
                     child: ListTile(
-                      leading: const Icon(Icons.dns_rounded),
-                      title: Text(provider.name),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 8,
+                      ),
+                      leading: CircleAvatar(
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.16),
+                        child: const Icon(Icons.dns_rounded),
+                      ),
+                      title: Text(
+                        provider.name,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
                       subtitle: Text(
                         provider.servers.join('\n'),
                         textDirection: TextDirection.ltr,
@@ -166,16 +182,44 @@ class _DnsServersPageState extends State<DnsServersPage> {
                                 ? '—'
                                 : '${_delays[_id(provider)]} ms'),
                           if (_id(provider) == widget.settings.homeDnsServers.join(','))
-                            const Icon(Icons.check_rounded),
+                            const Icon(Icons.check_circle_rounded),
                         ],
                       ),
                       onTap: busy ? null : () => _choose(provider),
                     ),
                   ),
+              const SizedBox(height: 96),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+class _DnsActionButton extends StatelessWidget {
+  const _DnsActionButton({
+    required this.onPressed,
+    required this.icon,
+    required this.label,
+  });
+
+  final VoidCallback? onPressed;
+  final Widget icon;
+  final Widget label;
+
+  @override
+  Widget build(BuildContext context) => FilledButton.icon(
+    onPressed: onPressed,
+    icon: icon,
+    label: label,
+    style: FilledButton.styleFrom(
+      backgroundColor: const Color(0xFF171B2E),
+      foregroundColor: const Color(0xFFB7B9FF),
+      disabledBackgroundColor: const Color(0xFF111522),
+      disabledForegroundColor: const Color(0xFF626A86),
+      side: const BorderSide(color: Color(0x664A5071)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    ),
+  );
 }

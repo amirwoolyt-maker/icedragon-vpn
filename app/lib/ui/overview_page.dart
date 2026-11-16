@@ -36,6 +36,14 @@ const _homeDnsPresets = <String, List<String>>{
   'Electro': ['78.157.42.100', '78.157.42.101'],
   'Begzar': ['185.55.226.26', '185.55.225.25'],
   'Radar Game': ['10.202.10.10'],
+  'AdGuard': ['94.140.14.14', '94.140.15.15'],
+  'AdGuard Family': ['94.140.14.15', '94.140.15.16'],
+  'NextDNS': ['45.90.28.0', '45.90.30.0'],
+  'Verisign': ['64.6.64.6', '64.6.65.6'],
+  'Comodo Secure': ['8.26.56.26', '8.20.247.20'],
+  'UncensoredDNS': ['91.239.100.100', '89.233.43.71'],
+  'Control D': ['76.76.2.0', '76.76.10.0'],
+  'Neustar': ['156.154.70.1', '156.154.71.1'],
 };
 
 Future<void> _saveHomeDns(CoreController core, List<String> servers) async {
