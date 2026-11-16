@@ -85,7 +85,7 @@ class _DnsServersPageState extends State<DnsServersPage> {
         ];
         if (!mounted) return;
         setState(() {
-          _delays[_id(provider)] = timings.isEmpty
+          _delays[_id(provider)] = timings.isEmpty || timings.length != results.length
               ? null
               : timings.reduce((a, b) => a + b) ~/ timings.length;
           dnsProviderDelays[_id(provider)] = _delays[_id(provider)];

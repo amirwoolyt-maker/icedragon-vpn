@@ -27,6 +27,11 @@ import 'port_dialog.dart';
 import 'widgets.dart';
 
 const _homeDnsPresets = <String, List<String>>{
+  'Automatic': [
+    'https://1.1.1.1/dns-query',
+    'https://8.8.8.8/dns-query',
+    'https://9.9.9.9/dns-query',
+  ],
   'Cloudflare': ['https://1.1.1.1/dns-query', 'https://1.0.0.1/dns-query'],
   'Google': ['https://8.8.8.8/dns-query', 'https://8.8.4.4/dns-query'],
   'Quad9': ['https://9.9.9.9/dns-query', 'https://149.112.112.112/dns-query'],
@@ -2045,16 +2050,21 @@ class _PhoneHome extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               if (dnsMode) ...[
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 8,
-                  runSpacing: 8,
+                SizedBox(
+                  height: 34,
+                  child: ListView(
+                  scrollDirection: Axis.horizontal,
                   children: [
                     _HomeQuickChip(
                       palette: p,
                       accent: p.idle,
                       selected: settings.homeDnsName == _homeDnsPresets.keys.first,
-                      leading: Icon(Icons.auto_awesome_rounded, size: 14, color: p.muted),
+                      leading: Icon(
+                        Icons.auto_awesome_rounded,
+                        size: 14,
+                        color: settings.homeDnsName == _homeDnsPresets.keys.first
+                            ? p.idle : p.muted,
+                      ),
                       label: ms.quickAuto,
                       onTap: () => runShowingErrors(context, () async {
                         final servers = _homeDnsPresets.values.first;
@@ -2066,6 +2076,7 @@ class _PhoneHome extends StatelessWidget {
                         );
                       }),
                     ),
+                    const SizedBox(width: 8),
                     _HomeQuickChip(
                       palette: p,
                       accent: p.idle,
@@ -2080,6 +2091,7 @@ class _PhoneHome extends StatelessWidget {
                       ),
                     ),
                   ],
+                  ),
                 ),
                 const SizedBox(height: 10),
                 _HomeDnsCard(
