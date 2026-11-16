@@ -526,7 +526,7 @@ class _ActiveProGlassCard extends StatelessWidget {
                 child: Text(
                   isLifetime
                       ? strings.proLifetimeActive
-                      : '  روز باقی مانده است',
+                      : '${strings.proDaysRemaining} $days روز باقی مانده است',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: const Color(0xFFE2E8F0),
                     fontWeight: FontWeight.w600,
