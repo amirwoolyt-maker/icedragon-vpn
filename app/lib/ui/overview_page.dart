@@ -1909,12 +1909,6 @@ class _PhoneHome extends StatelessWidget {
                         color: p.muted,
                       ),
                     ),
-                  if (onOpenDns != null)
-                    _DnsPill(
-                      palette: p,
-                      onTap: onOpenDns!,
-                      compact: true,
-                    ),
                   if (onOpenPro != null)
                     _ProPill(palette: p, onTap: onOpenPro!),
                   if (onOpenSettings != null)
@@ -1945,7 +1939,9 @@ class _PhoneHome extends StatelessWidget {
                   // No account yet: the accounts page, which explains
                   // them and links to Mozilla's sign-up.
                   onPressed: () => dnsMode
-                      ? runShowingErrors(context, () => _toggle(on))
+                      ? settings.homeDnsServers.isEmpty
+                          ? _chooseDns(context)
+                          : runShowingErrors(context, () => _toggle(on))
                       : status.totalAccounts == 0
                       ? _openAccounts(context, core, settings, onOpenAccounts)
                       : runShowingErrors(context, () => _toggle(on)),
@@ -2139,7 +2135,7 @@ class _PhoneHome extends StatelessWidget {
               ],
               const Spacer(),
               SizedBox(height: short ? 8 : 14),
-              if (on && status.traffic != null && settings.showSpeedChart && !short) ...[
+              if (!dnsMode && on && status.traffic != null && settings.showSpeedChart && !short) ...[
                 LiveSpeedCard(
                   traffic: status.traffic!,
                   samples: SpeedHistory.samples,
@@ -2161,7 +2157,42 @@ class _PhoneHome extends StatelessWidget {
                 connected: connected,
                 palette: p,
               ),
-              if (short && !dnsMode)
+              Center(
+                child: _ModeSwitch(
+                  palette: p,
+                  accent: p.idle,
+                  selected: dnsMode ? 'dns' : 'vpn',
+                  onSelected: (mode) {
+                    unawaited(HapticFeedback.selectionClick());
+                    settings.update(homeConnectionMode: mode);
+                  },
+                  modes: [
+                    (
+                      value: 'vpn',
+                      icon: Icons.vpn_lock_rounded,
+                      label: l.modeVpn,
+                      tooltip: '',
+                    ),
+                    (
+                      value: 'dns',
+                      icon: Icons.dns_rounded,
+                      label: ms.modeDns,
+                      tooltip: ms.modeDnsHint,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              if (dnsMode)
+                _HomeDnsCard(
+                  palette: p,
+                  settings: settings,
+                  core: core,
+                  onTap: () => _chooseDns(context),
+                  active: dnsOn,
+                  showStatus: dnsOn,
+                )
+              else if (short)
                 IntrinsicHeight(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2188,19 +2219,7 @@ class _PhoneHome extends StatelessWidget {
                   ),
                 )
               else ...[
-                if (dnsMode) ...[
-                  _HomeDnsCard(
-                    palette: p,
-                    settings: settings,
-                    core: core,
-                    onTap: () => _chooseDns(context),
-                    active: dnsOn,
-                    showStatus: dnsOn,
-                  ),
-                  const SizedBox(height: 10),
-                ],
-                if (!dnsMode &&
-                    (status.totalAccounts > 0 || onOpenDns != null)) ...[
+                if (status.totalAccounts > 0) ...[
                   _QuickLocationChips(
                     core: core,
                     settings: settings,
@@ -2208,12 +2227,6 @@ class _PhoneHome extends StatelessWidget {
                     palette: p,
                     accent: accent,
                     onOpenServers: onOpenServers,
-                    dnsSelected: false,
-                    onChooseDns: onOpenDns == null
-                        ? null
-                        : () {
-                            _chooseDns(context);
-                          },
                   ),
                   const SizedBox(height: 10),
                 ],
