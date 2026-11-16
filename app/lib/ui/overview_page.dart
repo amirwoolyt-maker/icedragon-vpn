@@ -3400,7 +3400,6 @@ class _QuickLocationChipsState extends State<_QuickLocationChips> {
     final accent = widget.accent;
     final core = widget.core;
     final onOpenServers = widget.onOpenServers;
-    final onChooseDns = widget.onChooseDns;
 
     Widget chip({
       required String label,
