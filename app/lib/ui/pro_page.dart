@@ -1,22 +1,66 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:io';
 
-import '../app_info.dart' show proPurchaseUrl;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../app_info.dart' show proLicensingApi, proPurchaseUrl;
+import '../app_settings.dart';
 import '../mobile/mobile_strings.dart';
 import '../platform.dart';
 import 'widgets.dart';
 
-/// Pro overview and purchase entry point. License verification is intentionally
-/// not simulated locally; it requires a trusted licensing service.
+/// Pro overview and purchase entry point connected to Cloudflare Licensing API.
 class ProPage extends StatefulWidget {
-  const ProPage({super.key});
+  const ProPage({super.key, required this.settings});
+
+  final AppSettings settings;
 
   @override
   State<ProPage> createState() => _ProPageState();
 }
 
 class _ProPageState extends State<ProPage> {
+  final _codeController = TextEditingController();
   int? _expandedPlan;
   bool _animatingPlan = false;
+  bool _submitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkStatusSilently();
+  }
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _checkStatusSilently() async {
+    final code = widget.settings.proLicenseCode.trim();
+    if (code.isEmpty) return;
+    try {
+      final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
+      final uri = Uri.parse('$proLicensingApi/status?code=${Uri.encodeComponent(code)}');
+      final req = await client.getUrl(uri);
+      final res = await req.close();
+      if (res.statusCode == 200) {
+        final body = await res.transform(utf8.decoder).join();
+        final json = jsonDecode(body) as Map<String, Object?>?;
+        if (json != null && json['ok'] == true && json['active'] == true && mounted) {
+          widget.settings.update(
+            proActive: true,
+            proPlanName: json['plan'] as String? ?? widget.settings.proPlanName,
+            proExpiresAt: json['expires_at'] as String? ?? widget.settings.proExpiresAt,
+            proDaysLeft: json['days_left'] as int? ?? widget.settings.proDaysLeft,
+            proIsLifetime: json['is_lifetime'] == true,
+          );
+        }
+      }
+    } catch (_) {}
+  }
 
   Future<void> _togglePlan(int index) async {
     if (_animatingPlan) return;
@@ -26,10 +70,86 @@ class _ProPageState extends State<ProPage> {
     if (mounted) setState(() => _animatingPlan = false);
   }
 
+  Future<void> _redeemCode() async {
+    final strings = MobileStrings.of(context);
+    final code = _codeController.text.trim().toUpperCase();
+    if (code.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(strings.proCodeEmpty)),
+      );
+      return;
+    }
+
+    setState(() => _submitting = true);
+    try {
+      final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
+      final uri = Uri.parse('$proLicensingApi/redeem');
+      final req = await client.postUrl(uri);
+      req.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
+      req.write(jsonEncode({
+        'code': code,
+        'device_id': widget.settings.deviceId,
+      }));
+      final res = await req.close();
+      final body = await res.transform(utf8.decoder).join();
+      final json = jsonDecode(body) as Map<String, Object?>?;
+
+      if (!mounted) return;
+
+      if (res.statusCode == 200 && json != null && json['ok'] == true) {
+        final plan = json['plan'] as String? ?? 'VIP';
+        final expiresAt = json['expires_at'] as String? ?? '';
+        final daysLeft = json['days_left'] as int? ?? 30;
+        final isLifetime = json['is_lifetime'] == true;
+
+        widget.settings.update(
+          proActive: true,
+          proLicenseCode: code,
+          proPlanName: plan,
+          proExpiresAt: expiresAt,
+          proDaysLeft: daysLeft,
+          proIsLifetime: isLifetime,
+        );
+
+        _codeController.clear();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFF00E676),
+            content: Text(
+              strings.proActivatedSuccess,
+              style: const TextStyle(color: Color(0xFF051C0F), fontWeight: FontWeight.w700),
+            ),
+          ),
+        );
+      } else {
+        final err = json?['error'] as String? ?? 'خطا در فعال‌سازی لایسنس';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFFD32F2F),
+            content: Text(err),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Color(0xFFD32F2F),
+            content: Text('خطا در برقراری ارتباط با سرور اعتبارسنجی'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = MobileStrings.of(context);
     final theme = Theme.of(context);
+    final isPro = widget.settings.proActive;
+
     final features = [
       (Icons.call_split_rounded, strings.proFeatureSplitDns),
       (Icons.speed_rounded, strings.proFeatureUnlimitedTests),
@@ -39,6 +159,7 @@ class _ProPageState extends State<ProPage> {
       (Icons.cloud_sync_rounded, strings.proFeatureBackup),
       (Icons.widgets_rounded, strings.proFeatureTile),
     ];
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Center(
@@ -50,23 +171,30 @@ class _ProPageState extends State<ProPage> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0x99FFB300)),
-                  gradient: const LinearGradient(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isPro ? const Color(0x9900E676) : const Color(0x99FFB300),
+                  ),
+                  gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0x553D2E13), Color(0x33201912), Color(0x44221609)],
+                    colors: isPro
+                        ? const [Color(0x550C3820), Color(0x33081E12), Color(0x44061F13)]
+                        : const [Color(0x553D2E13), Color(0x33201912), Color(0x44221609)],
                   ),
-                  boxShadow: const [
-                    BoxShadow(color: Color(0x33FF9800), blurRadius: 22),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isPro ? const Color(0x3300E676) : const Color(0x33FF9800),
+                      blurRadius: 22,
+                    ),
                   ],
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.workspace_premium_rounded,
+                    Icon(
+                      isPro ? Icons.verified_rounded : Icons.workspace_premium_rounded,
                       size: 42,
-                      color: Color(0xFFFFC247),
+                      color: isPro ? const Color(0xFF00E676) : const Color(0xFFFFC247),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -74,14 +202,19 @@ class _ProPageState extends State<ProPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            strings.proTitle,
+                            isPro ? 'IceDragon VIP' : strings.proTitle,
                             style: theme.textTheme.headlineSmall?.copyWith(
-                              color: const Color(0xFFFFD16A),
+                              color: isPro ? const Color(0xFF69F0AE) : const Color(0xFFFFD16A),
                               fontWeight: FontWeight.w800,
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(strings.proSubtitle),
+                          Text(
+                            isPro ? strings.proActiveStatus : strings.proSubtitle,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: isPro ? const Color(0xFFC8E6C9) : null,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -89,18 +222,35 @@ class _ProPageState extends State<ProPage> {
                 ),
               ),
               const SizedBox(height: 20),
+
+              // Active Subscription Card
+              if (isPro) ...[
+                _ActiveProGlassCard(
+                  settings: widget.settings,
+                  strings: strings,
+                ),
+                const SizedBox(height: 20),
+              ],
+
               Text(strings.proAvailable, style: theme.textTheme.titleMedium),
               const SizedBox(height: 10),
               for (final (icon, title) in features)
                 Card(
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
-                    leading: Icon(icon, color: const Color(0xFFFFC247)),
+                    leading: Icon(
+                      icon,
+                      color: isPro ? const Color(0xFF00E676) : const Color(0xFFFFC247),
+                    ),
                     title: Text(title),
-                    trailing: const _ProBadge(),
+                    trailing: _ProBadge(
+                      label: isPro ? 'ACTIVE' : 'PRO',
+                      color: isPro ? const Color(0xFF00E676) : const Color(0xFFFFC247),
+                    ),
                   ),
                 ),
               const SizedBox(height: 14),
+
               LayoutBuilder(
                 builder: (context, constraints) {
                   final plans = [
@@ -123,58 +273,41 @@ class _ProPageState extends State<ProPage> {
                       strings.proPlanLifetimeDetail,
                     ),
                   ];
-                  Widget details(int index) => ClipRect(
-                    child: AnimatedSize(
-                      duration: const Duration(milliseconds: 260),
-                      curve: Curves.easeOutCubic,
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 180),
-                        opacity: _expandedPlan == index ? 1 : 0,
-                        child: _expandedPlan == index
-                            ? Container(
-                                width: double.infinity,
-                                margin: const EdgeInsets.only(top: 4),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xCC171B28),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: const Color(0x445E9BC4),
-                                  ),
-                                ),
-                                child: Text(
-                                  plans[index].$4,
-                                  style: theme.textTheme.bodySmall,
-                                ),
-                              )
-                            : const SizedBox.shrink(),
+                  Widget card(int i) => _PlanCard(
+                    title: plans[i].$1,
+                    badge: plans[i].$2,
+                    price: plans[i].$3,
+                    expanded: _expandedPlan == i,
+                    enabled: !_animatingPlan,
+                    onTap: () => _togglePlan(i),
+                  );
+                  Widget details(int i) => AnimatedCrossFade(
+                    duration: const Duration(milliseconds: 220),
+                    crossFadeState: _expandedPlan == i
+                        ? CrossFadeState.showSecond
+                        : CrossFadeState.showFirst,
+                    firstChild: const SizedBox.shrink(),
+                    secondChild: Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(top: 10),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0x332B3245),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0x4475CFFF)),
+                      ),
+                      child: Text(
+                        plans[i].$4,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: const Color(0xFFE2E8F0),
+                        ),
                       ),
                     ),
                   );
-                  Widget card(int index) => _PlanCard(
-                    title: plans[index].$1,
-                    badge: plans[index].$2,
-                    price: plans[index].$3,
-                    expanded: _expandedPlan == index,
-                    enabled: !_animatingPlan,
-                    onTap: () => _togglePlan(index),
-                  );
 
-                  if (constraints.maxWidth < 520) {
-                    return Column(
-                      children: [
-                        for (var i = 0; i < plans.length; i++) ...[
-                          if (i > 0) const SizedBox(height: 8),
-                          SizedBox(width: double.infinity, child: card(i)),
-                          details(i),
-                        ],
-                      ],
-                    );
-                  }
                   return Column(
                     children: [
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           for (var i = 0; i < plans.length; i++) ...[
                             if (i > 0) const SizedBox(width: 8),
@@ -187,49 +320,61 @@ class _ProPageState extends State<ProPage> {
                   );
                 },
               ),
+
               const SizedBox(height: 16),
-              _GlassActionSurface(
-                child: TextField(
-                  enabled: false,
-                  decoration: InputDecoration(
-                    labelText: strings.proRedeem,
-                    prefixIcon: const Icon(Icons.key_rounded),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 15,
+
+              // Code Redemption Section (Hidden if already Pro)
+              if (!isPro) ...[
+                _GlassActionSurface(
+                  child: TextField(
+                    controller: _codeController,
+                    textCapitalization: TextCapitalization.characters,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\-]')),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: strings.proRedeem,
+                      hintText: strings.proCodeHint,
+                      prefixIcon: const Icon(Icons.key_rounded, color: Color(0xFFFFD16A)),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 15,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              _GlassActionSurface(
-                child: OutlinedButton.icon(
-                  onPressed: null,
-                  icon: const Icon(Icons.verified_user_outlined),
-                  label: Text(strings.proRestore),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48),
-                    side: const BorderSide(color: Color(0x4469D7FF)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                const SizedBox(height: 10),
+                _GlassActionSurface(
+                  child: FilledButton.icon(
+                    onPressed: _submitting ? null : _redeemCode,
+                    icon: _submitting
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Icon(Icons.verified_rounded),
+                    label: Text(strings.proActivateButton),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                      backgroundColor: const Color(0x33816BFF),
+                      foregroundColor: const Color(0xFF00D2FF),
+                      side: const BorderSide(color: Color(0x6600D2FF)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                strings.proBackendUnavailable,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
+                const SizedBox(height: 14),
+              ],
+
               const Divider(),
               const SizedBox(height: 8),
+
               _ProBuyButton(
-                label: strings.proBuy,
+                label: isPro ? strings.proSupportTelegram : strings.proBuy,
                 onPressed: () => runShowingErrors(
                   context,
                   () async {
@@ -245,23 +390,221 @@ class _ProPageState extends State<ProPage> {
   }
 }
 
+class _ActiveProGlassCard extends StatelessWidget {
+  const _ActiveProGlassCard({
+    required this.settings,
+    required this.strings,
+  });
+
+  final AppSettings settings;
+  final MobileStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final days = settings.proDaysLeft;
+    final isLifetime = settings.proIsLifetime;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0x3312172D),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0x4D816BFF), width: 1.2),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0x33816BFF),
+            Color(0x1F12172D),
+            Color(0x2800D2FF),
+          ],
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x20000000),
+            blurRadius: 16,
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: Color(0x1A816BFF),
+            blurRadius: 24,
+            spreadRadius: -2,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0x26FFD56A),
+                  border: Border.all(color: const Color(0x66FFD56A)),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x22FFD56A),
+                      blurRadius: 12,
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.workspace_premium_rounded,
+                  color: Color(0xFFFFD56A),
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      strings.proActiveStatus,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      settings.proPlanName.isNotEmpty ? settings.proPlanName : 'IceDragon VIP',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: const Color(0xFFFFD56A),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: ShapeDecoration(
+                  color: const Color(0x2600E5A3),
+                  shape: const StadiumBorder(
+                    side: BorderSide(color: Color(0x5500E5A3)),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF00E5A3),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'VIP ACTIVE',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: const Color(0xFF00E5A3),
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Divider(color: Color(0x2E816BFF), height: 1),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              const Icon(Icons.schedule_rounded, size: 18, color: Color(0xFF00D2FF)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  isLifetime
+                      ? strings.proLifetimeActive
+                      : '  روز باقی مانده است',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFFE2E8F0),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (settings.proLicenseCode.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0x22000000),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0x22FFFFFF)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.key_rounded, size: 15, color: Color(0xFFFFD56A)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'کد لایسنس: ',
+                      textDirection: TextDirection.ltr,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: const Color(0xCCFFFFFF),
+                        fontFamily: 'monospace',
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: settings.proLicenseCode));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('کد لایسنس کپی شد'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(4),
+                      child: Icon(Icons.copy_rounded, size: 15, color: Color(0xAAFFFFFF)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _ProBadge extends StatelessWidget {
-  const _ProBadge({this.label = 'PRO'});
+  const _ProBadge({
+    this.label = 'PRO',
+    this.color = const Color(0xFFFFC247),
+  });
 
   final String label;
+  final Color color;
 
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     decoration: BoxDecoration(
-      color: const Color(0x22FFB300),
+      color: color.withValues(alpha: 0.16),
       borderRadius: BorderRadius.circular(6),
-      border: Border.all(color: const Color(0x88FFB300)),
+      border: Border.all(color: color.withValues(alpha: 0.5)),
     ),
     child: Text(
       label,
       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-        color: const Color(0xFFFFC247),
+        color: color,
         fontWeight: FontWeight.w800,
       ),
     ),

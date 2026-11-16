@@ -281,9 +281,9 @@ class _ShellState extends State<Shell> {
                             appBar: AppBar(
                               title: Text(MobileStrings.of(context).proTitle),
                             ),
-                            body: const SafeArea(
+                            body: SafeArea(
                               top: false,
-                              child: ProPage(),
+                              child: ProPage(settings: widget.settings),
                             ),
                           ),
                           transitionsBuilder: (_, animation, _, child) =>

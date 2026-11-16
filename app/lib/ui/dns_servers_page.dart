@@ -64,7 +64,7 @@ class _DnsServersPageState extends State<DnsServersPage> {
     final settings = widget.settings;
     final day = DateTime.now().toIso8601String().substring(0, 10);
     final used = settings.dnsTestDay == day ? settings.dnsTestCount : 0;
-    if (used >= 3) {
+    if (!settings.proActive && used >= 3) {
       showError(context, MobileStrings.of(context).dnsTestUnavailableToday);
       return;
     }

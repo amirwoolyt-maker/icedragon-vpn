@@ -118,7 +118,7 @@ class _MobileShellState extends State<MobileShell> {
       PageRouteBuilder<void>(
         pageBuilder: (_, _, _) => Scaffold(
           appBar: AppBar(title: Text(MobileStrings.of(context).proTitle)),
-          body: const SafeArea(top: false, child: ProPage()),
+          body: SafeArea(top: false, child: ProPage(settings: settings)),
         ),
         transitionsBuilder: (_, animation, _, child) => FadeTransition(
           opacity: CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),

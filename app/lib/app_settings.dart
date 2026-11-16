@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -91,6 +92,15 @@ class AppSettings extends ChangeNotifier {
 
   /// Shows the live download/upload speed chart card on mobile home.
   bool showSpeedChart = true;
+
+  /// Pro VIP subscription fields
+  bool proActive = false;
+  String proLicenseCode = '';
+  String proPlanName = '';
+  String proExpiresAt = '';
+  int proDaysLeft = 0;
+  bool proIsLifetime = false;
+  String deviceId = '';
 
   /// The app's languages, in the order the language menus list them.
   /// 'zh' is Simplified and 'zh_Hant' Traditional Chinese.
@@ -272,6 +282,16 @@ class AppSettings extends ChangeNotifier {
           s.homeDnsServers = servers.whereType<String>().toList();
         }
         s.showSpeedChart = j['show_speed_chart'] != false;
+        s.proActive = j['pro_active'] == true;
+        s.proLicenseCode = j['pro_license_code'] as String? ?? '';
+        s.proPlanName = j['pro_plan_name'] as String? ?? '';
+        s.proExpiresAt = j['pro_expires_at'] as String? ?? '';
+        s.proDaysLeft = j['pro_days_left'] as int? ?? 0;
+        s.proIsLifetime = j['pro_is_lifetime'] == true;
+        s.deviceId = j['device_id'] as String? ?? '';
+        if (s.deviceId.isEmpty) {
+          s.deviceId = 'dev_${DateTime.now().millisecondsSinceEpoch}_${math.Random().nextInt(999999)}';
+        }
       }
     } on FileSystemException {
       // First run: defaults, and the welcome page.
@@ -311,6 +331,13 @@ class AppSettings extends ChangeNotifier {
     String? homeDnsName,
     List<String>? homeDnsServers,
     bool? showSpeedChart,
+    bool? proActive,
+    String? proLicenseCode,
+    String? proPlanName,
+    String? proExpiresAt,
+    int? proDaysLeft,
+    bool? proIsLifetime,
+    String? deviceId,
   }) {
     this.favoriteCountries = favoriteCountries ?? this.favoriteCountries;
     this.customDnsProviders = customDnsProviders ?? this.customDnsProviders;
@@ -321,6 +348,13 @@ class AppSettings extends ChangeNotifier {
     this.homeDnsName = homeDnsName ?? this.homeDnsName;
     this.homeDnsServers = homeDnsServers ?? this.homeDnsServers;
     this.showSpeedChart = showSpeedChart ?? this.showSpeedChart;
+    this.proActive = proActive ?? this.proActive;
+    this.proLicenseCode = proLicenseCode ?? this.proLicenseCode;
+    this.proPlanName = proPlanName ?? this.proPlanName;
+    this.proExpiresAt = proExpiresAt ?? this.proExpiresAt;
+    this.proDaysLeft = proDaysLeft ?? this.proDaysLeft;
+    this.proIsLifetime = proIsLifetime ?? this.proIsLifetime;
+    this.deviceId = deviceId ?? this.deviceId;
     this.hiddenConnectionColumns =
         hiddenConnectionColumns ?? this.hiddenConnectionColumns;
     this.udpNotice = udpNotice ?? this.udpNotice;
@@ -381,6 +415,13 @@ class AppSettings extends ChangeNotifier {
           'home_dns_name': homeDnsName,
           'home_dns_servers': homeDnsServers,
           'show_speed_chart': showSpeedChart,
+          'pro_active': proActive,
+          'pro_license_code': proLicenseCode,
+          'pro_plan_name': proPlanName,
+          'pro_expires_at': proExpiresAt,
+          'pro_days_left': proDaysLeft,
+          'pro_is_lifetime': proIsLifetime,
+          'device_id': deviceId,
         }),
       );
     } on FileSystemException {

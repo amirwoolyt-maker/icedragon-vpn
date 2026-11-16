@@ -362,6 +362,54 @@ class MobileStrings {
     _ => 'Best value',
   };
 
+  String get proActiveStatus => switch (lang) {
+    'fa' => 'اشتراک ویژه Pro شما فعال است',
+    'ar' => 'اشتراك Pro الخاص بك مفعّل',
+    _ => 'Your Pro subscription is active',
+  };
+
+  String get proDaysRemaining => switch (lang) {
+    'fa' => 'اعتبار باقی‌مانده:',
+    'ar' => 'الصلاحية المتبقية:',
+    _ => 'Remaining access:',
+  };
+
+  String get proLifetimeActive => switch (lang) {
+    'fa' => 'دسترسی نامحدود و دائمی به تمام امکانات VIP',
+    'ar' => 'وصول دائم ومدى الحياة لجميع ميزات VIP',
+    _ => 'Permanent lifetime access to all VIP features',
+  };
+
+  String get proActivateButton => switch (lang) {
+    'fa' => 'تأیید و فعال‌سازی اشتراک',
+    'ar' => 'تأكيد وتفعيل الاشتراك',
+    _ => 'Verify and activate',
+  };
+
+  String get proCodeHint => switch (lang) {
+    'fa' => 'کد لایسنس (مثلاً ICE-PRO-XXXX-XXXX)',
+    'ar' => 'رمز الترخيص (مثال ICE-PRO-XXXX-XXXX)',
+    _ => 'License code (e.g. ICE-PRO-XXXX-XXXX)',
+  };
+
+  String get proCodeEmpty => switch (lang) {
+    'fa' => 'لطفاً کد لایسنس را وارد کنید',
+    'ar' => 'الرجاء إدخال رمز الترخيص',
+    _ => 'Please enter the license code',
+  };
+
+  String get proActivatedSuccess => switch (lang) {
+    'fa' => 'اشتراک VIP با موفقیت فعال شد! خوش آمدید 🐉',
+    'ar' => 'تم تفعيل اشتراك VIP بنجاح! أهلاً بك 🐉',
+    _ => 'VIP subscription activated successfully! Welcome 🐉',
+  };
+
+  String get proSupportTelegram => switch (lang) {
+    'fa' => 'پشتیبانی و تمدید در تلگرام',
+    'ar' => 'الدعم والتجديد على Telegram',
+    _ => 'Support & renewal on Telegram',
+  };
+
   String get proBuy => switch (lang) {
     'fa' => 'ادامه در تلگرام',
     'ar' => 'المتابعة إلى Telegram',

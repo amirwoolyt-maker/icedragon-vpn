@@ -22,7 +22,12 @@ const telegramChannelHandle = '@icedragon_lair';
 /// Configure the official Telegram bot URL at build time when it is ready.
 const proPurchaseUrl = String.fromEnvironment(
   'PRO_PURCHASE_URL',
-  defaultValue: telegramChannelUrl,
+  defaultValue: 'https://t.me/IceDragonVPN_BOT',
+);
+
+const proLicensingApi = String.fromEnvironment(
+  'PRO_LICENSING_API',
+  defaultValue: 'https://icedragon.siricedragon.workers.dev/api',
 );
 
 const updateManifestUrl =
