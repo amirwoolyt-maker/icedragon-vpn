@@ -1045,53 +1045,6 @@ class _ProPill extends StatelessWidget {
   );
 }
 
-class _DnsPill extends StatelessWidget {
-  const _DnsPill({
-    required this.palette,
-    required this.onTap,
-    this.compact = false,
-  });
-
-  final _HomePalette palette;
-  final VoidCallback onTap;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final strings = MobileStrings.of(context);
-    return _HomePill(
-      palette: palette,
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(999),
-          onTap: onTap,
-          child: Tooltip(
-            message: strings.dnsQuickSelect,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.dns_rounded, size: 16, color: palette.muted),
-                if (!compact) ...[
-                  const SizedBox(width: 6),
-                  Text(
-                    strings.dnsQuickSelect,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: palette.text,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _HomeDnsCard extends StatefulWidget {
   const _HomeDnsCard({
     required this.palette,
@@ -1111,57 +1064,6 @@ class _HomeDnsCard extends StatefulWidget {
 
   @override
   State<_HomeDnsCard> createState() => _HomeDnsCardState();
-}
-
-class _QuickDnsChip extends StatelessWidget {
-  const _QuickDnsChip({
-    required this.palette,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final _HomePalette palette;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final strings = MobileStrings.of(context);
-    final theme = Theme.of(context);
-    final color = selected ? palette.idle : palette.muted;
-    return Material(
-      color: selected ? palette.idle.withValues(alpha: 0.22) : palette.card,
-      shape: StadiumBorder(
-        side: BorderSide(
-          color: selected ? palette.idle.withValues(alpha: 0.7) : palette.cardBorder,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () {
-          unawaited(HapticFeedback.selectionClick());
-          onTap();
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.dns_rounded, size: 15, color: color),
-              const SizedBox(width: 6),
-              Text(
-                strings.modeDns,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: selected ? palette.text : palette.muted,
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _HomeDnsCardState extends State<_HomeDnsCard> {
@@ -3434,8 +3336,6 @@ class _QuickLocationChips extends StatefulWidget {
     required this.selection,
     required this.palette,
     required this.accent,
-    this.dnsSelected = false,
-    this.onChooseDns,
     this.onOpenServers,
   });
 
@@ -3444,8 +3344,6 @@ class _QuickLocationChips extends StatefulWidget {
   final String selection;
   final _HomePalette palette;
   final Color accent;
-  final bool dnsSelected;
-  final VoidCallback? onChooseDns;
   final VoidCallback? onOpenServers;
 
   @override
@@ -3617,14 +3515,7 @@ class _QuickLocationChipsState extends State<_QuickLocationChips> {
                 onTap: onOpenServers,
               ),
             ],
-            if (onChooseDns != null) ...[
-              const SizedBox(width: 8),
-              _QuickDnsChip(
-                palette: palette,
-                selected: widget.dnsSelected,
-                onTap: onChooseDns,
-              ),
-            ],
+
           ],
         ),
       ),
