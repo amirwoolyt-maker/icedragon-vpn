@@ -398,6 +398,12 @@ class MobileStrings {
     _ => 'DNS off',
   };
 
+  String get dnsTestUnavailableToday => switch (lang) {
+    'fa' => 'آزمایش DNS امروز برای حساب رایگان در دسترس نیست. فردا دوباره تلاش کنید.',
+    'ar' => 'اختبار DNS غير متاح اليوم للحساب المجاني. حاول مجدداً غداً.',
+    _ => 'DNS testing is unavailable for the free account today. Try again tomorrow.',
+  };
+
   String get proPlanMonthlyDetail => switch (lang) {
     'fa' => 'دسترسی Pro برای یک ماه. تمدید خودکار در حال حاضر فعال نیست.',
     'ar' => 'وصول Pro لمدة شهر واحد. التجديد التلقائي غير متاح حالياً.',

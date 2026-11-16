@@ -21,6 +21,7 @@ import '../mobile/speed_sparkline.dart';
 import '../platform.dart';
 import 'browser_signin.dart';
 import 'connection_mode.dart';
+import 'dns_servers_page.dart';
 import 'format.dart';
 import 'port_dialog.dart';
 import 'widgets.dart';
@@ -51,8 +52,9 @@ Future<void> _saveHomeDns(CoreController core, List<String> servers) async {
 Future<void> _chooseHomeDns(
   BuildContext context,
   CoreController core,
-  AppSettings settings,
-) async {
+  AppSettings settings, {
+  bool findFastest = false,
+}) async {
   final providers = <({String name, List<String> servers})>[
     for (final entry in _homeDnsPresets.entries)
       (name: entry.key, servers: entry.value),
@@ -64,47 +66,25 @@ Future<void> _chooseHomeDns(
         ],
       ),
   ];
-  final chosen = await showDialog<({String name, List<String> servers})>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(MobileStrings.of(context).dnsQuickSelect),
-      content: SizedBox(
-        width: 380,
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            for (final provider in providers)
-              ListTile(
-                leading: const Icon(Icons.dns_outlined),
-                title: Text(provider.name),
-                subtitle: Text(ltr(provider.servers.join(' · '))),
-                trailing: provider.servers.join(',') ==
-                        settings.homeDnsServers.join(',')
-                    ? const Icon(Icons.check_rounded)
-                    : null,
-                onTap: () => Navigator.pop(context, provider),
-              ),
-          ],
-        ),
+  await Navigator.of(context).push<void>(
+    MaterialPageRoute(
+      builder: (_) => DnsServersPage(
+        core: core,
+        settings: settings,
+        providers: providers,
+        findFastest: findFastest,
+        onChoose: (chosen) async {
+          await _saveHomeDns(core, chosen.servers);
+          settings.update(
+            homeDnsName: chosen.name,
+            homeDnsServers: chosen.servers,
+            homeConnectionMode: 'dns',
+            homeDnsEnabled: true,
+          );
+        },
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context).cancel),
-        ),
-      ],
     ),
   );
-  if (chosen == null || !context.mounted) return;
-  await runShowingErrors(context, () async {
-    await _saveHomeDns(core, chosen.servers);
-    settings.update(
-      homeDnsName: chosen.name,
-      homeDnsServers: chosen.servers,
-      homeConnectionMode: 'dns',
-      homeDnsEnabled: true,
-    );
-  });
 }
 
 /// The home page: the switch, the state, where the traffic goes, and the
@@ -1067,48 +1047,11 @@ class _HomeDnsCard extends StatefulWidget {
 }
 
 class _HomeDnsCardState extends State<_HomeDnsCard> {
-  int? _pingMs;
-  List<String> _testedServers = const [];
-
-  @override
-  void initState() {
-    super.initState();
-    _test();
-  }
-
-  @override
-  void didUpdateWidget(_HomeDnsCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_testedServers.join(',') != widget.settings.homeDnsServers.join(',')) {
-      _test();
-    }
-  }
-
-  Future<void> _test() async {
-    final servers = [...widget.settings.homeDnsServers];
-    if (servers.isEmpty) return;
-    _testedServers = servers;
-    try {
-      final results = await widget.core.call((api) => api.testDns(servers));
-      final successful = [
-        for (final result in results)
-          if (result.error.isEmpty && result.ms > 0) result.ms,
-      ];
-      if (mounted) {
-        setState(() => _pingMs = successful.isEmpty
-            ? null
-            : successful.reduce((a, b) => a + b) ~/ successful.length);
-      }
-    } on Object {
-      if (mounted) setState(() => _pingMs = null);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final p = widget.palette;
     final theme = Theme.of(context);
-    final ping = _pingMs;
+    final ping = dnsProviderDelays[widget.settings.homeDnsServers.join(',')];
     return _HomeCard(
       palette: p,
       onTap: widget.onTap,
@@ -1749,14 +1692,17 @@ class _PhoneHome extends StatelessWidget {
                 children: [
                   const AppLogo(size: 28),
                   const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      l.appTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: p.text,
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
+                        l.appTitle,
+                        maxLines: 1,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: p.text,
+                        ),
                       ),
                     ),
                   ),
@@ -1786,7 +1732,6 @@ class _PhoneHome extends StatelessWidget {
                       ),
                     ),
                   ],
-                  const Spacer(),
                   if (onOpenExtension != null)
                     IconButton(
                       tooltip: Localizations.localeOf(context).languageCode == 'fa'
@@ -2085,7 +2030,38 @@ class _PhoneHome extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              if (dnsMode)
+              if (dnsMode) ...[
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    ActionChip(
+                      avatar: const Icon(Icons.auto_awesome_rounded, size: 18),
+                      label: Text(ms.quickAuto),
+                      onPressed: () => runShowingErrors(context, () async {
+                        final servers = _homeDnsPresets.values.first;
+                        await _saveHomeDns(core, servers);
+                        settings.update(
+                          homeDnsName: _homeDnsPresets.keys.first,
+                          homeDnsServers: servers,
+                          homeDnsEnabled: true,
+                        );
+                      }),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.bolt_rounded, size: 18),
+                      label: Text(ms.quickFastest),
+                      onPressed: () => _chooseHomeDns(
+                        context,
+                        core,
+                        settings,
+                        findFastest: true,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
                 _HomeDnsCard(
                   palette: p,
                   settings: settings,
@@ -2093,7 +2069,8 @@ class _PhoneHome extends StatelessWidget {
                   onTap: () => _chooseDns(context),
                   active: dnsOn,
                   showStatus: dnsOn,
-                )
+                ),
+              ]
               else if (short)
                 IntrinsicHeight(
                   child: Row(

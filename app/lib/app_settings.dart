@@ -86,6 +86,8 @@ class AppSettings extends ChangeNotifier {
   bool homeDnsEnabled = false;
   String homeDnsName = '';
   List<String> homeDnsServers = const [];
+  String dnsTestDay = '';
+  int dnsTestCount = 0;
 
   /// Shows the live download/upload speed chart card on mobile home.
   bool showSpeedChart = true;
@@ -262,6 +264,8 @@ class AppSettings extends ChangeNotifier {
           ];
         }
         if (j['home_connection_mode'] == 'dns') s.homeConnectionMode = 'dns';
+        s.dnsTestDay = j['dns_test_day'] as String? ?? '';
+        s.dnsTestCount = j['dns_test_count'] as int? ?? 0;
         s.homeDnsEnabled = j['home_dns_enabled'] == true;
         if (j['home_dns_name'] case final String name) s.homeDnsName = name;
         if (j['home_dns_servers'] case final List<Object?> servers) {
@@ -301,6 +305,8 @@ class AppSettings extends ChangeNotifier {
     List<String>? favoriteCountries,
     List<Map<String, Object?>>? customDnsProviders,
     String? homeConnectionMode,
+    String? dnsTestDay,
+    int? dnsTestCount,
     bool? homeDnsEnabled,
     String? homeDnsName,
     List<String>? homeDnsServers,
@@ -309,6 +315,8 @@ class AppSettings extends ChangeNotifier {
     this.favoriteCountries = favoriteCountries ?? this.favoriteCountries;
     this.customDnsProviders = customDnsProviders ?? this.customDnsProviders;
     this.homeConnectionMode = homeConnectionMode ?? this.homeConnectionMode;
+    this.dnsTestDay = dnsTestDay ?? this.dnsTestDay;
+    this.dnsTestCount = dnsTestCount ?? this.dnsTestCount;
     this.homeDnsEnabled = homeDnsEnabled ?? this.homeDnsEnabled;
     this.homeDnsName = homeDnsName ?? this.homeDnsName;
     this.homeDnsServers = homeDnsServers ?? this.homeDnsServers;
@@ -367,6 +375,8 @@ class AppSettings extends ChangeNotifier {
           'favorite_countries': favoriteCountries,
           'custom_dns_providers': customDnsProviders,
           'home_connection_mode': homeConnectionMode,
+          'dns_test_day': dnsTestDay,
+          'dns_test_count': dnsTestCount,
           'home_dns_enabled': homeDnsEnabled,
           'home_dns_name': homeDnsName,
           'home_dns_servers': homeDnsServers,
