@@ -2045,6 +2045,10 @@ class _PhoneHome extends StatelessWidget {
                   runSpacing: 8,
                   children: [
                     ActionChip(
+                      backgroundColor: p.card,
+                      surfaceTintColor: Colors.transparent,
+                      side: BorderSide(color: p.cardBorder),
+                      labelStyle: TextStyle(color: p.text),
                       avatar: const Icon(Icons.auto_awesome_rounded, size: 18),
                       label: Text(ms.quickAuto),
                       onPressed: () => runShowingErrors(context, () async {
@@ -2058,6 +2062,10 @@ class _PhoneHome extends StatelessWidget {
                       }),
                     ),
                     ActionChip(
+                      backgroundColor: p.card,
+                      surfaceTintColor: Colors.transparent,
+                      side: BorderSide(color: p.cardBorder),
+                      labelStyle: TextStyle(color: p.text),
                       avatar: const Icon(Icons.bolt_rounded, size: 18),
                       label: Text(ms.quickFastest),
                       onPressed: () => _chooseHomeDns(

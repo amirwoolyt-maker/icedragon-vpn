@@ -108,9 +108,16 @@ class _DnsServersPageState extends State<DnsServersPage> {
     final strings = MobileStrings.of(context);
     final l = AppLocalizations.of(context);
     final busy = _testing || _saving;
+    final providers = widget.providers.where((provider) {
+      return provider.name.toLowerCase().contains(_query) ||
+          provider.servers.any((server) => server.toLowerCase().contains(_query));
+    }).toList();
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: Text(strings.dnsQuickSelect)),
-      body: Center(
+      body: SafeArea(
+        top: false,
+        child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 800),
           child: ListView(
@@ -149,49 +156,67 @@ class _DnsServersPageState extends State<DnsServersPage> {
               Text(strings.dnsProviderHint),
               if (_testing) const LinearProgressIndicator(),
               const SizedBox(height: 8),
-              for (final provider in widget.providers)
-                if (provider.name.toLowerCase().contains(_query))
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    clipBehavior: Clip.antiAlias,
-                    child: ListTile(
+              Card(
+                margin: EdgeInsets.zero,
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  children: [
+                    for (var i = 0; i < providers.length; i++) ...[
+                      if (i > 0) const Divider(height: 1),
+                      ListTile(
+                      selected: _id(providers[i]) ==
+                          widget.settings.homeDnsServers.join(','),
+                      selectedTileColor: scheme.primary.withValues(alpha: 0.08),
                       contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 8,
+                        horizontal: 14,
+                        vertical: 4,
                       ),
-                      leading: CircleAvatar(
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .primary
-                            .withValues(alpha: 0.16),
-                        child: const Icon(Icons.dns_rounded),
+                      leading: Container(
+                        width: 36,
+                        height: 27,
+                        decoration: BoxDecoration(
+                          color: scheme.primary.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Icon(Icons.dns_rounded, size: 20, color: scheme.primary),
                       ),
                       title: Text(
-                        provider.name,
+                        providers[i].name,
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                       subtitle: Text(
-                        provider.servers.join('\n'),
+                        providers[i].servers.join(' · '),
                         textDirection: TextDirection.ltr,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (_delays.containsKey(_id(provider)))
-                            Text(_delays[_id(provider)] == null
+                          if (_delays.containsKey(_id(providers[i])))
+                            Text(_delays[_id(providers[i])] == null
                                 ? '—'
-                                : '${_delays[_id(provider)]} ms'),
-                          if (_id(provider) == widget.settings.homeDnsServers.join(','))
-                            const Icon(Icons.check_circle_rounded),
+                                : '${_delays[_id(providers[i])]} ms'),
+                          const SizedBox(width: 6),
+                          Icon(
+                            _id(providers[i]) == widget.settings.homeDnsServers.join(',')
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_unchecked,
+                            size: 24,
+                          ),
                         ],
                       ),
-                      onTap: busy ? null : () => _choose(provider),
+                      onTap: busy ? null : () => _choose(providers[i]),
                     ),
-                  ),
+                    ],
+                  ],
+                ),
+              ),
               const SizedBox(height: 96),
             ],
           ),
         ),
+      ),
       ),
     );
   }
