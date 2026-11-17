@@ -592,10 +592,20 @@ class StoreAggregator {
 
     final ds5 = _extractAfCallbackJson(html, 'ds:5');
     List<Object?>? root;
-    if (ds5 is List && ds5.length > 1 && ds5[1] is List) {
-      final inner = ds5[1]! as List<Object?>;
-      if (inner.length > 2 && inner[2] is List) {
-        root = inner[2]! as List<Object?>;
+    if (ds5 is List) {
+      if (ds5.length > 1 && ds5[1] is List) {
+        final inner = ds5[1]! as List<Object?>;
+        if (inner.length > 2 && inner[2] is List) {
+          root = inner[2]! as List<Object?>;
+        } else if (inner.length > 140) {
+          root = inner;
+        }
+      }
+      if (root == null && ds5.length > 2 && ds5[2] is List) {
+        root = ds5[2]! as List<Object?>;
+      }
+      if (root == null && ds5.length > 140) {
+        root = ds5;
       }
     }
 

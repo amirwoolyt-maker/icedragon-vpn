@@ -144,7 +144,10 @@ class OverviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = core.status!;
+    final status = core.status;
+    if (status == null) {
+      return const SizedBox.shrink();
+    }
     final showIp = settings.showPublicIp;
     if (phone) {
       return _PhoneHome(

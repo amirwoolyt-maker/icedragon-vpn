@@ -389,7 +389,7 @@ void main() {
       );
       // Security: geminiApiKey is never persisted to unencrypted/backupable JSON.
       expect(reloaded.geminiApiKey, isEmpty);
-      final rawDisk = File('${dir.path}/core/app-hub-state.json')
+      final rawDisk = File('${dir.path}/app-hub-state.json')
           .readAsStringSync();
       expect(rawDisk, isNot(contains('gemini_api_key')));
       expect(rawDisk, isNot(contains('test-key')));
@@ -901,7 +901,7 @@ void main() {
     });
 
     // Legacy plaintext key migration scrubs JSON and moves key into Keystore secret
-    final legacyFile = File('${dir.path}/core/app-hub-state.json')
+    final legacyFile = File('${dir.path}/app-hub-state.json')
       ..parent.createSync(recursive: true)
       ..writeAsStringSync(jsonEncode({'gemini_api_key': 'AIzaLegacyKey99'}));
 
@@ -972,13 +972,16 @@ void main() {
     expect(hub.lastError, contains('offline store error'));
 
     await tester.pumpWidget(_wrap(AssistantHubPage(hub: hub)));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     // Switch to Collections sub-tab and trigger invalid import error
     await tester.tap(find.text('Collections'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.byIcon(Icons.download_rounded));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.enterText(find.byType(TextField).last, 'invalid-collection-data');
     await tester.tap(find.text('Apply'));
     await tester.pump();
@@ -1002,7 +1005,8 @@ void main() {
     await tester.pumpWidget(
       _wrap(HubSettingsPage(hub: hub, settings: AppSettings())),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.ensureVisible(find.byType(TextField));
     expect(find.text('Delete'), findsNothing);
     await tester.enterText(find.byType(TextField), 'AIzaTypedKey');

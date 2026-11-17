@@ -27,23 +27,31 @@ class AnnouncementOverlay extends StatelessWidget {
       child,
       if (visible)
         Positioned.fill(
-          child: AbsorbPointer(
-            absorbing: modal,
-            child: ColoredBox(
-              color: Theme.of(context).colorScheme.scrim
-                  .withValues(alpha: modal ? 0.55 : 0.16),
+          child: modal
+              ? AbsorbPointer(
+                  absorbing: true,
+                  child: ColoredBox(
+                    color: Theme.of(context).colorScheme.scrim
+                        .withValues(alpha: 0.55),
+                  ),
+                )
+              : IgnorePointer(
+                  child: ColoredBox(
+                    color: Theme.of(context).colorScheme.scrim
+                        .withValues(alpha: 0.16),
+                  ),
+                ),
+        ),
+      if (visible)
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: AnnouncementPanel(
+              settings: settings,
+              onOpenUpdates: onOpenUpdates,
             ),
           ),
         ),
-      Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: AnnouncementPanel(
-            settings: settings,
-            onOpenUpdates: onOpenUpdates,
-          ),
-        ),
-      ),
     ],
   );
 
