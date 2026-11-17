@@ -565,4 +565,47 @@ class MobileStrings {
     'ar' => 'مفتوح المصدر وآمن · بدون تتبع',
     _ => 'Clean & Auditable · No tracking or hidden binaries',
   };
+
+  String get dnsLeakTitle => switch (lang) {
+    'fa' => 'بررسی نشت DNS و IP عمومی',
+    'ar' => 'فحص تسرب DNS وIP العام',
+    _ => 'DNS Leak & Public IP Test',
+  };
+
+  String get timeMachineTitle => switch (lang) {
+    'fa' => 'ماشین زمان اینترنت',
+    'ar' => 'آلة زمن الإنترنت',
+    _ => 'Network Time Machine',
+  };
+
+  String get connectionLabTitle => switch (lang) {
+    'fa' => 'آزمایشگاه اتصال (تست چندمسیره)',
+    'ar' => 'مختبر الاتصال (فحص المسارات)',
+    _ => 'Connection Diagnostic Lab',
+  };
+
+  String get connectionTimerTitle => switch (lang) {
+    'fa' => 'اتصال موقت با تایمر',
+    'ar' => 'اتصال مؤقت بمؤقت',
+    _ => 'Connection Timer',
+  };
+
+  String get autoSwitchTitle => switch (lang) {
+    'fa' => 'جابجایی خودکار به سریع‌ترین DNS',
+    'ar' => 'التبديل التلقائي لأسرع DNS',
+    _ => 'Auto-Switch to Fastest DNS',
+  };
+
+  String get vipOnlyBadge => switch (lang) {
+    'fa' => 'ویژه Pro',
+    'ar' => 'خاص بـ Pro',
+    _ => 'Pro Only',
+  };
+
+  String get testInconclusive => switch (lang) {
+    'fa' => 'نامشخص (شواهد کافی نیست)',
+    'ar' => 'غير محدد (أدلة غير كافية)',
+    _ => 'Inconclusive',
+  };
+
 }

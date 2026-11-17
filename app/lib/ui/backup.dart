@@ -34,7 +34,7 @@ class BackupMenuButton extends StatelessWidget {
 
   final CoreController core;
 
-  Future<void> _export(BuildContext context) async {
+  Future<void> export(BuildContext context) async {
     final api = core.api;
     if (api == null) return;
     final l = AppLocalizations.of(context);
@@ -49,7 +49,7 @@ class BackupMenuButton extends StatelessWidget {
     }
   }
 
-  Future<void> _import(BuildContext context) async {
+  Future<void> import(BuildContext context) async {
     final api = core.api;
     if (api == null) return;
     final l = AppLocalizations.of(context);
@@ -119,7 +119,7 @@ class BackupMenuButton extends StatelessWidget {
     // The tooltip is Flutter's own "Show menu", in the app's language.
     return PopupMenuButton<bool>(
       icon: const Icon(Icons.more_vert_rounded),
-      onSelected: (export) => export ? _export(context) : _import(context),
+      onSelected: (isExport) => isExport ? export(context) : import(context),
       itemBuilder: (context) => [
         PopupMenuItem(
           value: true,
@@ -191,6 +191,55 @@ class _ImportDialog extends StatelessWidget {
           child: Text(l.backupImportAction),
         ),
       ],
+    );
+  }
+}
+
+
+/// A prominent dedicated panel for Backup & Restore placed right below the Firefox guide.
+class BackupPanel extends StatelessWidget {
+  const BackupPanel({super.key, required this.core});
+
+  final CoreController core;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isFa = l.backupExport.contains('پشتیبان');
+    return Panel(
+      title: isFa ? 'پشتیبان‌گیری و بازیابی اطلاعات' : 'Backup & Restore',
+      icon: Icons.archive_rounded,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isFa
+                ? 'از حساب‌ها، سرورها و تنظیمات خود فایل پشتیبان (ZIP) تهیه کنید یا هر زمان که خواستید آن را روی این دستگاه یا دستگاهی دیگر بازگردانید.'
+                : 'Export your accounts, servers, and configuration to a ZIP backup file, or restore them anytime on this device or another.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              FilledButton.icon(
+                onPressed: () => BackupMenuButton(core: core).export(context),
+                icon: const Icon(Icons.file_download_rounded, size: 18),
+                label: Text(l.backupExport),
+              ),
+              OutlinedButton.icon(
+                onPressed: () => BackupMenuButton(core: core).import(context),
+                icon: const Icon(Icons.file_upload_rounded, size: 18),
+                label: Text(l.backupImport),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

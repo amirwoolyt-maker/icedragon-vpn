@@ -6,15 +6,20 @@ import 'package:flutter/services.dart';
 
 import '../app_info.dart' show proLicensingApi, proPurchaseUrl;
 import '../app_settings.dart';
+import '../core/core_controller.dart';
+import '../mobile/connection_lab_page.dart';
+import '../mobile/connection_timer.dart';
+import '../mobile/dns_leak_page.dart';
 import '../mobile/mobile_strings.dart';
+import '../mobile/network_time_machine_page.dart';
 import '../platform.dart';
 import 'widgets.dart';
 
-/// Pro overview and purchase entry point connected to Cloudflare Licensing API.
 class ProPage extends StatefulWidget {
-  const ProPage({super.key, required this.settings});
+  const ProPage({super.key, required this.settings, this.core});
 
   final AppSettings settings;
+  final CoreController? core;
 
   @override
   State<ProPage> createState() => _ProPageState();
@@ -150,14 +155,94 @@ class _ProPageState extends State<ProPage> {
     final theme = Theme.of(context);
     final isPro = widget.settings.proActive;
 
+    final isFa = widget.settings.language == 'fa';
     final features = [
-      (Icons.call_split_rounded, strings.proFeatureSplitDns),
-      (Icons.speed_rounded, strings.proFeatureUnlimitedTests),
-      (Icons.dns_rounded, strings.proFeatureCustomDns),
-      (Icons.swap_vert_rounded, strings.proFeatureAutoSwitch),
-      (Icons.fingerprint_rounded, strings.proFeatureAppLock),
-      (Icons.cloud_sync_rounded, strings.proFeatureBackup),
-      (Icons.widgets_rounded, strings.proFeatureTile),
+      (
+        Icons.speed_rounded,
+        isFa ? 'تست نامحدود پینگ و سرعت سرورها' : 'Unlimited Server & DNS Ping Tests',
+        isFa ? 'بدون محدودیت ۳ بار در روز' : 'Bypass the daily 3-test limit',
+        () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(isFa ? 'محدودیت تست پینگ برای شما برداشته شده است.' : 'Unlimited ping test is active.')),
+          );
+        },
+      ),
+      (
+        Icons.dns_rounded,
+        isFa ? 'افزودن نامحدود سرور DNS سفارشی' : 'Unlimited Custom DNS Servers',
+        isFa ? 'کاربران عادی: حداکثر ۱ عدد' : 'Free users limited to 1 custom DNS',
+        null,
+      ),
+      (
+        Icons.timer_outlined,
+        isFa ? 'اتصال موقت با تایمر (قطع خودکار)' : 'Connection Timer',
+        isFa ? '۳۰ دقیقه، ۱ ساعت یا زمان دلخواه' : 'Auto-disconnect after chosen time',
+        () {
+          if (widget.core != null) {
+            showConnectionTimerSheet(context: context, settings: widget.settings, core: widget.core!);
+          }
+        },
+      ),
+      (
+        Icons.security_rounded,
+        isFa ? 'بررسی نشت DNS و استعلام IP واقعی' : 'DNS Leak & Public IP Test',
+        isFa ? 'تست واقعی و بدون نتایج دروغین' : 'Live verification of IP and resolvers',
+        () {
+          if (widget.core != null) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => DnsLeakPage(settings: widget.settings, core: widget.core!),
+              ),
+            );
+          }
+        },
+      ),
+      (
+        Icons.history_rounded,
+        isFa ? 'ماشین زمان اینترنت' : 'Network Time Machine',
+        isFa ? 'ثبت و بازگشت به تنظیمات موفق هر شبکه' : 'Bookmark & rollback verified network setups',
+        () {
+          if (widget.core != null) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => NetworkTimeMachinePage(settings: widget.settings, core: widget.core!),
+              ),
+            );
+          }
+        },
+      ),
+      (
+        Icons.biotech_rounded,
+        isFa ? 'آزمایشگاه اتصال (تست چندمسیره)' : 'Connection Diagnostic Lab',
+        isFa ? 'مقایسه Direct ،DNS و VPN در ۴ مرحله شبکه' : '4-layer analysis: DNS, TCP, TLS, HTTP',
+        () {
+          if (widget.core != null) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => ConnectionLabPage(settings: widget.settings, core: widget.core!),
+              ),
+            );
+          }
+        },
+      ),
+      (
+        Icons.swap_vert_rounded,
+        isFa ? 'جابجایی خودکار به سریع‌ترین DNS' : 'Auto-Switch to Fastest DNS',
+        isFa ? (widget.settings.autoSwitchDns ? 'فعال است' : 'سوئیچ هوشمند هنگام اختلال') : 'Smart switch when restricted',
+        () {
+          final next = !widget.settings.autoSwitchDns;
+          widget.settings.update(autoSwitchDns: next);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(isFa ? (next ? 'جابجایی خودکار فعال شد.' : 'جابجایی خودکار غیرفعال شد.') : (next ? 'Auto-switch enabled.' : 'Auto-switch disabled.'))),
+          );
+        },
+      ),
+      (
+        Icons.toggle_on_rounded,
+        isFa ? 'دو تاگل جداگانه در تنظیمات سریع اندروید' : 'Dual Quick Settings Tiles',
+        isFa ? 'کاشی‌های مجزای VPN و DNS-only' : 'Separate VPN and DNS-only tiles',
+        null,
+      ),
     ];
 
     return SingleChildScrollView(
@@ -234,18 +319,34 @@ class _ProPageState extends State<ProPage> {
 
               Text(strings.proAvailable, style: theme.textTheme.titleMedium),
               const SizedBox(height: 10),
-              for (final (icon, title) in features)
+              for (final (icon, title, subtitle, onTap) in features)
                 Card(
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
+                    onTap: () {
+                      if (isPro) {
+                        if (onTap != null) onTap();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(isFa ? 'این قابلیت مخصوص کاربران Pro است.' : 'This feature requires a Pro subscription.'),
+                            action: SnackBarAction(
+                              label: isFa ? 'خرید اشتراک' : 'Upgrade',
+                              onPressed: () => openUrl(proPurchaseUrl),
+                            ),
+                          ),
+                        );
+                      }
+                    },
                     leading: Icon(
                       icon,
-                      color: isPro ? const Color(0xFF00E676) : const Color(0xFFFFC247),
+                      color: isPro ? const Color(0xFF00D2FF) : const Color(0xFFFFC247),
                     ),
-                    title: Text(title),
+                    title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    subtitle: Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xFF94A3B8))),
                     trailing: _ProBadge(
-                      label: isPro ? 'ACTIVE' : 'PRO',
-                      color: isPro ? const Color(0xFF00E676) : const Color(0xFFFFC247),
+                      label: isPro ? 'VIP' : 'PRO',
+                      color: isPro ? const Color(0xFF00E5A3) : const Color(0xFFFFC247),
                     ),
                   ),
                 ),

@@ -92,6 +92,8 @@ class AccountsPage extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         const _CreateAccountGuide(),
+        const SizedBox(height: 16),
+        BackupPanel(core: core),
       ],
     );
   }

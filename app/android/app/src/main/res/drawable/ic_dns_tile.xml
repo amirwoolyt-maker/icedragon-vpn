@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Monochrome Quick Settings tile icon for IceDragon DNS:
+     a stylized globe silhouette intersected by DNS resolution waves. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M12,2 C6.48,2 2,6.48 2,12 C2,17.52 6.48,22 12,22 C17.52,22 22,17.52 22,12 C22,6.48 17.52,2 12,2 Z M11,4.07 C7.05,4.56 4,7.92 4,12 C4,12.34 4.02,12.67 4.07,13 L9,13 C9,9.2 9.87,5.86 11,4.07 Z M13,4.07 C14.13,5.86 15,9.2 15,13 L19.93,13 C19.98,12.67 20,12.34 20,12 C20,7.92 16.95,4.56 13,4.07 Z M4.26,15 C5.09,17.94 7.74,20 11,20 C11,18.5 10.3,16.5 9.5,15 L4.26,15 Z M13,20 C16.26,20 18.91,17.94 19.74,15 L14.5,15 C13.7,16.5 13,18.5 13,20 Z" />
+</vector>

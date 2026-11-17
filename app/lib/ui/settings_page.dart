@@ -1,3 +1,4 @@
+import 'pro_page.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -1496,6 +1497,53 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _editDnsProvider(Map<String, Object?>? existing) async {
+    if (existing == null &&
+        !widget.settings.proActive &&
+        widget.settings.customDnsProviders.isNotEmpty) {
+      final isFa = widget.settings.language == 'fa';
+      showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Row(
+            children: [
+              const Icon(Icons.workspace_premium_rounded, color: Color(0xFFFFD56A)),
+              const SizedBox(width: 8),
+              Text(isFa ? 'محدودیت نسخه عادی' : 'Free Version Limit'),
+            ],
+          ),
+          content: Text(
+            isFa
+                ? 'در نسخه عادی حداکثر می‌توانید ۱ سرور DNS سفارشی داشته باشید. برای افزودن نامحدود DNS و دسترسی به امکانات VIP، اشتراک Pro را فعال کنید.'
+                : 'Free users can add at most 1 custom DNS server. Activate Pro for unlimited custom DNS and full VIP access.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(isFa ? 'متوجه شدم' : 'Dismiss'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFFFD56A),
+                foregroundColor: const Color(0xFF1E293B),
+              ),
+              onPressed: () {
+                Navigator.pop(ctx);
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => Scaffold(
+                      appBar: AppBar(title: const Text('IceDragon Pro')),
+                      body: SafeArea(child: ProPage(settings: widget.settings)),
+                    ),
+                  ),
+                );
+              },
+              child: Text(isFa ? 'مشاهده اشتراک Pro' : 'View Pro'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
     final picked = await showDialog<Map<String, Object?>>(
       context: context,
       builder: (_) => _DnsProviderDialog(provider: existing),

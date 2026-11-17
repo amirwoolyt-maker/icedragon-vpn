@@ -19,14 +19,16 @@ class QuickTile : TileService() {
 
     override fun onClick() {
         super.onClick()
-        if (CoreService.on) {
+        if (CoreService.on && !CoreService.isDnsOnly) {
+            // VPN is already on: clicking it turns off both modes.
             CoreService.turnOff(this)
         } else if (CoreService.usesVpn(this) && VpnService.prepare(this) != null) {
             // The VPN permission is asked in the app.
             openApp()
         } else {
             try {
-                CoreService.turnOn(this)
+                // Starts VPN mode (if DNS-only was active, it stops DNS first).
+                CoreService.turnOn(this, dnsOnly = false)
             } catch (e: Exception) {
                 // Android refused to start the service from here: the app
                 // opens, and its button turns it on.
@@ -39,7 +41,8 @@ class QuickTile : TileService() {
 
     private fun show() {
         val tile = qsTile ?: return
-        tile.state = if (CoreService.on) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+        tile.state = if (CoreService.on && !CoreService.isDnsOnly) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+        tile.label = getString(R.string.quick_tile_vpn)
         tile.updateTile()
     }
 
@@ -54,9 +57,12 @@ class QuickTile : TileService() {
     }
 
     companion object {
-        /** Asks the system to show the tile's state again. */
+        /** Asks the system to show both tiles' states again. */
         fun refresh(context: Context) {
-            TileService.requestListeningState(context, ComponentName(context, QuickTile::class.java))
+            try {
+                TileService.requestListeningState(context, ComponentName(context, QuickTile::class.java))
+                DnsQuickTile.refresh(context)
+            } catch (ignored: Throwable) {}
         }
     }
 }

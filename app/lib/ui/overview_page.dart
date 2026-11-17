@@ -1,3 +1,4 @@
+import '../mobile/connection_timer.dart';
 import 'dart:io';
 import 'dart:async';
 import 'dart:math' as math;
@@ -576,7 +577,7 @@ class _DesktopHome extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                       ],
-                      if (status.totalAccounts > 0)
+                      if (status.totalAccounts > 0) ...[
                         _HomePill(
                           palette: p,
                           child: Material(
@@ -608,6 +609,49 @@ class _DesktopHome extends StatelessWidget {
                             ),
                           ),
                         ),
+                        const SizedBox(width: 8),
+                        _HomePill(
+                          palette: p,
+                          child: Material(
+                            type: MaterialType.transparency,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(999),
+                              onTap: () => showConnectionTimerSheet(
+                                context: context,
+                                settings: settings,
+                                core: core,
+                              ),
+                              child: Tooltip(
+                                message: ms.connectionTimerTitle,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.timer_outlined,
+                                      size: 16,
+                                      color: settings.connectionTimerEndMillis > DateTime.now().millisecondsSinceEpoch
+                                          ? const Color(0xFFFFB547)
+                                          : p.second,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      settings.connectionTimerEndMillis > DateTime.now().millisecondsSinceEpoch
+                                          ? ConnectionTimerManager.remainingFormatted(settings.connectionTimerEndMillis)
+                                          : (settings.language == 'fa' ? 'تایمر' : 'Timer'),
+                                      style: theme.textTheme.labelMedium?.copyWith(
+                                        color: settings.connectionTimerEndMillis > DateTime.now().millisecondsSinceEpoch
+                                            ? const Color(0xFFFFB547)
+                                            : p.text,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                       if (onOpenPro != null) ...[
                         if (status.totalAccounts > 0 || onOpenExtension != null)
                           const SizedBox(width: 8),

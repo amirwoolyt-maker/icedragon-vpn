@@ -309,16 +309,19 @@ class CoreService : VpnService() {
             val mtu = mobile.Mobile.tunMTU().takeIf { it > 0 } ?: MTU
             val config = mobile.Mobile.tunConfig(mtu)
             val builder = Builder()
-                .setSession(getString(R.string.app_name))
+                .setSession(if (isDnsOnly) getString(R.string.quick_tile_dns) else getString(R.string.app_name))
                 .setMtu(mtu)
                 .addAddress("172.19.0.1", 30)
-                .addRoute("0.0.0.0", 0)
-                // The tunnel answers DNS sent here (core/mobile), with
-                // addresses that stand for names.
                 .addDnsServer("172.19.0.2")
-                .addAddress("fdfe:dcba:9876::1", 126)
-                .addRoute("::", 0)
-            applyApps(builder)
+
+            if (isDnsOnly) {
+                builder.addRoute("172.19.0.2", 32)
+            } else {
+                builder.addRoute("0.0.0.0", 0)
+                    .addAddress("fdfe:dcba:9876::1", 126)
+                    .addRoute("::", 0)
+                applyApps(builder)
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) builder.setMetered(false)
             val tun = builder.establish() ?: return false
             if (!Tun2Socks.start(config, tun)) {
@@ -630,6 +633,10 @@ class CoreService : VpnService() {
         var on = false
             private set
 
+        @Volatile
+        var isDnsOnly = false
+            private set
+
         /**
          * On and through: the exit country is known (the notification shows
          * it). On but not [connected] is "Connecting…", for the widget.
@@ -653,15 +660,21 @@ class CoreService : VpnService() {
          * not let the service start now (from the background on Android 12
          * and later).
          */
-        fun turnOn(context: Context) {
-            val intent = Intent(context, CoreService::class.java)
+        fun turnOn(context: Context, dnsOnly: Boolean = false) {
+            if (on && isDnsOnly != dnsOnly) {
+                stopTunnel()
+                if (mobile.Mobile.running()) mobile.Mobile.setOn(false)
+            }
+            isDnsOnly = dnsOnly
+            val intent = Intent(context, CoreService::class.java).apply {
+                putExtra("dns_only", dnsOnly)
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
             } else {
                 context.startService(intent)
             }
             startCore(context, on = true)
-            // The core owns the connection and any retries.
             mobile.Mobile.connect()
             on = true
             connected = false
@@ -681,6 +694,7 @@ class CoreService : VpnService() {
             stopTunnel()
             if (mobile.Mobile.running()) mobile.Mobile.setOn(false)
             on = false
+            isDnsOnly = false
             connected = false
             exitCountryCode = ""
             context.stopService(Intent(context, CoreService::class.java))

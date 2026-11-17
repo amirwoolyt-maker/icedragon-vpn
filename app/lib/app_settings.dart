@@ -102,6 +102,11 @@ class AppSettings extends ChangeNotifier {
   bool proIsLifetime = false;
   String deviceId = '';
 
+  /// VIP Features
+  bool autoSwitchDns = false;
+  int connectionTimerEndMillis = 0;
+  List<Map<String, Object?>> networkTimeMachineHistory = const [];
+
   /// The app's languages, in the order the language menus list them.
   /// 'zh' is Simplified and 'zh_Hant' Traditional Chinese.
   static const supportedLanguages = [
@@ -289,6 +294,14 @@ class AppSettings extends ChangeNotifier {
         s.proDaysLeft = j['pro_days_left'] as int? ?? 0;
         s.proIsLifetime = j['pro_is_lifetime'] == true;
         s.deviceId = j['device_id'] as String? ?? '';
+        s.autoSwitchDns = j['auto_switch_dns'] == true;
+        s.connectionTimerEndMillis = j['conn_timer_end'] as int? ?? 0;
+        if (j['time_machine_history'] case final List<Object?> h) {
+          s.networkTimeMachineHistory = [
+            for (final item in h)
+              if (item is Map<String, Object?>) item,
+          ];
+        }
         if (s.deviceId.isEmpty) {
           s.deviceId = 'dev_${DateTime.now().millisecondsSinceEpoch}_${math.Random().nextInt(999999)}';
         }
@@ -338,6 +351,9 @@ class AppSettings extends ChangeNotifier {
     int? proDaysLeft,
     bool? proIsLifetime,
     String? deviceId,
+    bool? autoSwitchDns,
+    int? connectionTimerEndMillis,
+    List<Map<String, Object?>>? networkTimeMachineHistory,
   }) {
     this.favoriteCountries = favoriteCountries ?? this.favoriteCountries;
     this.customDnsProviders = customDnsProviders ?? this.customDnsProviders;
@@ -355,6 +371,9 @@ class AppSettings extends ChangeNotifier {
     this.proDaysLeft = proDaysLeft ?? this.proDaysLeft;
     this.proIsLifetime = proIsLifetime ?? this.proIsLifetime;
     this.deviceId = deviceId ?? this.deviceId;
+    this.autoSwitchDns = autoSwitchDns ?? this.autoSwitchDns;
+    this.connectionTimerEndMillis = connectionTimerEndMillis ?? this.connectionTimerEndMillis;
+    this.networkTimeMachineHistory = networkTimeMachineHistory ?? this.networkTimeMachineHistory;
     this.hiddenConnectionColumns =
         hiddenConnectionColumns ?? this.hiddenConnectionColumns;
     this.udpNotice = udpNotice ?? this.udpNotice;
@@ -422,6 +441,9 @@ class AppSettings extends ChangeNotifier {
           'pro_days_left': proDaysLeft,
           'pro_is_lifetime': proIsLifetime,
           'device_id': deviceId,
+          'auto_switch_dns': autoSwitchDns,
+          'conn_timer_end': connectionTimerEndMillis,
+          'time_machine_history': networkTimeMachineHistory,
         }),
       );
     } on FileSystemException {

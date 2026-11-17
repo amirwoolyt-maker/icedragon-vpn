@@ -15,4 +15,6 @@
     <string name="widget_status_off">خاموش · لمس برای اتصال</string>
     <string name="widget_status_connecting">در حال اتصال…</string>
     <string name="widget_status_connected">متصل</string>
+    <string name="quick_tile_vpn">IceDragon VPN</string>
+    <string name="quick_tile_dns">IceDragon DNS</string>
 </resources>

@@ -283,7 +283,7 @@ class _ShellState extends State<Shell> {
                             ),
                             body: SafeArea(
                               top: false,
-                              child: ProPage(settings: widget.settings),
+                              child: ProPage(settings: widget.settings, core: widget.core),
                             ),
                           ),
                           transitionsBuilder: (_, animation, _, child) =>
