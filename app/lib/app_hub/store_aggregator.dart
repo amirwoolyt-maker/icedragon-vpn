@@ -127,21 +127,21 @@ class StoreAggregator {
     await Future.wait([
       () async {
         try {
-          final hits = directPackage
-              ? [
-                  if (await fetchGooglePlayDetails(
-                        trimmed,
-                        hl: hl,
-                        proxyAddress: proxyAddress,
-                      )
-                      case final d?)
-                    d,
-                ]
-              : await searchGooglePlay(
-                  trimmed,
-                  hl: hl,
-                  proxyAddress: proxyAddress,
-                );
+          final List<AppHit> hits;
+          if (directPackage) {
+            final d = await fetchGooglePlayDetails(
+              trimmed,
+              hl: hl,
+              proxyAddress: proxyAddress,
+            );
+            hits = d != null ? [d] : <AppHit>[];
+          } else {
+            hits = await searchGooglePlay(
+              trimmed,
+              hl: hl,
+              proxyAddress: proxyAddress,
+            );
+          }
           reachable[StoreId.googlePlay] = true;
           addHits(StoreId.googlePlay, hits);
         } catch (e) {
@@ -151,16 +151,16 @@ class StoreAggregator {
       }(),
       () async {
         try {
-          final hits = directPackage
-              ? [
-                  if (await fetchBazaarDetails(
-                        trimmed,
-                        proxyAddress: proxyAddress,
-                      )
-                      case final d?)
-                    d,
-                ]
-              : await searchBazaar(trimmed, proxyAddress: proxyAddress);
+          final List<AppHit> hits;
+          if (directPackage) {
+            final d = await fetchBazaarDetails(
+              trimmed,
+              proxyAddress: proxyAddress,
+            );
+            hits = d != null ? [d] : <AppHit>[];
+          } else {
+            hits = await searchBazaar(trimmed, proxyAddress: proxyAddress);
+          }
           reachable[StoreId.bazaar] = true;
           addHits(StoreId.bazaar, hits);
         } catch (e) {
@@ -170,16 +170,16 @@ class StoreAggregator {
       }(),
       () async {
         try {
-          final hits = directPackage
-              ? [
-                  if (await fetchMyketDetails(
-                        trimmed,
-                        proxyAddress: proxyAddress,
-                      )
-                      case final d?)
-                    d,
-                ]
-              : await searchMyket(trimmed, proxyAddress: proxyAddress);
+          final List<AppHit> hits;
+          if (directPackage) {
+            final d = await fetchMyketDetails(
+              trimmed,
+              proxyAddress: proxyAddress,
+            );
+            hits = d != null ? [d] : <AppHit>[];
+          } else {
+            hits = await searchMyket(trimmed, proxyAddress: proxyAddress);
+          }
           reachable[StoreId.myket] = true;
           addHits(StoreId.myket, hits);
         } catch (e) {

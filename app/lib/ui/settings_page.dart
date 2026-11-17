@@ -939,9 +939,9 @@ class _SettingsPageState extends State<SettingsPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF00E5FF).withOpacity(0.08),
+                color: const Color(0x1400E5FF),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF00E5FF).withOpacity(0.2)),
+                border: Border.all(color: const Color(0x3300E5FF)),
               ),
               child: Row(
                 children: [

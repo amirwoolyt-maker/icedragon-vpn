@@ -106,6 +106,20 @@ void main() {
     expect(s.signInMethod, SignInMethod.api);
   });
 
+  test('persists speed limit and lastKnownServerTime', () async {
+    final s = await AppSettings.load(dir.path);
+    s.update(
+      speedLimitEnabled: true,
+      speedLimitKbps: 2048,
+      lastKnownServerTime: 1731800000000,
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    final loaded = await AppSettings.load(dir.path);
+    expect(loaded.speedLimitEnabled, isTrue);
+    expect(loaded.speedLimitKbps, 2048);
+    expect(loaded.lastKnownServerTime, 1731800000000);
+  });
+
   test('takes the core executable from --core', () {
     expect(
       CoreProcess.executableFrom(['--core=C:/bin/core.exe']),

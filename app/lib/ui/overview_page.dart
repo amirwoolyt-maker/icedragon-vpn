@@ -957,9 +957,9 @@ class _DesktopHome extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00E5FF).withOpacity(0.12),
+                  color: const Color(0x1F00E5FF),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF00E5FF).withOpacity(0.28)),
+                  border: Border.all(color: const Color(0x4700E5FF)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -2114,9 +2114,9 @@ class _PhoneHome extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF00E5FF).withOpacity(0.12),
+                        color: const Color(0x1F00E5FF),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFF00E5FF).withOpacity(0.28)),
+                        border: Border.all(color: const Color(0x4700E5FF)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
