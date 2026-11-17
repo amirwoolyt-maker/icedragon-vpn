@@ -444,4 +444,86 @@ class AndroidCore {
       return '';
     }
   }
+
+  static Future<Map<String, Object?>> deviceInfo() async {
+    try {
+      final res = await _channel.invokeMapMethod<String, Object?>('deviceInfo');
+      return res ?? const {};
+    } catch (_) {
+      return const {};
+    }
+  }
+
+  static Future<List<Map<String, Object?>>> installedAppsDetailed() async {
+    try {
+      final res = await _channel.invokeListMethod<Map<Object?, Object?>>('installedAppsDetailed');
+      return [
+        for (final m in res ?? const [])
+          {for (final e in m.entries) '${e.key}': e.value},
+      ];
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  static Future<bool> openAppSettings(String package) async {
+    try {
+      return await _channel.invokeMethod<bool>('openAppSettings', {'package': package}) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> uninstallApp(String package) async {
+    try {
+      return await _channel.invokeMethod<bool>('uninstallApp', {'package': package}) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> launchApp(String package) async {
+    try {
+      return await _channel.invokeMethod<bool>('launchApp', {'package': package}) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<Map<String, Object?>> boostMemory({List<String> exclude = const []}) async {
+    try {
+      final res = await _channel.invokeMapMethod<String, Object?>('boostMemory', {'exclude': exclude});
+      return res ?? const {};
+    } catch (_) {
+      return const {};
+    }
+  }
+
+  static Future<bool> openUsageAccessSettings() async {
+    try {
+      return await _channel.invokeMethod<bool>('openUsageAccessSettings') ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> shareText(String text, {String subject = ''}) async {
+    try {
+      return await _channel.invokeMethod<bool>('shareText', {'text': text, 'subject': subject}) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> openStore(String package, String store, {String fallbackUrl = ''}) async {
+    try {
+      return await _channel.invokeMethod<bool>('openStore', {
+        'package': package,
+        'store': store,
+        'fallbackUrl': fallbackUrl,
+      }) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
 }
