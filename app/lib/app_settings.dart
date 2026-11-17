@@ -312,15 +312,24 @@ class AppSettings extends ChangeNotifier {
               if (item is Map<String, Object?>) item,
           ];
         }
+        var generatedDevice = false;
         if (s.deviceId.isEmpty) {
           s.deviceId = 'dev_${DateTime.now().millisecondsSinceEpoch}_${math.Random().nextInt(999999)}';
+          generatedDevice = true;
+        }
+        if (generatedDevice) {
+          unawaited(s.save());
         }
       }
     } on FileSystemException {
       // First run: defaults, and the welcome page.
       s.firstRun = true;
+      s.deviceId = 'dev_${DateTime.now().millisecondsSinceEpoch}_${math.Random().nextInt(999999)}';
+      unawaited(s.save());
     } on FormatException {
       // A broken file: defaults, rewritten on the next change.
+      s.deviceId = 'dev_${DateTime.now().millisecondsSinceEpoch}_${math.Random().nextInt(999999)}';
+      unawaited(s.save());
     }
     return s;
   }

@@ -50,13 +50,16 @@ jobs:
       - name: Update manifest check
         run: |
           jq -e 'type == "object"
-            and all(keys[]; IN("android", "linux", "macos", "windows"))
-            and all(.[]; type == "string" and test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))' .github/updates.json >/dev/null || {
+            and (.android | type == "string" and test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))
+            and (.linux | type == "string" and test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))
+            and (.macos | type == "string" and test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))
+            and (.windows | type == "string" and test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))' .github/updates.json >/dev/null || {
             echo "::error::.github/updates.json must map android/linux/macos/windows to major.minor.patch versions"
             exit 1
           }
           v="${{ steps.version.outputs.version }}"
           ahead="$(jq -r --arg v "$v" '($v | split(".") | map(tonumber)) as $app
+            | {android: .android, linux: .linux, macos: .macos, windows: .windows}
             | to_entries[] | select((.value | split(".") | map(tonumber)) > $app) | "\(.key) \(.value)"' .github/updates.json | xargs)"
           if [ -n "$ahead" ]; then
             echo "::error::.github/updates.json names versions newer than app/pubspec.yaml ($v): $ahead"

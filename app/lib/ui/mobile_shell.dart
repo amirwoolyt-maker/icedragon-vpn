@@ -51,6 +51,12 @@ class _MobileShellState extends State<MobileShell> {
     super.initState();
     AndroidCore.homeRequests.addListener(_openHome);
     AndroidCore.proRequests.addListener(_openPro);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final route = await AndroidCore.getPendingRoute();
+      if (route == 'pro' && mounted) {
+        _openPro();
+      }
+    });
   }
 
   void _openHome() => setState(() => _tab = 0);

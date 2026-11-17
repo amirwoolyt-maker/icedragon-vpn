@@ -621,11 +621,34 @@ class CoreService : VpnService() {
         private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
         private const val PRO_ACTIVE = "pro_active"
+        private const val PRO_EXPIRES_AT = "pro_expires_at"
+        private const val PRO_LIFETIME = "pro_lifetime"
 
-        fun isProActive(context: Context): Boolean = prefs(context).getBoolean(PRO_ACTIVE, false)
+        fun isProActive(context: Context): Boolean {
+            val p = prefs(context)
+            if (!p.getBoolean(PRO_ACTIVE, false)) return false
+            if (p.getBoolean(PRO_LIFETIME, false)) return true
+            val expiresAt = p.getString(PRO_EXPIRES_AT, null) ?: return false
+            return try {
+                val exp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    java.time.Instant.parse(expiresAt).toEpochMilli()
+                } else {
+                    java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).apply {
+                        timeZone = java.util.TimeZone.getTimeZone("UTC")
+                    }.parse(expiresAt.replace("Z", "+0000"))?.time ?: 0L
+                }
+                System.currentTimeMillis() < exp
+            } catch (e: Throwable) {
+                false
+            }
+        }
 
-        fun setProActive(context: Context, active: Boolean) {
-            prefs(context).edit().putBoolean(PRO_ACTIVE, active).apply()
+        fun setProActive(context: Context, active: Boolean, expiresAt: String? = null, isLifetime: Boolean = false) {
+            prefs(context).edit()
+                .putBoolean(PRO_ACTIVE, active)
+                .putString(PRO_EXPIRES_AT, expiresAt)
+                .putBoolean(PRO_LIFETIME, isLifetime)
+                .apply()
             QuickTile.refresh(context)
         }
 

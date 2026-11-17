@@ -396,10 +396,27 @@ class AndroidCore {
   static Future<bool> openVpnSettings() async =>
       await _channel.invokeMethod<bool>('openVpnSettings') ?? false;
 
-  /// Synchronizes VIP entitlement status to Android native service and Quick Tiles.
-  static Future<void> setProActive(bool active) async {
+  /// Retrieves any cold-start launch route requested by an intent (e.g. from a Quick Tile).
+  static Future<String?> getPendingRoute() async {
     try {
-      await _channel.invokeMethod<void>('setProActive', {'active': active});
+      return await _channel.invokeMethod<String>('getPendingRoute');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Synchronizes VIP entitlement status to Android native service and Quick Tiles.
+  static Future<void> setProActive(
+    bool active, {
+    String? expiresAt,
+    bool isLifetime = false,
+  }) async {
+    try {
+      await _channel.invokeMethod<void>('setProActive', {
+        'active': active,
+        'expires_at': expiresAt,
+        'is_lifetime': isLifetime,
+      });
     } catch (_) {}
   }
 }

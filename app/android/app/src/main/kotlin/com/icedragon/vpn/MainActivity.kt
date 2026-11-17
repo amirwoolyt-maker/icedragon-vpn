@@ -64,11 +64,13 @@ class MainActivity : FlutterActivity() {
     private var pendingOpen: Result? = null
     // Package removal dialog waiting for system completion.
     private var pendingUninstall: Pair<String, Result>? = null
+    private var pendingRoute: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         holdPhoneUpright(resources.configuration)
         super.onCreate(savedInstanceState)
         removeOtherCards()
+        pendingRoute = intent.getStringExtra("route")
     }
 
     /** A tile long-press returns an already open UI to its home page. */
@@ -195,8 +197,15 @@ class MainActivity : FlutterActivity() {
                 }
                 "setProActive" -> {
                     val active = call.argument<Boolean>("active") == true
-                    CoreService.setProActive(this, active)
+                    val expiresAt = call.argument<String>("expires_at")
+                    val isLifetime = call.argument<Boolean>("is_lifetime") == true
+                    CoreService.setProActive(this, active, expiresAt, isLifetime)
                     result.success(null)
+                }
+                "getPendingRoute" -> {
+                    val r = pendingRoute
+                    pendingRoute = null
+                    result.success(r)
                 }
                 "isProActive" -> result.success(CoreService.isProActive(this))
                 "setConnectionMode" -> {
