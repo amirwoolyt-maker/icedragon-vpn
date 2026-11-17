@@ -2,5 +2,94 @@
   "android": "1.0.25",
   "linux": "1.0.25",
   "macos": "1.0.25",
-  "windows": "1.0.25"
+  "windows": "1.0.25",
+  "releases": {
+    "1.0.25": {
+      "release_url": "https://github.com/amirwoolyt-maker/icedragon-vpn/releases/tag/v1.0.25",
+      "base_url": "https://github.com/amirwoolyt-maker/icedragon-vpn/releases/download/v1.0.25/",
+      "checksums_file": "SHA256SUMS.txt",
+      "signature_file": "SHA256SUMS.txt"
+    }
+  },
+  "platforms": {
+    "android": {
+      "stable": {
+        "version": "1.0.25",
+        "mandatory": true,
+        "downloads": {
+          "universal": { "file": "IceDragon-VPN-1.0.25-Android-universal.apk" },
+          "arm64-v8a": { "file": "IceDragon-VPN-1.0.25-Android-arm64-v8a.apk" },
+          "armeabi-v7a": { "file": "IceDragon-VPN-1.0.25-Android-armeabi-v7a.apk" },
+          "x86_64": { "file": "IceDragon-VPN-1.0.25-Android-x86_64.apk" }
+        }
+      },
+      "latest": {
+        "version": "1.0.25",
+        "mandatory": true,
+        "downloads": {
+          "universal": { "file": "IceDragon-VPN-1.0.25-Android-universal.apk" },
+          "arm64-v8a": { "file": "IceDragon-VPN-1.0.25-Android-arm64-v8a.apk" },
+          "armeabi-v7a": { "file": "IceDragon-VPN-1.0.25-Android-armeabi-v7a.apk" },
+          "x86_64": { "file": "IceDragon-VPN-1.0.25-Android-x86_64.apk" }
+        }
+      }
+    },
+    "windows": {
+      "version": "1.0.25",
+      "mandatory": true,
+      "downloads": {
+        "installer-x64": { "file": "IceDragon-VPN-1.0.25-Windows-Setup-x64.exe" },
+        "archive-x64": { "file": "IceDragon-VPN-1.0.25-Windows-x64.zip" }
+      }
+    },
+    "linux": {
+      "version": "1.0.25",
+      "mandatory": true,
+      "downloads": {
+        "amd64": { "file": "IceDragon-VPN-1.0.25-Linux-amd64.tar.gz" },
+        "arm64": { "file": "IceDragon-VPN-1.0.25-Linux-arm64.tar.gz" }
+      }
+    },
+    "macos": {
+      "version": "1.0.25",
+      "mandatory": true,
+      "downloads": {
+        "installer": { "file": "IceDragon-VPN-1.0.25-macOS.dmg" },
+        "archive": { "file": "IceDragon-VPN-1.0.25-macOS.tar.gz" }
+      }
+    }
+  },
+  "announcements": [
+    {
+      "id": "deprecate-legacy-versions",
+      "revision": 1,
+      "enabled": true,
+      "type": "critical",
+      "priority": 100,
+      "dismissible": false,
+      "max_app_version": "1.0.24",
+      "display": {
+        "mode": "per_launch"
+      },
+      "title": {
+        "fa": "نسخه شما منسوخ شده است",
+        "en": "Your App Version is Deprecated",
+        "ru": "Ваша версия приложения устарела"
+      },
+      "message": {
+        "fa": "این نسخه از برنامه دیگر پشتیبانی نمی‌شود و امکان اتصال ندارد. برای ادامه استفاده از فیلترشکن، باید آخرین نسخه (۱.۰.۲۵) را نصب کنید.",
+        "en": "This version of the app is no longer supported and cannot connect. Please install the latest version (1.0.25) to continue using the VPN.",
+        "ru": "Эта версия приложения больше не поддерживается и не может подключаться. Пожалуйста, установите последнюю версию (1.0.25), чтобы продолжить использование VPN."
+      },
+      "action": {
+        "type": "open_url",
+        "url": "https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest",
+        "label": {
+          "fa": "دانلود و نصب آخرین نسخه (v1.0.25)",
+          "en": "Download Latest Version (v1.0.25)",
+          "ru": "Скачать новую версию (v1.0.25)"
+        }
+      }
+    }
+  ]
 }
