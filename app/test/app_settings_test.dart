@@ -111,13 +111,13 @@ void main() {
     s.update(
       speedLimitEnabled: true,
       speedLimitKbps: 2048,
-      lastKnownServerTime: 1731800000000,
+      lastKnownServerTime: '2026-11-17T12:00:00.000Z',
     );
     await Future<void>.delayed(const Duration(milliseconds: 200));
     final loaded = await AppSettings.load(dir.path);
     expect(loaded.speedLimitEnabled, isTrue);
     expect(loaded.speedLimitKbps, 2048);
-    expect(loaded.lastKnownServerTime, 1731800000000);
+    expect(loaded.lastKnownServerTime, '2026-11-17T12:00:00.000Z');
   });
 
   test('takes the core executable from --core', () {

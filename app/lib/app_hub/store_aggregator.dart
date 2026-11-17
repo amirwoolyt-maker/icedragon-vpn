@@ -127,14 +127,14 @@ class StoreAggregator {
     await Future.wait([
       () async {
         try {
-          final List<AppHit> hits;
+          final List<StoreListing> hits;
           if (directPackage) {
             final d = await fetchGooglePlayDetails(
               trimmed,
               hl: hl,
               proxyAddress: proxyAddress,
             );
-            hits = d != null ? [d] : <AppHit>[];
+            hits = d != null ? [d] : <StoreListing>[];
           } else {
             hits = await searchGooglePlay(
               trimmed,
@@ -151,13 +151,13 @@ class StoreAggregator {
       }(),
       () async {
         try {
-          final List<AppHit> hits;
+          final List<StoreListing> hits;
           if (directPackage) {
             final d = await fetchBazaarDetails(
               trimmed,
               proxyAddress: proxyAddress,
             );
-            hits = d != null ? [d] : <AppHit>[];
+            hits = d != null ? [d] : <StoreListing>[];
           } else {
             hits = await searchBazaar(trimmed, proxyAddress: proxyAddress);
           }
@@ -170,13 +170,13 @@ class StoreAggregator {
       }(),
       () async {
         try {
-          final List<AppHit> hits;
+          final List<StoreListing> hits;
           if (directPackage) {
             final d = await fetchMyketDetails(
               trimmed,
               proxyAddress: proxyAddress,
             );
-            hits = d != null ? [d] : <AppHit>[];
+            hits = d != null ? [d] : <StoreListing>[];
           } else {
             hits = await searchMyket(trimmed, proxyAddress: proxyAddress);
           }
