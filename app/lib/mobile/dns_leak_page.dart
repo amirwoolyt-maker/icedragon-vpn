@@ -22,7 +22,6 @@ class DnsLeakPage extends StatefulWidget {
 class _DnsLeakPageState extends State<DnsLeakPage> {
   bool _testing = false;
   String? _publicIp;
-  String? _ispOrg;
   String? _country;
   List<String> _detectedResolvers = const [];
   String? _leakStatus; // 'clean', 'potential_leak', 'inconclusive'
@@ -39,7 +38,6 @@ class _DnsLeakPageState extends State<DnsLeakPage> {
     setState(() {
       _testing = true;
       _publicIp = null;
-      _ispOrg = null;
       _country = null;
       _detectedResolvers = const [];
       _leakStatus = null;

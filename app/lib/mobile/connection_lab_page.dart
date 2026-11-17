@@ -143,14 +143,14 @@ class _ConnectionLabPageState extends State<ConnectionLabPage> {
     setState(() {});
 
     // Stage 3: TLS Negotiation (SNI & Handshake)
-    SecureSocket? secureSocket;
     if (tcpSocket != null) {
       try {
-        secureSocket = await SecureSocket.secure(
+        final s = await SecureSocket.secure(
           tcpSocket,
           host: host,
           onBadCertificate: (_) => true,
         ).timeout(const Duration(seconds: 6));
+        await s.close();
         direct.stages.add(_StageResult(
           isFa ? 'مذاکره امن TLS (SNI)' : 'TLS Handshake',
           true,

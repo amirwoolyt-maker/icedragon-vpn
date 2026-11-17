@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../app_settings.dart';
 import '../core/core_controller.dart';
-import '../ui/widgets.dart';
 import 'mobile_strings.dart';
 import 'mobile_theme.dart';
 
@@ -21,13 +20,13 @@ class ConnectionTimerManager {
     if (diff <= 0) {
       // Already expired: turn off connection cleanly
       settings.update(connectionTimerEndMillis: 0);
-      core.turnOff();
+      core.setOn(false);
       return;
     }
 
     _activeTimer = Timer(Duration(milliseconds: diff), () {
       settings.update(connectionTimerEndMillis: 0);
-      core.turnOff();
+      core.setOn(false);
     });
   }
 
