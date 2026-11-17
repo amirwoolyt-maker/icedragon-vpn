@@ -62,7 +62,7 @@
   "announcements": [
     {
       "id": "deprecate-legacy-versions",
-      "revision": 1,
+      "revision": 2,
       "enabled": true,
       "type": "critical",
       "priority": 100,
@@ -72,22 +72,22 @@
         "mode": "per_launch"
       },
       "title": {
-        "fa": "نسخه شما منسوخ شده است",
-        "en": "Your App Version is Deprecated",
-        "ru": "Ваша версия приложения устарела"
+        "fa": "⚠️ اخطار مهم: قطع اتصال و منسوخ شدن نسخه",
+        "en": "⚠️ Critical Alert: Connection Termination",
+        "ru": "⚠️ Критическое предупреждение: Отключение"
       },
       "message": {
-        "fa": "این نسخه از برنامه دیگر پشتیبانی نمی‌شود و امکان اتصال ندارد. برای ادامه استفاده از فیلترشکن، باید آخرین نسخه (۱.۰.۲۵) را نصب کنید.",
-        "en": "This version of the app is no longer supported and cannot connect. Please install the latest version (1.0.25) to continue using the VPN.",
-        "ru": "Эта версия приложения больше не поддерживается и не может подключаться. Пожалуйста, установите последнюю версию (1.0.25), чтобы продолжить использование VPN."
+        "fa": "نسخه ۱.۰.۲۴ به دلیل تغییرات ساختار امنیتی سرورها، به زودی به طور کامل قطع خواهد شد و اتصال شما ناامن است. برای جلوگیری از قطع دائمی اینترنت و فعال ماندن سرویس، حتماً همین الان نسخه جدید (v1.0.25) را نصب کنید.",
+        "en": "Version 1.0.24 is being permanently decommissioned due to mandatory security protocol updates. Your connection will stop working shortly. To avoid internet interruption and stay protected, update to version 1.0.25 immediately.",
+        "ru": "Версия 1.0.24 будет полностью отключена в связи с обновлением протоколов безопасности серверов. Ваше соединение скоро перестанет работать. Пожалуйста, немедленно установите версию 1.0.25 для бесперебойного доступа."
       },
       "action": {
         "type": "open_url",
         "url": "https://github.com/amirwoolyt-maker/icedragon-vpn/releases/latest",
         "label": {
-          "fa": "دانلود و نصب آخرین نسخه (v1.0.25)",
-          "en": "Download Latest Version (v1.0.25)",
-          "ru": "Скачать новую версию (v1.0.25)"
+          "fa": "🚨 نصب فوری نسخه جدید (v1.0.25)",
+          "en": "🚨 Update to v1.0.25 Now",
+          "ru": "🚨 Срочно обновить до v1.0.25"
         }
       }
     }

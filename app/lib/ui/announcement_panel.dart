@@ -27,10 +27,11 @@ class AnnouncementOverlay extends StatelessWidget {
       child,
       if (visible)
         Positioned.fill(
-          child: IgnorePointer(
+          child: AbsorbPointer(
+            absorbing: true,
             child: ColoredBox(
               color: Theme.of(context).colorScheme.scrim
-                  .withValues(alpha: 0.16),
+                  .withValues(alpha: 0.55),
             ),
           ),
         ),
