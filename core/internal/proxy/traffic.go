@@ -22,6 +22,62 @@ type Traffic struct {
 // rateWindow is how many one-second samples the speed averages.
 const rateWindow = 3
 
+// RateLimiter limits bandwidth in bytes per second using a token bucket.
+type RateLimiter struct {
+	rate      int64
+	burst     int64
+	mu        sync.Mutex
+	tokens    float64
+	lastCheck time.Time
+}
+
+func NewRateLimiter(bytesPerSec int64) *RateLimiter {
+	if bytesPerSec <= 0 {
+		return nil
+	}
+	burst := bytesPerSec / 2
+	if burst < 32*1024 {
+		burst = 32 * 1024
+	}
+	return &RateLimiter{
+		rate:      bytesPerSec,
+		burst:     burst,
+		tokens:    float64(burst),
+		lastCheck: time.Now(),
+	}
+}
+
+func (l *RateLimiter) Wait(bytes int) {
+	if l == nil || l.rate <= 0 || bytes <= 0 {
+		return
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	now := time.Now()
+	elapsed := now.Sub(l.lastCheck).Seconds()
+	l.lastCheck = now
+
+	l.tokens += elapsed * float64(l.rate)
+	if l.tokens > float64(l.burst) {
+		l.tokens = float64(l.burst)
+	}
+
+	l.tokens -= float64(bytes)
+	if l.tokens < 0 {
+		debt := -l.tokens
+		waitTime := time.Duration((debt / float64(l.rate)) * float64(time.Second))
+		if waitTime > 0 {
+			if waitTime > 2*time.Second {
+				waitTime = 2 * time.Second
+			}
+			time.Sleep(waitTime)
+			l.lastCheck = time.Now()
+			l.tokens = 0
+		}
+	}
+}
+
 // trafficMeter counts bytes by route and samples the speed every second.
 type trafficMeter struct {
 	up, down, directUp, directDown atomic.Int64
@@ -31,6 +87,20 @@ type trafficMeter struct {
 	filled  int
 	stop    chan struct{}
 	once    sync.Once
+
+	limiter atomic.Pointer[RateLimiter]
+}
+
+func (m *trafficMeter) SetSpeedLimit(kbps int) {
+	if kbps <= 0 {
+		m.limiter.Store(nil)
+	} else {
+		m.limiter.Store(NewRateLimiter(int64(kbps) * 1024))
+	}
+}
+
+func (m *trafficMeter) Limiter() *RateLimiter {
+	return m.limiter.Load()
 }
 
 func newTrafficMeter() *trafficMeter {
@@ -85,6 +155,7 @@ type countingConn struct {
 	net.Conn
 	up, down *atomic.Int64
 	route    string
+	meter    *trafficMeter
 	// onClose, when set, runs once when the connection closes.
 	onClose   func()
 	closeOnce sync.Once
@@ -103,13 +174,22 @@ func (c *countingConn) Route() string { return c.route }
 
 func (c *countingConn) Read(p []byte) (int, error) {
 	n, err := c.Conn.Read(p)
-	c.down.Add(int64(n))
+	if n > 0 {
+		c.down.Add(int64(n))
+		if c.meter != nil {
+			if l := c.meter.Limiter(); l != nil {
+				l.Wait(n)
+			}
+		}
+	}
 	return n, err
 }
 
 func (c *countingConn) Write(p []byte) (int, error) {
 	n, err := c.Conn.Write(p)
-	c.up.Add(int64(n))
+	if n > 0 {
+		c.up.Add(int64(n))
+	}
 	return n, err
 }
 
@@ -127,6 +207,11 @@ func countConn(conn net.Conn, up, down *atomic.Int64) net.Conn {
 // countRouted is countConn for a tunnel that took route.
 func countRouted(conn net.Conn, up, down *atomic.Int64, route string) net.Conn {
 	return wrapCounting(&countingConn{Conn: conn, up: up, down: down, route: route})
+}
+
+// countRoutedWithMeter counts and enforces bandwidth limiting if enabled.
+func countRoutedWithMeter(conn net.Conn, up, down *atomic.Int64, route string, meter *trafficMeter) net.Conn {
+	return wrapCounting(&countingConn{Conn: conn, up: up, down: down, route: route, meter: meter})
 }
 
 func wrapCounting(counted *countingConn) net.Conn {

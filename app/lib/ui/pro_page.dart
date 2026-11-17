@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -6,7 +7,9 @@ import 'package:flutter/services.dart';
 
 import '../app_info.dart' show proLicensingApi, proPurchaseUrl;
 import '../app_settings.dart';
+import '../core/android_core.dart';
 import '../core/core_controller.dart';
+import '../core/license_service.dart';
 import '../mobile/connection_lab_page.dart';
 import '../mobile/connection_timer.dart';
 import '../mobile/dns_leak_page.dart';
@@ -44,37 +47,7 @@ class _ProPageState extends State<ProPage> {
   }
 
   Future<void> _checkStatusSilently() async {
-    final code = widget.settings.proLicenseCode.trim();
-    if (code.isEmpty) {
-      if (widget.settings.proActive) {
-        widget.settings.update(proActive: false, proDaysLeft: 0);
-      }
-      return;
-    }
-    try {
-      final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
-      final uri = Uri.parse('$proLicensingApi/status?code=${Uri.encodeComponent(code)}');
-      final req = await client.getUrl(uri);
-      final res = await req.close();
-      if (res.statusCode == 200) {
-        final body = await res.transform(utf8.decoder).join();
-        final json = jsonDecode(body) as Map<String, Object?>?;
-        if (json != null && json['ok'] == true && json['active'] == true && mounted) {
-          widget.settings.update(
-            proActive: true,
-            proPlanName: json['plan'] as String? ?? widget.settings.proPlanName,
-            proExpiresAt: json['expires_at'] as String? ?? widget.settings.proExpiresAt,
-            proDaysLeft: json['days_left'] as int? ?? widget.settings.proDaysLeft,
-            proIsLifetime: json['is_lifetime'] == true,
-          );
-        } else if (json != null && (json['ok'] == false || json['active'] == false) && mounted) {
-          widget.settings.update(
-            proActive: false,
-            proDaysLeft: 0,
-          );
-        }
-      }
-    } catch (_) {}
+    await LicenseService.syncStatus(widget.settings);
   }
 
   Future<void> _togglePlan(int index) async {
@@ -111,6 +84,18 @@ class _ProPageState extends State<ProPage> {
 
       if (!mounted) return;
 
+      final dateHeader = res.headers.value(HttpHeaders.dateHeader);
+      DateTime? serverDate;
+      if (dateHeader != null && dateHeader.isNotEmpty) {
+        try {
+          serverDate = HttpDate.parse(dateHeader);
+          final lastKnown = DateTime.tryParse(widget.settings.lastKnownServerTime);
+          if (lastKnown == null || serverDate.isAfter(lastKnown)) {
+            widget.settings.update(lastKnownServerTime: serverDate.toIso8601String());
+          }
+        } catch (_) {}
+      }
+
       if (res.statusCode == 200 && json != null && json['ok'] == true) {
         final plan = json['plan'] as String? ?? 'VIP';
         final expiresAt = json['expires_at'] as String? ?? '';
@@ -125,6 +110,15 @@ class _ProPageState extends State<ProPage> {
           proDaysLeft: daysLeft,
           proIsLifetime: isLifetime,
         );
+
+        if (Platform.isAndroid) {
+          unawaited(AndroidCore.setProActive(
+            true,
+            expiresAt: expiresAt,
+            isLifetime: isLifetime,
+            lastKnownServerTimeMillis: serverDate?.millisecondsSinceEpoch ?? 0,
+          ));
+        }
 
         _codeController.clear();
         ScaffoldMessenger.of(context).showSnackBar(

@@ -199,7 +199,8 @@ class MainActivity : FlutterActivity() {
                     val active = call.argument<Boolean>("active") == true
                     val expiresAt = call.argument<String>("expires_at")
                     val isLifetime = call.argument<Boolean>("is_lifetime") == true
-                    CoreService.setProActive(this, active, expiresAt, isLifetime)
+                    val lastKnownTime = call.argument<Number>("last_known_server_time_millis")?.toLong() ?: 0L
+                    CoreService.setProActive(this, active, expiresAt, isLifetime, lastKnownTime)
                     result.success(null)
                 }
                 "getPendingRoute" -> {

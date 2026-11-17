@@ -224,6 +224,8 @@ type Proxy struct {
 	// settings requests that still carry it load; it is cleared on load
 	// and not written back.
 	AllowLocked bool `json:"allow_locked,omitempty"`
+	// SpeedLimitKbps limits the proxy throughput in kilobits/sec (0 = unlimited).
+	SpeedLimitKbps int `json:"speed_limit_kbps,omitempty"`
 }
 
 // Accounts configures multi-account failover.

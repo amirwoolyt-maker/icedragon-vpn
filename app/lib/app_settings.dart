@@ -107,6 +107,13 @@ class AppSettings extends ChangeNotifier {
   int connectionTimerEndMillis = 0;
   List<Map<String, Object?>> networkTimeMachineHistory = const [];
 
+  /// Monotonic trusted server time (ISO 8601) to prevent device clock rollback attacks
+  String lastKnownServerTime = '';
+
+  /// Bandwidth / Speed Limiter
+  bool speedLimitEnabled = false;
+  int speedLimitKbps = 0; // 0 = Unlimited
+
   /// The app's languages, in the order the language menus list them.
   /// 'zh' is Simplified and 'zh_Hant' Traditional Chinese.
   static const supportedLanguages = [
@@ -295,12 +302,22 @@ class AppSettings extends ChangeNotifier {
         s.deviceId = j['device_id'] as String? ?? '';
         s.autoSwitchDns = j['auto_switch_dns'] == true;
         s.connectionTimerEndMillis = j['conn_timer_end'] as int? ?? 0;
+        s.lastKnownServerTime = j['last_known_server_time'] as String? ?? '';
+        s.speedLimitEnabled = j['speed_limit_enabled'] == true;
+        s.speedLimitKbps = j['speed_limit_kbps'] as int? ?? 0;
 
         // Security check: proActive requires a non-empty license code and valid expiration.
         var active = j['pro_active'] == true && s.proLicenseCode.trim().isNotEmpty;
         if (active && !s.proIsLifetime && s.proExpiresAt.isNotEmpty) {
+          var now = DateTime.now();
+          if (s.lastKnownServerTime.isNotEmpty) {
+            final lastKnown = DateTime.tryParse(s.lastKnownServerTime);
+            if (lastKnown != null && now.isBefore(lastKnown)) {
+              now = lastKnown;
+            }
+          }
           final exp = DateTime.tryParse(s.proExpiresAt);
-          if (exp != null && DateTime.now().isAfter(exp)) {
+          if (exp != null && now.isAfter(exp)) {
             active = false;
             s.proDaysLeft = 0;
           }
@@ -396,6 +413,9 @@ class AppSettings extends ChangeNotifier {
     String? deviceId,
     bool? autoSwitchDns,
     int? connectionTimerEndMillis,
+    String? lastKnownServerTime,
+    bool? speedLimitEnabled,
+    int? speedLimitKbps,
     List<Map<String, Object?>>? networkTimeMachineHistory,
   }) {
     this.favoriteCountries = favoriteCountries ?? this.favoriteCountries;
@@ -412,6 +432,9 @@ class AppSettings extends ChangeNotifier {
     this.proExpiresAt = proExpiresAt ?? this.proExpiresAt;
     this.proDaysLeft = proDaysLeft ?? this.proDaysLeft;
     this.proIsLifetime = proIsLifetime ?? this.proIsLifetime;
+    this.lastKnownServerTime = lastKnownServerTime ?? this.lastKnownServerTime;
+    this.speedLimitEnabled = speedLimitEnabled ?? this.speedLimitEnabled;
+    this.speedLimitKbps = speedLimitKbps ?? this.speedLimitKbps;
     if (proActive != null) {
       var effective = proActive;
       final code = this.proLicenseCode.trim();
@@ -419,8 +442,15 @@ class AppSettings extends ChangeNotifier {
         effective = false;
       }
       if (effective && !this.proIsLifetime && this.proExpiresAt.isNotEmpty) {
+        var now = DateTime.now();
+        if (this.lastKnownServerTime.isNotEmpty) {
+          final lastKnown = DateTime.tryParse(this.lastKnownServerTime);
+          if (lastKnown != null && now.isBefore(lastKnown)) {
+            now = lastKnown;
+          }
+        }
         final exp = DateTime.tryParse(this.proExpiresAt);
-        if (exp != null && DateTime.now().isAfter(exp)) {
+        if (exp != null && now.isAfter(exp)) {
           effective = false;
           this.proDaysLeft = 0;
         }
@@ -500,6 +530,9 @@ class AppSettings extends ChangeNotifier {
           'device_id': deviceId,
           'auto_switch_dns': autoSwitchDns,
           'conn_timer_end': connectionTimerEndMillis,
+          'last_known_server_time': lastKnownServerTime,
+          'speed_limit_enabled': speedLimitEnabled,
+          'speed_limit_kbps': speedLimitKbps,
           'time_machine_history': networkTimeMachineHistory,
         }),
       );

@@ -842,7 +842,194 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
         ),
+        const SizedBox(height: 16),
+        _speedLimiterPanel(context, l, widget.settings),
       ],
+    );
+  }
+
+  Widget _speedLimiterPanel(BuildContext context, AppLocalizations l, AppSettings s) {
+    const presetValues = <int>[128, 256, 512, 1024, 2048, 5120, 10240, 0];
+    const presetLabelsFa = <String>[
+      '۱۲۸ کیلوبایت',
+      '۲۵۶ کیلوبایت',
+      '۵۱۲ کیلوبایت',
+      '۱ مگابایت',
+      '۲ مگابایت',
+      '۵ مگابایت',
+      '۱۰ مگابایت',
+      'نامحدود',
+    ];
+    const presetDescsFa = <String>[
+      'صرفه‌جویی حداکثری / چت و پیام‌رسانی',
+      'صرفه‌جویی بالا / وب‌گردی سبک',
+      'صرفه‌جویی متوسط / شبکه‌های اجتماعی',
+      'سرعت متناسب / اینستاگرام و تصاویر',
+      'پخش روان ویدیو SD و آهنگ',
+      'کیفیت HD و استریم',
+      'دانلود سریع با سقف امن',
+      'بدون محدودیت سرعت',
+    ];
+
+    final isFa = l.localeName.startsWith('fa');
+    final enabled = s.speedLimitEnabled;
+    final currentKbps = s.speedLimitKbps;
+
+    var sliderIndex = presetValues.indexOf(currentKbps);
+    if (sliderIndex < 0) {
+      if (currentKbps <= 0) {
+        sliderIndex = 7;
+      } else {
+        sliderIndex = 3;
+      }
+    }
+
+    final activeLabel = isFa
+        ? presetLabelsFa[sliderIndex]
+        : (presetValues[sliderIndex] == 0
+            ? 'Unlimited'
+            : '${presetValues[sliderIndex] >= 1024 ? (presetValues[sliderIndex] / 1024).round() : presetValues[sliderIndex]} ${presetValues[sliderIndex] >= 1024 ? "MB/s" : "KB/s"}');
+    final activeDesc = isFa
+        ? presetDescsFa[sliderIndex]
+        : (presetValues[sliderIndex] == 0
+            ? 'No bandwidth cap applied'
+            : 'Bandwidth throttle applied');
+
+    return Panel(
+      title: isFa ? 'محدودیت سرعت اینترنت (صرفه‌جویی حجم)' : 'Speed Limiter & Data Saver',
+      icon: Icons.speed_rounded,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isFa ? 'کنترل مصرف و سقف سرعت' : 'Data Saver & Speed Limit',
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isFa
+                          ? 'جلوگیری از تمام شدن ناگهانی حجم اینترنت در دانلودها و پس‌زمینه'
+                          : 'Prevent accidental high data usage in background downloads',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: enabled,
+                onChanged: (on) {
+                  final targetKbps = on ? (currentKbps > 0 ? currentKbps : 1024) : 0;
+                  s.update(speedLimitEnabled: on, speedLimitKbps: targetKbps);
+                  _save({['proxy', 'speed_limit_kbps']: on ? targetKbps : 0});
+                },
+              ),
+            ],
+          ),
+          if (enabled) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00E5FF).withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF00E5FF).withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.bolt_rounded, color: Color(0xFF00E5FF), size: 24),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${isFa ? "سقف سرعت انتخابی:" : "Active Limit:"} $activeLabel',
+                          style: const TextStyle(
+                            color: Color(0xFF00E5FF),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          activeDesc,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  isFa ? '۱۲۸ KB/s (کمترین)' : '128 KB/s',
+                  style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
+                Text(
+                  isFa ? 'نامحدود (بیشترین)' : 'Unlimited',
+                  style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
+              ],
+            ),
+            Slider(
+              value: sliderIndex.toDouble(),
+              min: 0,
+              max: 7,
+              divisions: 7,
+              label: activeLabel,
+              onChanged: (val) {
+                final idx = val.round();
+                final kbps = presetValues[idx];
+                s.update(speedLimitEnabled: true, speedLimitKbps: kbps);
+                _save({['proxy', 'speed_limit_kbps']: kbps});
+              },
+            ),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (var i = 0; i < presetValues.length; i++)
+                  ChoiceChip(
+                    label: Text(
+                      isFa
+                          ? presetLabelsFa[i]
+                          : (presetValues[i] == 0
+                              ? 'Max'
+                              : '${presetValues[i] >= 1024 ? (presetValues[i] / 1024).round() : presetValues[i]}${presetValues[i] >= 1024 ? "M" : "K"}'),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: sliderIndex == i ? FontWeight.w700 : FontWeight.w500,
+                      ),
+                    ),
+                    selected: sliderIndex == i,
+                    onSelected: (selected) {
+                      if (selected) {
+                        final kbps = presetValues[i];
+                        s.update(speedLimitEnabled: true, speedLimitKbps: kbps);
+                        _save({['proxy', 'speed_limit_kbps']: kbps});
+                      }
+                    },
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
     );
   }
 

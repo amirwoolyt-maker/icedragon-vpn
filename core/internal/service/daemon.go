@@ -1010,8 +1010,17 @@ func (d *Daemon) updateSettings(next config.Config, newPassword *string) (settin
 
 	logx.Verbose.Store(next.Logging.Verbose || d.forceVerbose)
 	d.mgr.SetPolicy(accounts.Policy{ThresholdPercent: next.Accounts.SwitchThresholdPercent})
+	proxyChanged := next.Proxy != prev.Proxy
+	if next.Proxy.SpeedLimitKbps != prev.Proxy.SpeedLimitKbps {
+		if e := d.currentEngine(); e != nil && e.routed != nil {
+			e.routed.SetSpeedLimit(next.Proxy.SpeedLimitKbps)
+		}
+		prevLimit := prev.Proxy
+		prevLimit.SpeedLimitKbps = next.Proxy.SpeedLimitKbps
+		proxyChanged = next.Proxy != prevLimit
+	}
 	change := settingsChange{
-		restartEngine:    next.Proxy != prev.Proxy || next.Network != prev.Network,
+		restartEngine:    proxyChanged || next.Network != prev.Network,
 		restartDashboard: next.Dashboard.Listen != prev.Dashboard.Listen,
 	}
 	logx.Info("settings saved restart_proxy=%v restart_dashboard=%v", change.restartEngine, change.restartDashboard)

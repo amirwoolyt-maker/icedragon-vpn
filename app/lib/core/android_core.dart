@@ -410,12 +410,14 @@ class AndroidCore {
     bool active, {
     String? expiresAt,
     bool isLifetime = false,
+    int lastKnownServerTimeMillis = 0,
   }) async {
     try {
       await _channel.invokeMethod<void>('setProActive', {
         'active': active,
         'expires_at': expiresAt,
         'is_lifetime': isLifetime,
+        'last_known_server_time_millis': lastKnownServerTimeMillis,
       });
     } catch (_) {}
   }

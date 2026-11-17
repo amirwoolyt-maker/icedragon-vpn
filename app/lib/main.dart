@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'app_settings.dart';
 import 'core/android_core.dart';
 import 'core/core_api.dart';
 import 'core/core_controller.dart';
+import 'core/license_service.dart';
 import 'core/updates.dart';
 import 'core/core_process.dart';
 import 'core/ports.dart';
@@ -23,6 +25,7 @@ Future<void> main(List<String> args) async {
   if (Platform.isAndroid) return runAndroid();
   final dataDir = CoreLocator.dataDir(args);
   final settings = await AppSettings.load(dataDir);
+  unawaited(LicenseService.syncStatus(settings));
   final process = CoreProcess(
     executable: CoreProcess.executableFrom(args),
     dataDir: dataDir,
@@ -84,18 +87,23 @@ Future<void> runAndroid() async {
   final hasSettings =
       File('$dataDir${Platform.pathSeparator}app-settings.json').existsSync();
   final settings = await AppSettings.load(dataDir);
+  final lastKnownMillis = DateTime.tryParse(settings.lastKnownServerTime)?.millisecondsSinceEpoch ?? 0;
   await AndroidCore.setProActive(
     settings.proActive,
     expiresAt: settings.proExpiresAt,
     isLifetime: settings.proIsLifetime,
+    lastKnownServerTimeMillis: lastKnownMillis,
   );
   settings.addListener(() {
+    final curLastKnown = DateTime.tryParse(settings.lastKnownServerTime)?.millisecondsSinceEpoch ?? 0;
     AndroidCore.setProActive(
       settings.proActive,
       expiresAt: settings.proExpiresAt,
       isLifetime: settings.proIsLifetime,
+      lastKnownServerTimeMillis: curLastKnown,
     );
   });
+  unawaited(LicenseService.syncStatus(settings));
   if (!hasSettings) {
     settings.themeMode = ThemeMode.dark;
   }

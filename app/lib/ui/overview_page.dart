@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import '../app_settings.dart';
 import '../core/android_core.dart';
 import '../core/core_controller.dart';
+import '../core/license_service.dart';
 import '../core/updates.dart';
 import '../core/models.dart';
 import '../core/ports.dart';
@@ -406,7 +407,10 @@ class _DesktopHome extends StatelessWidget {
       }
     }
     await core.setOn(on);
-    if (on) _testAfterPowerOn(core);
+    if (on) {
+      _testAfterPowerOn(core);
+      unawaited(LicenseService.syncStatus(settings));
+    }
   }
 
   Future<void> _setDnsMode(BuildContext context, bool on) async {
@@ -415,6 +419,9 @@ class _DesktopHome extends StatelessWidget {
       return;
     }
     settings.update(homeConnectionMode: 'dns', homeDnsEnabled: on);
+    if (on) {
+      unawaited(LicenseService.syncStatus(settings));
+    }
     if (defaultTargetPlatform == TargetPlatform.android) {
       try {
         await AndroidCore.setDnsOn(on);
@@ -944,6 +951,34 @@ class _DesktopHome extends StatelessWidget {
             textColor: p.text,
             mutedColor: p.muted,
           ),
+          if (settings.speedLimitEnabled && settings.speedLimitKbps > 0) ...[
+            const SizedBox(height: 8),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF00E5FF).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFF00E5FF).withOpacity(0.28)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.speed_rounded, size: 14, color: Color(0xFF00E5FF)),
+                    const SizedBox(width: 6),
+                    Text(
+                      'سقف سرعت فعال: ${settings.speedLimitKbps >= 1024 ? (settings.speedLimitKbps / 1024).toStringAsFixed(settings.speedLimitKbps % 1024 == 0 ? 0 : 1) + " MB/s" : "${settings.speedLimitKbps} KB/s"}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF00E5FF),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
         ],
         _UpdateNotice(core: core, settings: settings, palette: p),
@@ -1623,7 +1658,10 @@ class _PhoneHome extends StatelessWidget {
     } else {
       await core.setOn(!on);
     }
-    if (!on && !_dnsMode) _testAfterPowerOn(core);
+    if (!on && !_dnsMode) {
+      _testAfterPowerOn(core);
+      unawaited(LicenseService.syncStatus(settings));
+    }
   }
 
   @override
@@ -2070,6 +2108,34 @@ class _PhoneHome extends StatelessWidget {
                   textColor: p.text,
                   mutedColor: p.muted,
                 ),
+                if (settings.speedLimitEnabled && settings.speedLimitKbps > 0) ...[
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF00E5FF).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFF00E5FF).withOpacity(0.28)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.speed_rounded, size: 14, color: Color(0xFF00E5FF)),
+                          const SizedBox(width: 6),
+                          Text(
+                            'سقف سرعت فعال: ${settings.speedLimitKbps >= 1024 ? (settings.speedLimitKbps / 1024).toStringAsFixed(settings.speedLimitKbps % 1024 == 0 ? 0 : 1) + " MB/s" : "${settings.speedLimitKbps} KB/s"}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF00E5FF),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 10),
               ],
               _UpdateNotice(core: core, settings: settings, palette: p),

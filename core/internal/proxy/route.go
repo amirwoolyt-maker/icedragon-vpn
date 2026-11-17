@@ -166,6 +166,13 @@ func NewRoutedOpener(upstream tunnelOpener) *RoutedOpener {
 	return o
 }
 
+// SetSpeedLimit configures the download bandwidth throttle in kbps (0 for unlimited).
+func (o *RoutedOpener) SetSpeedLimit(kbps int) {
+	if o.meter != nil {
+		o.meter.SetSpeedLimit(kbps)
+	}
+}
+
 // Lookup resolves host the way the router's IP rules see it: through
 // Mozilla.
 func (o *RoutedOpener) Lookup(ctx context.Context, host string) ([]netip.Addr, error) {
@@ -275,7 +282,7 @@ func (o *RoutedOpener) openPush(authority, clientKey string) (conn net.Conn, ok 
 	}
 	o.direct.Add(1)
 	logx.Debug("Google's push server directly target=%s", logx.Target(authority))
-	return countRouted(conn, &o.meter.directUp, &o.meter.directDown, RouteDirect), true
+	return countRoutedWithMeter(conn, &o.meter.directUp, &o.meter.directDown, RouteDirect, o.meter), true
 }
 
 // OpenTunnelForClient keeps the client affinity of the upstream pool.
@@ -300,7 +307,7 @@ func (o *RoutedOpener) OpenTunnelForClient(authority, clientKey string) (net.Con
 			if err != nil {
 				return nil, err
 			}
-			return countRouted(conn, &o.meter.directUp, &o.meter.directDown, RouteDirect), nil
+			return countRoutedWithMeter(conn, &o.meter.directUp, &o.meter.directDown, RouteDirect, o.meter), nil
 		case routing.Block:
 			o.blocked.Add(1)
 			logx.Debug("route blocked target=%s", logx.Target(authority))
@@ -320,7 +327,7 @@ func (o *RoutedOpener) OpenTunnelForClient(authority, clientKey string) (net.Con
 		logx.Debug("DNS through the proxy answered here target=%s", logx.Target(authority))
 		client, server := net.Pipe()
 		go serveDNS(server, o.exchange)
-		return countRouted(client, &o.meter.up, &o.meter.down, RouteVPN), nil
+		return countRoutedWithMeter(client, &o.meter.up, &o.meter.down, RouteVPN, o.meter), nil
 	}
 	authority = throughMozilla(authority)
 	var conn net.Conn
@@ -333,5 +340,5 @@ func (o *RoutedOpener) OpenTunnelForClient(authority, clientKey string) (net.Con
 	if err != nil {
 		return nil, err
 	}
-	return countRouted(conn, &o.meter.up, &o.meter.down, RouteVPN), nil
+	return countRoutedWithMeter(conn, &o.meter.up, &o.meter.down, RouteVPN, o.meter), nil
 }

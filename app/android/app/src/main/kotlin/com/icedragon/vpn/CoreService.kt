@@ -623,6 +623,7 @@ class CoreService : VpnService() {
         private const val PRO_ACTIVE = "pro_active"
         private const val PRO_EXPIRES_AT = "pro_expires_at"
         private const val PRO_LIFETIME = "pro_lifetime"
+        private const val PRO_LAST_KNOWN_TIME = "pro_last_known_server_time"
 
         fun isProActive(context: Context): Boolean {
             val p = prefs(context)
@@ -637,18 +638,26 @@ class CoreService : VpnService() {
                         timeZone = java.util.TimeZone.getTimeZone("UTC")
                     }.parse(expiresAt.replace("Z", "+0000"))?.time ?: 0L
                 }
-                System.currentTimeMillis() < exp
+                val lastKnownTime = p.getLong(PRO_LAST_KNOWN_TIME, 0L)
+                val now = maxOf(System.currentTimeMillis(), lastKnownTime)
+                now < exp
             } catch (e: Throwable) {
                 false
             }
         }
 
-        fun setProActive(context: Context, active: Boolean, expiresAt: String? = null, isLifetime: Boolean = false) {
-            prefs(context).edit()
+        fun setProActive(context: Context, active: Boolean, expiresAt: String? = null, isLifetime: Boolean = false, lastKnownServerTimeMillis: Long = 0L) {
+            val edit = prefs(context).edit()
                 .putBoolean(PRO_ACTIVE, active)
                 .putString(PRO_EXPIRES_AT, expiresAt)
                 .putBoolean(PRO_LIFETIME, isLifetime)
-                .apply()
+            if (lastKnownServerTimeMillis > 0L) {
+                val currentLast = prefs(context).getLong(PRO_LAST_KNOWN_TIME, 0L)
+                if (lastKnownServerTimeMillis > currentLast) {
+                    edit.putLong(PRO_LAST_KNOWN_TIME, lastKnownServerTimeMillis)
+                }
+            }
+            edit.apply()
             QuickTile.refresh(context)
         }
 

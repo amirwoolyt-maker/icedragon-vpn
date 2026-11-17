@@ -107,6 +107,9 @@ func (d *Daemon) startEngine() (*proxyEngine, error) {
 	routed := proxy.NewRoutedOpener(&engineUpstream{d: d, engine: engine})
 	routed.SetRouter(d.currentRouter())
 	engine.routed = routed
+	if cfg.Proxy.SpeedLimitKbps > 0 {
+		routed.SetSpeedLimit(cfg.Proxy.SpeedLimitKbps)
+	}
 	socks := proxy.NewSOCKSServer(routed, config.HandshakeTimeout, config.IdleTimeout, cfg.Proxy.MaxConnections)
 	socks.Auth = proxy.SOCKSCredentials(cfg.Proxy.Username, cfg.Proxy.Password)
 	socks.Notices = d.notices
