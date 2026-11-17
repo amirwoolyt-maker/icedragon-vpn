@@ -11,7 +11,7 @@
 [![Telegram](https://img.shields.io/badge/Telegram-@icedragon__lair-26A5E4?style=flat-square&logo=telegram)](https://t.me/icedragon_lair)
 [![License](https://img.shields.io/github/license/amirwoolyt-maker/icedragon-vpn?style=flat-square&label=License)](../../LICENSE)
 
-[📥 دانلود مستقیم APK](#-دانلود-مستقیم-و-راحت) &bull; [✨ ویژگی‌ها](#-چرا-icedragon-vpn) &bull; [💬 کانال تلگرام](https://t.me/icedragon_lair) &bull; [English](../../README.md) &bull; [Русский](README_ru.md) &bull; [中文](README_zh.md)
+[📥 دانلود مستقیم APK](#-دانلود-مستقیم-و-راحت) &bull; [✨ ویژگی‌ها](#-چرا-icedragon-vpn) &bull; [📸 تصاویر محیط برنامه](#-تصاویر-محیط-برنامه-screenshots) &bull; [💬 کانال تلگرام](https://t.me/icedragon_lair) &bull; [English](../../README.md) &bull; [Русский](README_ru.md) &bull; [中文](README_zh.md)
 
 </div>
 
@@ -33,6 +33,56 @@
 - 📲 **ویجت شیشه‌ای صفحه اصلی و تایل تنظیمات سریع:** اتصال، قطع و اتصال مجدد (Reconnect) مستقیم از ویجت صفحه اصلی یا نوتیفیکیشن اندروید.
 - 🛡️ **جداسازی برنامه‌ها (Split Tunneling) و ابزارهای عبور از محدودیت:** استثنا کردن برنامه‌های دلخواه، فرگمنت TLS، تنظیم DNS اختصاصی و پشتیبانی از رله.
 - 🔔 **اطلاع‌رسانی هوشمند آپدیت جدید:** دریافت نوتیفیکیشن انتشار نسخه جدید به‌صورت غیراجباری در خود برنامه و نصب آسان روی نسخه‌های قبلی.
+
+---
+
+## 📸 تصاویر محیط برنامه (Screenshots)
+
+<h3 align="center">🖥️ نسخه دسکتاپ (ویندوز، مک و لینوکس)</h3>
+
+<table align="center" width="100%">
+  <tr>
+    <th align="center" width="50%">اتصال فعال، مانیتورینگ زنده ترافیک و حالت TUN</th>
+    <th align="center" width="50%">لیست سرورها، تست پینگ واقعی و انتخاب سریع‌ترین سرور</th>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="../screenshots/desktop_connected.jpg" alt="داشبورد متصل دسکتاپ" width="100%">
+    </td>
+    <td align="center" width="50%">
+      <img src="../screenshots/desktop_servers.png" alt="انتخاب سرور دسکتاپ" width="100%">
+    </td>
+  </tr>
+</table>
+
+<h3 align="center">📱 نسخه موبایل (اندروید)</h3>
+
+<table align="center" width="100%">
+  <tr>
+    <th align="center" width="20%">حالت وی‌پی‌ان (VPN)</th>
+    <th align="center" width="20%">حالت DNS مجزا</th>
+    <th align="center" width="20%">مرکز تنظیمات</th>
+    <th align="center" width="20%">انتخاب ارائه‌دهنده DNS</th>
+    <th align="center" width="20%">تنظیمات عمومی و شخصی‌سازی</th>
+  </tr>
+  <tr>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_home_vpn.jpg" alt="حالت VPN اندروید" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_home_dns.jpg" alt="حالت DNS اندروید" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_settings.jpg" alt="مرکز تنظیمات" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_dns.jpg" alt="انتخاب ارائه‌دهنده DNS" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_general.png" alt="تنظیمات عمومی" width="100%">
+    </td>
+  </tr>
+</table>
 
 ---
 

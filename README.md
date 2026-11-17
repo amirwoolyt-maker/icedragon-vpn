@@ -11,7 +11,7 @@
 [![Telegram](https://img.shields.io/badge/Telegram-@icedragon__lair-26A5E4?style=flat-square&logo=telegram)](https://t.me/icedragon_lair)
 [![License](https://img.shields.io/github/license/amirwoolyt-maker/icedragon-vpn?style=flat-square&label=License)](LICENSE)
 
-[📥 Download Latest APK](#-quick-download) &bull; [✨ Features](#-why-icedragon-vpn) &bull; [💬 Telegram Channel](https://t.me/icedragon_lair) &bull; [🌐 فارسی](docs/readme/README_fa.md) &bull; [Русский](docs/readme/README_ru.md) &bull; [中文](docs/readme/README_zh.md)
+[📥 Download Latest APK](#-quick-download) &bull; [✨ Features](#-why-icedragon-vpn) &bull; [📸 Screenshots](#-screenshots) &bull; [💬 Telegram Channel](https://t.me/icedragon_lair) &bull; [🌐 فارسی](docs/readme/README_fa.md) &bull; [Русский](docs/readme/README_ru.md) &bull; [中文](docs/readme/README_zh.md)
 
 </div>
 
@@ -31,6 +31,56 @@
 - 📲 **Home Screen Widget & Quick Settings Tile:** Connect, disconnect, or reconnect straight from your Android home screen widget or status-bar notification.
 - 🛡️ **App Split Tunneling & Built-in Bypass Tools:** Per-app VPN bypass, TLS fragmentation, custom DoH/DoT DNS, and relay support for restrictive networks.
 - 🔔 **Automatic Update Notifications:** Stay effortlessly up to date with non-intrusive in-app notifications and direct APK downloads from GitHub Releases.
+
+---
+
+## 📸 Screenshots
+
+<h3 align="center">🖥️ Desktop Dashboard (Windows &bull; macOS &bull; Linux)</h3>
+
+<table align="center" width="100%">
+  <tr>
+    <th align="center" width="50%">Connected Dashboard &amp; Live Speed Graph (TUN Mode)</th>
+    <th align="center" width="50%">Server Selection, Real Latency Test &amp; Smart Routing</th>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/screenshots/desktop_connected.jpg" alt="IceDragon VPN Desktop Connected Dashboard" width="100%">
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/screenshots/desktop_servers.png" alt="IceDragon VPN Desktop Server List" width="100%">
+    </td>
+  </tr>
+</table>
+
+<h3 align="center">📱 Mobile Experience (Android)</h3>
+
+<table align="center" width="100%">
+  <tr>
+    <th align="center" width="20%">VPN Mode</th>
+    <th align="center" width="20%">Dedicated DNS Mode</th>
+    <th align="center" width="20%">Settings Hub</th>
+    <th align="center" width="20%">DNS Providers</th>
+    <th align="center" width="20%">Preferences &amp; Graphs</th>
+  </tr>
+  <tr>
+    <td align="center" width="20%">
+      <img src="docs/screenshots/mobile_home_vpn.jpg" alt="Android Home - VPN Mode" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="docs/screenshots/mobile_home_dns.jpg" alt="Android Home - DNS Mode" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="docs/screenshots/mobile_settings.jpg" alt="Android Settings Hub" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="docs/screenshots/mobile_dns.jpg" alt="DNS Selection" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="docs/screenshots/mobile_general.png" alt="General Settings" width="100%">
+    </td>
+  </tr>
+</table>
 
 ---
 

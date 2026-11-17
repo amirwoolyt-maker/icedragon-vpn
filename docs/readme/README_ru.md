@@ -11,7 +11,7 @@
 [![Telegram](https://img.shields.io/badge/Telegram-@icedragon__lair-26A5E4?style=flat-square&logo=telegram)](https://t.me/icedragon_lair)
 [![License](https://img.shields.io/github/license/amirwoolyt-maker/icedragon-vpn?style=flat-square&label=License)](../../LICENSE)
 
-[📥 Скачать APK](#-быстрая-загрузка) &bull; [💬 Telegram-канал](https://t.me/icedragon_lair) &bull; [English](../../README.md) &bull; [فارسی](README_fa.md) &bull; [中文](README_zh.md)
+[📥 Скачать APK](#-быстрая-загрузка) &bull; [📸 Скриншоты](#-скриншоты-screenshots) &bull; [💬 Telegram-канал](https://t.me/icedragon_lair) &bull; [English](../../README.md) &bull; [فارسی](README_fa.md) &bull; [中文](README_zh.md)
 
 </div>
 
@@ -26,6 +26,56 @@
 - 🔄 **50 ГБ/мес на аккаунт и авто-переключение:** плавная смена аккаунта при достижении лимита без разрыва соединений.
 - ⚡ **Живой пинг на быстрых локациях и диагностика в 1 касание:** Auto-Fix & Connect и цветовые метки задержки.
 - 🔔 **Удобные уведомления об обновлениях:** мягкое оповещение о выходе новой версии прямо в приложении.
+
+---
+
+## 📸 Скриншоты (Screenshots)
+
+<h3 align="center">🖥️ Десктопная версия (Windows &bull; macOS &bull; Linux)</h3>
+
+<table align="center" width="100%">
+  <tr>
+    <th align="center" width="50%">Активное подключение и мониторинг скорости (режим TUN)</th>
+    <th align="center" width="50%">Список локаций, тест пинга и авто-выбор</th>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="../screenshots/desktop_connected.jpg" alt="IceDragon Desktop Connected" width="100%">
+    </td>
+    <td align="center" width="50%">
+      <img src="../screenshots/desktop_servers.png" alt="IceDragon Desktop Servers" width="100%">
+    </td>
+  </tr>
+</table>
+
+<h3 align="center">📱 Мобильная версия (Android)</h3>
+
+<table align="center" width="100%">
+  <tr>
+    <th align="center" width="20%">Режим VPN</th>
+    <th align="center" width="20%">Автономный DNS</th>
+    <th align="center" width="20%">Центр настроек</th>
+    <th align="center" width="20%">Провайдеры DNS</th>
+    <th align="center" width="20%">Параметры и графики</th>
+  </tr>
+  <tr>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_home_vpn.jpg" alt="Android VPN Mode" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_home_dns.jpg" alt="Android DNS Mode" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_settings.jpg" alt="Android Settings" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_dns.jpg" alt="DNS Providers" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_general.png" alt="General Settings" width="100%">
+    </td>
+  </tr>
+</table>
 
 ## 📥 Быстрая загрузка
 

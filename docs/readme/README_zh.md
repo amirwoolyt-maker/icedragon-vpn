@@ -11,7 +11,7 @@
 [![Telegram](https://img.shields.io/badge/Telegram-@icedragon__lair-26A5E4?style=flat-square&logo=telegram)](https://t.me/icedragon_lair)
 [![License](https://img.shields.io/github/license/amirwoolyt-maker/icedragon-vpn?style=flat-square&label=License)](../../LICENSE)
 
-[📥 下载 APK](#-快速下载) &bull; [💬 Telegram 频道](https://t.me/icedragon_lair) &bull; [English](../../README.md) &bull; [فارسی](README_fa.md) &bull; [Русский](README_ru.md)
+[📥 下载 APK](#-快速下载) &bull; [📸 界面截图](#-界面截图-screenshots) &bull; [💬 Telegram 频道](https://t.me/icedragon_lair) &bull; [English](../../README.md) &bull; [فارسی](README_fa.md) &bull; [Русский](README_ru.md)
 
 </div>
 
@@ -26,6 +26,56 @@
 - 🔄 **每账户每月 50 GB & 自动无感切换：** 达到配额阈值后自动切换账户，不中断当前连接。
 - ⚡ **实时延迟测速与一键自愈诊断：** 主页常用节点显示实时延迟（`ms`），内置 Auto-Fix & Connect 一键修复连接。
 - 🔔 **无打扰应用内更新提醒：** 新版本发布时自动提示升级，同时保持旧版本稳定运行。
+
+---
+
+## 📸 界面截图 (Screenshots)
+
+<h3 align="center">🖥️ 桌面端体验 (Windows &bull; macOS &bull; Linux)</h3>
+
+<table align="center" width="100%">
+  <tr>
+    <th align="center" width="50%">已连接仪表盘与实时流量图表 (TUN 模式)</th>
+    <th align="center" width="50%">节点列表、实时测速与最快节点选择</th>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="../screenshots/desktop_connected.jpg" alt="桌面端仪表盘" width="100%">
+    </td>
+    <td align="center" width="50%">
+      <img src="../screenshots/desktop_servers.png" alt="节点选择列表" width="100%">
+    </td>
+  </tr>
+</table>
+
+<h3 align="center">📱 移动端体验 (Android)</h3>
+
+<table align="center" width="100%">
+  <tr>
+    <th align="center" width="20%">VPN 模式</th>
+    <th align="center" width="20%">独立 DNS 模式</th>
+    <th align="center" width="20%">功能设置中心</th>
+    <th align="center" width="20%">DNS 提供商</th>
+    <th align="center" width="20%">个性化与实时图表</th>
+  </tr>
+  <tr>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_home_vpn.jpg" alt="Android VPN 模式" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_home_dns.jpg" alt="Android DNS 模式" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_settings.jpg" alt="设置中心" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_dns.jpg" alt="DNS 提供商选择" width="100%">
+    </td>
+    <td align="center" width="20%">
+      <img src="../screenshots/mobile_general.png" alt="常规偏好设置" width="100%">
+    </td>
+  </tr>
+</table>
 
 ## 📥 快速下载
 
