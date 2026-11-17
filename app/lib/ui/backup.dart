@@ -208,7 +208,7 @@ class BackupPanel extends StatelessWidget {
     final theme = Theme.of(context);
     final isFa = l.backupExport.contains('پشتیبان');
     return Panel(
-      title: isFa ? 'پشتیبان‌گیری و بازیابی اطلاعات' : 'Backup & Restore',
+      title: isFa ? 'پشتیبان‌گیری و بازیابی اطلاعات' : 'Data Archiving & Restore',
       icon: Icons.archive_rounded,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,7 +216,7 @@ class BackupPanel extends StatelessWidget {
           Text(
             isFa
                 ? 'از حساب‌ها، سرورها و تنظیمات خود فایل پشتیبان (ZIP) تهیه کنید یا هر زمان که خواستید آن را روی این دستگاه یا دستگاهی دیگر بازگردانید.'
-                : 'Export your accounts, servers, and configuration to a ZIP backup file, or restore them anytime on this device or another.',
+                : 'Export your accounts, servers, and configuration to a ZIP archive, or restore them anytime on this device or another.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -229,12 +229,12 @@ class BackupPanel extends StatelessWidget {
               FilledButton.icon(
                 onPressed: () => BackupMenuButton(core: core).export(context),
                 icon: const Icon(Icons.file_download_rounded, size: 18),
-                label: Text(l.backupExport),
+                label: Text(isFa ? 'تهیه نسخه پشتیبان (خروجی ZIP)' : 'Export ZIP Archive'),
               ),
               OutlinedButton.icon(
                 onPressed: () => BackupMenuButton(core: core).import(context),
                 icon: const Icon(Icons.file_upload_rounded, size: 18),
-                label: Text(l.backupImport),
+                label: Text(isFa ? 'بازیابی از فایل پشتیبان (ورود ZIP)' : 'Restore ZIP Archive'),
               ),
             ],
           ),
