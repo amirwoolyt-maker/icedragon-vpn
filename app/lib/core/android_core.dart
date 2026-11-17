@@ -421,4 +421,27 @@ class AndroidCore {
       });
     } catch (_) {}
   }
+
+  static Future<bool> saveSecret(String key, String value) async {
+    try {
+      final res = await _channel.invokeMethod<bool>('saveSecret', {
+        'key': key,
+        'value': value,
+      });
+      return res == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<String> readSecret(String key) async {
+    try {
+      final res = await _channel.invokeMethod<String>('readSecret', {
+        'key': key,
+      });
+      return res ?? '';
+    } catch (_) {
+      return '';
+    }
+  }
 }

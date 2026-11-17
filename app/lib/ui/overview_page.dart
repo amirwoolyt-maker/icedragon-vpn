@@ -967,7 +967,7 @@ class _DesktopHome extends StatelessWidget {
                     const Icon(Icons.speed_rounded, size: 14, color: Color(0xFF00E5FF)),
                     const SizedBox(width: 6),
                     Text(
-                      'سقف سرعت فعال: ${settings.speedLimitKbps >= 1024 ? (settings.speedLimitKbps / 1024).toStringAsFixed(settings.speedLimitKbps % 1024 == 0 ? 0 : 1) + " MB/s" : "${settings.speedLimitKbps} KB/s"}',
+                      'سقف سرعت فعال: ${settings.speedLimitKbps >= 1024 ? "${(settings.speedLimitKbps / 1024).toStringAsFixed(settings.speedLimitKbps % 1024 == 0 ? 0 : 1)} MB/s" : "${settings.speedLimitKbps} KB/s"}',
                       style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -2124,7 +2124,7 @@ class _PhoneHome extends StatelessWidget {
                           const Icon(Icons.speed_rounded, size: 14, color: Color(0xFF00E5FF)),
                           const SizedBox(width: 6),
                           Text(
-                            'سقف سرعت فعال: ${settings.speedLimitKbps >= 1024 ? (settings.speedLimitKbps / 1024).toStringAsFixed(settings.speedLimitKbps % 1024 == 0 ? 0 : 1) + " MB/s" : "${settings.speedLimitKbps} KB/s"}',
+                            'سقف سرعت فعال: ${settings.speedLimitKbps >= 1024 ? "${(settings.speedLimitKbps / 1024).toStringAsFixed(settings.speedLimitKbps % 1024 == 0 ? 0 : 1)} MB/s" : "${settings.speedLimitKbps} KB/s"}',
                             style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,

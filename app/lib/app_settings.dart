@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -335,18 +336,18 @@ class AppSettings extends ChangeNotifier {
           generatedDevice = true;
         }
         if (generatedDevice) {
-          unawaited(s.save());
+          unawaited(s._save());
         }
       }
     } on FileSystemException {
       // First run: defaults, and the welcome page.
       s.firstRun = true;
       s.deviceId = 'dev_${DateTime.now().millisecondsSinceEpoch}_${math.Random().nextInt(999999)}';
-      unawaited(s.save());
+      unawaited(s._save());
     } on FormatException {
       // A broken file: defaults, rewritten on the next change.
       s.deviceId = 'dev_${DateTime.now().millisecondsSinceEpoch}_${math.Random().nextInt(999999)}';
-      unawaited(s.save());
+      unawaited(s._save());
     }
     return s;
   }

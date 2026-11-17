@@ -363,10 +363,11 @@ Future<void> showAssignCategoriesSheet(
                           radius: 12,
                           backgroundColor: Color(cat.colorValue),
                         ),
-                        title: Text(cat.label(fa: s.isFa)),
-                        trailing: cat.builtIn
-                            ? null
-                            : IconButton(
+                        title: Row(
+                          children: [
+                            Expanded(child: Text(cat.label(fa: s.isFa))),
+                            if (!cat.builtIn)
+                              IconButton(
                                 icon: const Icon(
                                   Icons.delete_outline_rounded,
                                   size: 18,
@@ -378,6 +379,8 @@ Future<void> showAssignCategoriesSheet(
                                   }
                                 },
                               ),
+                          ],
+                        ),
                       ),
                   ],
                 ),
