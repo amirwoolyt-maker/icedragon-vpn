@@ -400,6 +400,11 @@ class _DesktopHome extends StatelessWidget {
 
   /// The button: off, or on with a test that confirms the connection.
   Future<void> _power(bool on) async {
+    if (on && defaultTargetPlatform == TargetPlatform.android) {
+      if (settings.homeConnectionMode == 'dns') {
+        settings.update(homeConnectionMode: 'vpn', homeDnsEnabled: false);
+      }
+    }
     await core.setOn(on);
     if (on) _testAfterPowerOn(core);
   }
@@ -410,6 +415,11 @@ class _DesktopHome extends StatelessWidget {
       return;
     }
     settings.update(homeConnectionMode: 'dns', homeDnsEnabled: on);
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        await AndroidCore.setDnsOn(on);
+      } catch (_) {}
+    }
   }
 
   @override

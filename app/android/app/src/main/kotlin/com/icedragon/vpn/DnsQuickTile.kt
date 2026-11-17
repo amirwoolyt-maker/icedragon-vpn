@@ -34,6 +34,7 @@ class DnsQuickTile : TileService() {
             }
         }
         show()
+        QuickTile.refresh(this)
     }
 
     private fun show() {

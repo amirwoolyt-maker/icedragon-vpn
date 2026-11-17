@@ -158,7 +158,7 @@ class Shell extends StatefulWidget {
 
 enum _Page { overview, servers, accounts, settings, logs, about }
 
-class _ShellState extends State<Shell> {
+class _ShellState extends State<Shell> with WidgetsBindingObserver {
   _Page _page = _Page.overview;
 
   /// The settings section the home page opened (Connection), until another
@@ -168,7 +168,24 @@ class _ShellState extends State<Shell> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     AndroidCore.homeRequests.addListener(_openHome);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      widget.settings.reload();
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        AndroidCore.isDnsOnly().then((isDns) {
+          if (isDns && (!widget.settings.homeDnsEnabled || widget.settings.homeConnectionMode != 'dns')) {
+            widget.settings.update(homeConnectionMode: 'dns', homeDnsEnabled: true);
+          } else if (!isDns && widget.settings.homeConnectionMode == 'dns' && widget.settings.homeDnsEnabled) {
+            widget.settings.update(homeDnsEnabled: false);
+          }
+        });
+      }
+    }
   }
 
   void _openHome() {
@@ -181,6 +198,7 @@ class _ShellState extends State<Shell> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     AndroidCore.homeRequests.removeListener(_openHome);
     super.dispose();
   }

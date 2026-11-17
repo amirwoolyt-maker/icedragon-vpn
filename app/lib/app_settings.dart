@@ -315,6 +315,30 @@ class AppSettings extends ChangeNotifier {
     return s;
   }
 
+  Future<void> reload() async {
+    final f = file;
+    if (f == null) return;
+    try {
+      if (!await f.exists()) return;
+      final j = jsonDecode(await f.readAsString());
+      if (j is Map<String, Object?>) {
+        if (j['home_connection_mode'] is String) {
+          homeConnectionMode = j['home_connection_mode'] as String;
+        }
+        if (j['home_dns_enabled'] is bool) {
+          homeDnsEnabled = j['home_dns_enabled'] as bool;
+        }
+        if (j['home_dns_name'] case final String name) {
+          homeDnsName = name;
+        }
+        if (j['home_dns_servers'] case final List<Object?> servers) {
+          homeDnsServers = servers.whereType<String>().toList();
+        }
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
+
   void update({
     String? language,
     ThemeMode? themeMode,

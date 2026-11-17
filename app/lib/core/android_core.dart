@@ -247,6 +247,25 @@ class AndroidCore {
     }
   }
 
+  /// Turns Android DNS-only mode on or off.
+  static Future<void> setDnsOn(bool on) async {
+    try {
+      await _channel.invokeMethod<void>('setDnsOn', {'on': on});
+    } on PlatformException catch (e) {
+      if (e.code == 'vpn_denied') throw const VpnNotAllowed();
+      throw CoreApiException(0, e.message ?? e.code);
+    }
+  }
+
+  /// Whether Android DNS-only mode is active.
+  static Future<bool> isDnsOnly() async {
+    try {
+      return await _channel.invokeMethod<bool>('isDnsOnly') ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// The connection mode: 'vpn' (every app on the phone) or 'proxy' (only
   /// apps set up to use the local proxy). Read at start ([loadMode]).
   static final mode = ValueNotifier<String>('vpn');

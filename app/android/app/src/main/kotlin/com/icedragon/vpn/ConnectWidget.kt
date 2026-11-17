@@ -94,7 +94,7 @@ class ConnectWidget : AppWidgetProvider() {
 
         private fun current(context: Context): Shown {
             val state = when {
-                !CoreService.on -> OFF
+                !CoreService.on || CoreService.isDnsOnly -> OFF
                 CoreService.connected -> CONNECTED
                 else -> CONNECTING
             }

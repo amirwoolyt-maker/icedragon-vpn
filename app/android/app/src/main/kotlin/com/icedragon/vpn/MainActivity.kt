@@ -150,6 +150,31 @@ class MainActivity : FlutterActivity() {
                         }
                     }
                 }
+                "setDnsOn" -> {
+                    val on = call.argument<Boolean>("on") == true
+                    if (on) {
+                        val consent = if (CoreService.usesVpn(this)) VpnService.prepare(this) else null
+                        if (consent == null) {
+                            try {
+                                CoreService.turnOn(this, dnsOnly = true)
+                                result.success(null)
+                            } catch (e: Exception) {
+                                result.error("start_failed", e.message, null)
+                            }
+                        } else {
+                            pendingOn?.error("vpn_denied", "superseded", null)
+                            pendingOn = result
+                            startActivityForResult(consent, VPN_REQUEST)
+                        }
+                    } else {
+                        if (CoreService.on && CoreService.isDnsOnly) {
+                            CoreService.turnOff(this)
+                        }
+                        result.success(null)
+                    }
+                }
+                "isDnsOnly" -> result.success(CoreService.on && CoreService.isDnsOnly)
+                "isVpnOn" -> result.success(CoreService.on && !CoreService.isDnsOnly)
                 "isRunning" -> result.success(
                     try {
                         mobile.Mobile.running()

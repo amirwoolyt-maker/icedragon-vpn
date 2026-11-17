@@ -17,8 +17,10 @@ import android.net.VpnService
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.ParcelFileDescriptor
 import android.util.Log
 import android.widget.Toast
+import org.json.JSONObject
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
@@ -67,6 +69,7 @@ class CoreService : VpnService() {
             // now, between Android removing it and onDestroy, would leave it
             // behind with no service.
             if (!on) return
+            if (isDnsOnly) return
             if (!mobile.Mobile.running()) {
                 Log.e(TAG, "the core stopped; turning the VPN off")
                 turnOff(this@CoreService)
@@ -241,7 +244,7 @@ class CoreService : VpnService() {
         if (intent?.action == ACTION_RECONNECT) {
             // New settings: the apps left out of the VPN, or the mode.
             if (on) {
-                if (usesVpn(this)) {
+                if (isDnsOnly || usesVpn(this)) {
                     if (!startTunnel()) turnOff(this)
                 } else {
                     stopTunnel()
@@ -249,7 +252,23 @@ class CoreService : VpnService() {
             }
             return START_STICKY
         }
+        val dnsOnly = intent?.getBooleanExtra("dns_only", isDnsOnly) ?: isDnsOnly
+        isDnsOnly = dnsOnly
         startInForeground()
+
+        if (dnsOnly) {
+            if (!startTunnel()) {
+                turnOff(this)
+                return START_NOT_STICKY
+            }
+            on = true
+            offline = reportedDown
+            QuickTile.refresh(this)
+            ConnectWidget.updateAll(this)
+            watchNetwork()
+            return START_STICKY
+        }
+
         // Started by turnOn, or again by the system after it ended the
         // process: either way the VPN is on.
         startCore(this, on = true)
@@ -290,8 +309,10 @@ class CoreService : VpnService() {
         stopWatchingNetwork()
         stopTunnel()
         on = false
+        isDnsOnly = false
         connected = false
         exitCountryCode = ""
+        setDnsSettingsActive(this, false)
         QuickTile.refresh(this)
         ConnectWidget.updateAll(this)
         super.onDestroy()
@@ -305,31 +326,57 @@ class CoreService : VpnService() {
             return false
         }
         return try {
-            // tun.mtu when the user set one, else the app's own.
-            val mtu = mobile.Mobile.tunMTU().takeIf { it > 0 } ?: MTU
-            val config = mobile.Mobile.tunConfig(mtu)
-            val builder = Builder()
-                .setSession(if (isDnsOnly) getString(R.string.quick_tile_dns) else getString(R.string.app_name))
-                .setMtu(mtu)
-                .addAddress("172.19.0.1", 30)
-                .addDnsServer("172.19.0.2")
-
             if (isDnsOnly) {
+                val builder = Builder()
+                    .setSession(getString(R.string.quick_tile_dns))
+                    .setMtu(MTU)
+                    .addAddress("172.19.0.1", 30)
+
+                val dnsServers = getDnsServers(this)
+                for (dns in dnsServers) {
+                    try {
+                        builder.addDnsServer(dns)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "failed to add DNS server: $dns", e)
+                    }
+                }
                 builder.addRoute("172.19.0.2", 32)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) builder.setMetered(false)
+
+                try {
+                    vpnInterface?.close()
+                } catch (ignored: Throwable) {}
+                val tun = builder.establish() ?: return false
+                vpnInterface = tun
+                tunnelUpAt = System.currentTimeMillis()
+                true
             } else {
-                builder.addRoute("0.0.0.0", 0)
+                // tun.mtu when the user set one, else the app's own.
+                val mtu = mobile.Mobile.tunMTU().takeIf { it > 0 } ?: MTU
+                val config = mobile.Mobile.tunConfig(mtu)
+                val builder = Builder()
+                    .setSession(getString(R.string.app_name))
+                    .setMtu(mtu)
+                    .addAddress("172.19.0.1", 30)
+                    .addDnsServer("172.19.0.2")
+                    .addRoute("0.0.0.0", 0)
                     .addAddress("fdfe:dcba:9876::1", 126)
                     .addRoute("::", 0)
                 applyApps(builder)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) builder.setMetered(false)
+
+                try {
+                    vpnInterface?.close()
+                } catch (ignored: Throwable) {}
+                val tun = builder.establish() ?: return false
+                vpnInterface = tun
+                if (!Tun2Socks.start(config, tun)) {
+                    Log.e(TAG, "the VPN's tunnel did not start")
+                    return false
+                }
+                tunnelUpAt = System.currentTimeMillis()
+                true
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) builder.setMetered(false)
-            val tun = builder.establish() ?: return false
-            if (!Tun2Socks.start(config, tun)) {
-                Log.e(TAG, "the VPN's tunnel did not start")
-                return false
-            }
-            tunnelUpAt = System.currentTimeMillis()
-            true
         } catch (e: Throwable) { // An Error too: the native library may not load.
             Log.e(TAG, "the VPN did not start", e)
             Toast.makeText(this, e.message ?: e.toString(), Toast.LENGTH_LONG).show()
@@ -426,6 +473,37 @@ class CoreService : VpnService() {
      * is unknown; a Stop action.
      */
     private fun notification(code: String): Notification {
+        val open = PendingIntent.getActivity(
+            this, 0, Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+            PendingIntent.FLAG_IMMUTABLE,
+        )
+        val stop = PendingIntent.getService(
+            this, 1, Intent(this, CoreService::class.java).setAction(ACTION_STOP),
+            PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        if (isDnsOnly) {
+            val title = getString(R.string.quick_tile_dns)
+            val dnsName = getDnsName(this)
+            val text = "$title ($dnsName)"
+            val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Notification.Builder(this, CHANNEL)
+            } else {
+                @Suppress("DEPRECATION")
+                Notification.Builder(this)
+            }
+            return builder
+                .setSmallIcon(R.drawable.ic_stat_logo)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setStyle(Notification.BigTextStyle().bigText(text))
+                .setContentIntent(open)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .addAction(Notification.Action.Builder(null, getString(R.string.notification_stop), stop).build())
+                .build()
+        }
+
         val state = when {
             code == NO_NETWORK -> getString(R.string.notification_no_network)
             code.length == 2 -> "${flag(code)}  ${Locale.Builder().setRegion(code).build().displayCountry}"
@@ -436,14 +514,6 @@ class CoreService : VpnService() {
         // it is the proxy, not the VPN.
         val first = if (shownSpeed.isEmpty()) state else "$state  ·  $shownSpeed"
         val text = if (shownProxy.isEmpty()) first else "$first\n${getString(R.string.notification_proxy, shownProxy)}"
-        val open = PendingIntent.getActivity(
-            this, 0, Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
-            PendingIntent.FLAG_IMMUTABLE,
-        )
-        val stop = PendingIntent.getService(
-            this, 1, Intent(this, CoreService::class.java).setAction(ACTION_STOP),
-            PendingIntent.FLAG_IMMUTABLE,
-        )
         val retry = PendingIntent.getService(
             this, 2, Intent(this, CoreService::class.java).setAction(ACTION_RETRY),
             PendingIntent.FLAG_IMMUTABLE,
@@ -637,6 +707,65 @@ class CoreService : VpnService() {
         var isDnsOnly = false
             private set
 
+        @Volatile
+        private var vpnInterface: ParcelFileDescriptor? = null
+
+        fun getDnsServers(context: Context): List<String> {
+            try {
+                val file = File(dataDir(context), "app-settings.json")
+                if (file.exists()) {
+                    val json = JSONObject(file.readText())
+                    val serversJson = json.optJSONArray("home_dns_servers")
+                    if (serversJson != null && serversJson.length() > 0) {
+                        val list = mutableListOf<String>()
+                        for (i in 0 until serversJson.length()) {
+                            val s = serversJson.optString(i)
+                            if (s.matches(Regex("""^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"""))) {
+                                list.add(s)
+                            }
+                        }
+                        if (list.isNotEmpty()) return list
+                    }
+                }
+            } catch (ignored: Throwable) {}
+            return listOf("1.1.1.1", "1.0.0.1")
+        }
+
+        fun getDnsName(context: Context): String {
+            try {
+                val file = File(dataDir(context), "app-settings.json")
+                if (file.exists()) {
+                    val json = JSONObject(file.readText())
+                    val name = json.optString("home_dns_name")
+                    if (name.isNotBlank()) return name
+                }
+            } catch (ignored: Throwable) {}
+            return "Cloudflare"
+        }
+
+        private fun setDnsSettingsActive(context: Context, active: Boolean) {
+            try {
+                val file = File(dataDir(context), "app-settings.json")
+                val json = if (file.exists()) JSONObject(file.readText()) else JSONObject()
+                if (active) {
+                    json.put("home_connection_mode", "dns")
+                    json.put("home_dns_enabled", true)
+                } else {
+                    json.put("home_dns_enabled", false)
+                }
+                file.writeText(json.toString(2))
+            } catch (ignored: Throwable) {}
+        }
+
+        private fun setVpnSettingsActive(context: Context) {
+            try {
+                val file = File(dataDir(context), "app-settings.json")
+                val json = if (file.exists()) JSONObject(file.readText()) else JSONObject()
+                json.put("home_connection_mode", "vpn")
+                file.writeText(json.toString(2))
+            } catch (ignored: Throwable) {}
+        }
+
         /**
          * On and through: the exit country is known (the notification shows
          * it). On but not [connected] is "Connecting…", for the widget.
@@ -661,11 +790,29 @@ class CoreService : VpnService() {
          * and later).
          */
         fun turnOn(context: Context, dnsOnly: Boolean = false) {
-            if (on && isDnsOnly != dnsOnly) {
+            val wasOn = on
+            val prevDnsOnly = isDnsOnly
+
+            if (wasOn && prevDnsOnly != dnsOnly) {
                 stopTunnel()
-                if (mobile.Mobile.running()) mobile.Mobile.setOn(false)
+                if (prevDnsOnly) {
+                    setDnsSettingsActive(context, false)
+                } else {
+                    if (mobile.Mobile.running()) {
+                        try {
+                            mobile.Mobile.setOn(false)
+                        } catch (ignored: Throwable) {}
+                    }
+                }
             }
+
             isDnsOnly = dnsOnly
+            if (dnsOnly) {
+                setDnsSettingsActive(context, true)
+            } else {
+                setVpnSettingsActive(context)
+            }
+
             val intent = Intent(context, CoreService::class.java).apply {
                 putExtra("dns_only", dnsOnly)
             }
@@ -674,8 +821,16 @@ class CoreService : VpnService() {
             } else {
                 context.startService(intent)
             }
-            startCore(context, on = true)
-            mobile.Mobile.connect()
+
+            if (!dnsOnly) {
+                startCore(context, on = true)
+                try {
+                    mobile.Mobile.connect()
+                } catch (e: Throwable) {
+                    Log.w(TAG, "Mobile.connect failed", e)
+                }
+            }
+
             on = true
             connected = false
             exitCountryCode = ""
@@ -686,17 +841,30 @@ class CoreService : VpnService() {
         /** Ends the VPN's tunnel and its device, and the core's side of it. */
         private fun stopTunnel() {
             Tun2Socks.stop()
-            mobile.Mobile.stopTun()
+            try {
+                vpnInterface?.close()
+            } catch (ignored: Throwable) {}
+            vpnInterface = null
+            if (mobile.Mobile.running()) {
+                try {
+                    mobile.Mobile.stopTun()
+                } catch (ignored: Throwable) {}
+            }
         }
 
         /** Turns the VPN and the proxy off; the core keeps its API. */
         fun turnOff(context: Context) {
             stopTunnel()
-            if (mobile.Mobile.running()) mobile.Mobile.setOn(false)
+            if (mobile.Mobile.running()) {
+                try {
+                    mobile.Mobile.setOn(false)
+                } catch (ignored: Throwable) {}
+            }
             on = false
             isDnsOnly = false
             connected = false
             exitCountryCode = ""
+            setDnsSettingsActive(context, false)
             context.stopService(Intent(context, CoreService::class.java))
             QuickTile.refresh(context)
             ConnectWidget.updateAll(context)

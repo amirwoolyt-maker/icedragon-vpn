@@ -37,6 +37,7 @@ class QuickTile : TileService() {
             }
         }
         show()
+        refresh(this)
     }
 
     private fun show() {
