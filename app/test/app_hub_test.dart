@@ -910,7 +910,10 @@ void main() {
     final hub = HubController(
       platform: platform,
       stores: stores,
-      intelligence: AppIntelligence(stores: stores),
+      intelligence: AppIntelligence(
+        stores: stores,
+        geminiEndpoint: Uri.parse('http://127.0.0.1:1/generate'),
+      ),
     );
     addTearDown(hub.dispose);
 
