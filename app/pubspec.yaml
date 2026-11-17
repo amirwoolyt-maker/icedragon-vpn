@@ -2,7 +2,7 @@ name: icedragon_vpn
 description: "Cross-platform shell for the Go VPN core"
 publish_to: 'none'
 
-version: 1.0.25+146
+version: 1.0.26+147
 
 environment:
   sdk: ^3.13.5
