@@ -626,11 +626,17 @@ class _DesktopHome extends StatelessWidget {
                             type: MaterialType.transparency,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(999),
-                              onTap: () => showConnectionTimerSheet(
-                                context: context,
-                                settings: settings,
-                                core: core,
-                              ),
+                              onTap: () {
+                                if (!settings.proActive) {
+                                  onOpenPro?.call();
+                                  return;
+                                }
+                                showConnectionTimerSheet(
+                                  context: context,
+                                  settings: settings,
+                                  core: core,
+                                );
+                              },
                               child: Tooltip(
                                 message: ms.connectionTimerTitle,
                                 child: Row(

@@ -287,7 +287,6 @@ class AppSettings extends ChangeNotifier {
           s.homeDnsServers = servers.whereType<String>().toList();
         }
         s.showSpeedChart = j['show_speed_chart'] != false;
-        s.proActive = j['pro_active'] == true;
         s.proLicenseCode = j['pro_license_code'] as String? ?? '';
         s.proPlanName = j['pro_plan_name'] as String? ?? '';
         s.proExpiresAt = j['pro_expires_at'] as String? ?? '';
@@ -296,6 +295,17 @@ class AppSettings extends ChangeNotifier {
         s.deviceId = j['device_id'] as String? ?? '';
         s.autoSwitchDns = j['auto_switch_dns'] == true;
         s.connectionTimerEndMillis = j['conn_timer_end'] as int? ?? 0;
+
+        // Security check: proActive requires a non-empty license code and valid expiration.
+        var active = j['pro_active'] == true && s.proLicenseCode.trim().isNotEmpty;
+        if (active && !s.proIsLifetime && s.proExpiresAt.isNotEmpty) {
+          final exp = DateTime.tryParse(s.proExpiresAt);
+          if (exp != null && DateTime.now().isAfter(exp)) {
+            active = false;
+            s.proDaysLeft = 0;
+          }
+        }
+        s.proActive = active;
         if (j['time_machine_history'] case final List<Object?> h) {
           s.networkTimeMachineHistory = [
             for (final item in h)
@@ -388,12 +398,26 @@ class AppSettings extends ChangeNotifier {
     this.homeDnsName = homeDnsName ?? this.homeDnsName;
     this.homeDnsServers = homeDnsServers ?? this.homeDnsServers;
     this.showSpeedChart = showSpeedChart ?? this.showSpeedChart;
-    this.proActive = proActive ?? this.proActive;
     this.proLicenseCode = proLicenseCode ?? this.proLicenseCode;
     this.proPlanName = proPlanName ?? this.proPlanName;
     this.proExpiresAt = proExpiresAt ?? this.proExpiresAt;
     this.proDaysLeft = proDaysLeft ?? this.proDaysLeft;
     this.proIsLifetime = proIsLifetime ?? this.proIsLifetime;
+    if (proActive != null) {
+      var effective = proActive;
+      final code = this.proLicenseCode.trim();
+      if (effective && code.isEmpty) {
+        effective = false;
+      }
+      if (effective && !this.proIsLifetime && this.proExpiresAt.isNotEmpty) {
+        final exp = DateTime.tryParse(this.proExpiresAt);
+        if (exp != null && DateTime.now().isAfter(exp)) {
+          effective = false;
+          this.proDaysLeft = 0;
+        }
+      }
+      this.proActive = effective;
+    }
     this.deviceId = deviceId ?? this.deviceId;
     this.autoSwitchDns = autoSwitchDns ?? this.autoSwitchDns;
     this.connectionTimerEndMillis = connectionTimerEndMillis ?? this.connectionTimerEndMillis;

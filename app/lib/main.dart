@@ -84,6 +84,10 @@ Future<void> runAndroid() async {
   final hasSettings =
       File('$dataDir${Platform.pathSeparator}app-settings.json').existsSync();
   final settings = await AppSettings.load(dataDir);
+  await AndroidCore.setProActive(settings.proActive);
+  settings.addListener(() {
+    AndroidCore.setProActive(settings.proActive);
+  });
   if (!hasSettings) {
     settings.themeMode = ThemeMode.dark;
   }

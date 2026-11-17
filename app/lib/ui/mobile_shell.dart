@@ -50,13 +50,33 @@ class _MobileShellState extends State<MobileShell> {
   void initState() {
     super.initState();
     AndroidCore.homeRequests.addListener(_openHome);
+    AndroidCore.proRequests.addListener(_openPro);
   }
 
   void _openHome() => setState(() => _tab = 0);
+  void _openPro() {
+    Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        pageBuilder: (_, _, _) => Scaffold(
+          appBar: AppBar(title: Text(MobileStrings.of(context).proTitle)),
+          body: SafeArea(top: false, child: ProPage(settings: widget.settings, core: widget.core)),
+        ),
+        transitionsBuilder: (_, animation, _, child) => FadeTransition(
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+          child: SlideTransition(
+            position: Tween(begin: const Offset(0, 0.025), end: Offset.zero)
+                .animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   void dispose() {
     AndroidCore.homeRequests.removeListener(_openHome);
+    AndroidCore.proRequests.removeListener(_openPro);
     super.dispose();
   }
 
@@ -114,22 +134,7 @@ class _MobileShellState extends State<MobileShell> {
         section: SettingsSection.dns,
       ),
     );
-    void openPro() => Navigator.of(context).push(
-      PageRouteBuilder<void>(
-        pageBuilder: (_, _, _) => Scaffold(
-          appBar: AppBar(title: Text(MobileStrings.of(context).proTitle)),
-          body: SafeArea(top: false, child: ProPage(settings: settings, core: core)),
-        ),
-        transitionsBuilder: (_, animation, _, child) => FadeTransition(
-          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-          child: SlideTransition(
-            position: Tween(begin: const Offset(0, 0.025), end: Offset.zero)
-                .animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
-            child: child,
-          ),
-        ),
-      ),
-    );
+    void openPro() => _openPro();
     void openUpstreamProxy() => _push(
       l.upstreamProxy,
       () => SettingsPage(

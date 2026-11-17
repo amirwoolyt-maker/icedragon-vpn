@@ -107,13 +107,13 @@ class _AnnouncementPanelState extends State<AnnouncementPanel>
     try {
       if (action.type == 'navigate') {
         widget.onOpenUpdates();
-        store.acknowledge(item);
+        if (item.dismissible) store.acknowledge(item);
       } else {
         final opened = await (widget.openExternal ?? openUrl)(action.url!);
         if (!mounted) return;
-        if (opened) {
+        if (opened && item.dismissible) {
           store.acknowledge(item);
-        } else {
+        } else if (!opened) {
           await showLink(context, action.url!);
         }
       }

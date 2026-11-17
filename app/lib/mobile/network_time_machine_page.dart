@@ -104,6 +104,46 @@ class _NetworkTimeMachinePageState extends State<NetworkTimeMachinePage> {
     final isFa = widget.settings.language == 'fa';
     final history = widget.settings.networkTimeMachineHistory;
 
+    if (!widget.settings.proActive) {
+      return Scaffold(
+        backgroundColor: DarkGlassPalette.bgTop,
+        appBar: AppBar(
+          title: Text(strings.timeMachineTitle),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.workspace_premium_rounded, size: 64, color: Color(0xFFFFB547)),
+                const SizedBox(height: 16),
+                Text(
+                  isFa ? 'این قابلیت مختص کاربران VIP است' : 'VIP Feature Only',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  isFa
+                      ? 'برای استفاده از ماشین زمان اینترنت، اشتراک VIP را فعال کنید.'
+                      : 'An active VIP license is required to use Network Time Machine.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Color(0xFF94A3B8)),
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(isFa ? 'بازگشت' : 'Go Back'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: DarkGlassPalette.bgTop,
       appBar: AppBar(

@@ -45,7 +45,12 @@ class _ProPageState extends State<ProPage> {
 
   Future<void> _checkStatusSilently() async {
     final code = widget.settings.proLicenseCode.trim();
-    if (code.isEmpty) return;
+    if (code.isEmpty) {
+      if (widget.settings.proActive) {
+        widget.settings.update(proActive: false, proDaysLeft: 0);
+      }
+      return;
+    }
     try {
       final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
       final uri = Uri.parse('$proLicensingApi/status?code=${Uri.encodeComponent(code)}');
@@ -61,6 +66,11 @@ class _ProPageState extends State<ProPage> {
             proExpiresAt: json['expires_at'] as String? ?? widget.settings.proExpiresAt,
             proDaysLeft: json['days_left'] as int? ?? widget.settings.proDaysLeft,
             proIsLifetime: json['is_lifetime'] == true,
+          );
+        } else if (json != null && (json['ok'] == false || json['active'] == false) && mounted) {
+          widget.settings.update(
+            proActive: false,
+            proDaysLeft: 0,
           );
         }
       }

@@ -620,6 +620,15 @@ class CoreService : VpnService() {
 
         private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
+        private const val PRO_ACTIVE = "pro_active"
+
+        fun isProActive(context: Context): Boolean = prefs(context).getBoolean(PRO_ACTIVE, false)
+
+        fun setProActive(context: Context, active: Boolean) {
+            prefs(context).edit().putBoolean(PRO_ACTIVE, active).apply()
+            QuickTile.refresh(context)
+        }
+
         fun appMode(context: Context): String = prefs(context).getString(MODE, MODE_EXCLUDE) ?: MODE_EXCLUDE
 
         fun appSet(context: Context, key: String): Set<String> = prefs(context).getStringSet(key, emptySet()) ?: emptySet()

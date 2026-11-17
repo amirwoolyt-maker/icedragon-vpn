@@ -78,6 +78,9 @@ class MainActivity : FlutterActivity() {
         if (intent.action == TileService.ACTION_QS_TILE_PREFERENCES) {
             androidChannel?.invokeMethod("openHome", null)
         }
+        if (intent.getStringExtra("route") == "pro") {
+            androidChannel?.invokeMethod("openPro", null)
+        }
     }
 
     /**
@@ -190,6 +193,12 @@ class MainActivity : FlutterActivity() {
                     CoreService.setShowSpeed(this, call.argument<Boolean>("on") == true)
                     result.success(null)
                 }
+                "setProActive" -> {
+                    val active = call.argument<Boolean>("active") == true
+                    CoreService.setProActive(this, active)
+                    result.success(null)
+                }
+                "isProActive" -> result.success(CoreService.isProActive(this))
                 "setConnectionMode" -> {
                     val mode = call.argument<String>("mode") ?: CoreService.MODE_VPN
                     // A running proxy switched to the VPN needs the permission

@@ -90,9 +90,13 @@ class AndroidCore {
   /// A Quick Settings long-press returns the existing UI to Home.
   static final homeRequests = ValueNotifier<int>(0);
 
+  /// A Quick Settings tap when non-pro opens the Pro upgrade page.
+  static final proRequests = ValueNotifier<int>(0);
+
   static void listenForHomeRequests() {
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'openHome') homeRequests.value++;
+      if (call.method == 'openPro') proRequests.value++;
     });
   }
 
@@ -391,4 +395,11 @@ class AndroidCore {
   /// VPN or "Block connections without VPN" (native Kill Switch).
   static Future<bool> openVpnSettings() async =>
       await _channel.invokeMethod<bool>('openVpnSettings') ?? false;
+
+  /// Synchronizes VIP entitlement status to Android native service and Quick Tiles.
+  static Future<void> setProActive(bool active) async {
+    try {
+      await _channel.invokeMethod<void>('setProActive', {'active': active});
+    } catch (_) {}
+  }
 }

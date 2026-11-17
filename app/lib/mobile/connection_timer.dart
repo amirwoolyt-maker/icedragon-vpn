@@ -12,6 +12,10 @@ class ConnectionTimerManager {
 
   static void schedule(AppSettings settings, CoreController core) {
     _activeTimer?.cancel();
+    if (!settings.proActive) {
+      cancel(settings);
+      return;
+    }
     if (settings.connectionTimerEndMillis <= 0) return;
 
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -53,18 +57,32 @@ Future<void> showConnectionTimerSheet({
   required BuildContext context,
   required AppSettings settings,
   required CoreController core,
-}) => showModalBottomSheet<void>(
-  context: context,
-  isScrollControlled: true,
-  useSafeArea: true,
-  constraints: const BoxConstraints(maxWidth: 540),
-  backgroundColor: DarkGlassPalette.cardSurface,
-  shape: const RoundedRectangleBorder(
-    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    side: BorderSide(color: DarkGlassPalette.cardBorder),
-  ),
-  builder: (_) => _ConnectionTimerSheet(settings: settings, core: core),
-);
+}) {
+  if (!settings.proActive) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          settings.language == 'fa'
+              ? 'اتصال موقت با تایمر مختص کاربران VIP است.'
+              : 'Connection timer is an exclusive VIP feature.',
+        ),
+      ),
+    );
+    return Future.value();
+  }
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    constraints: const BoxConstraints(maxWidth: 540),
+    backgroundColor: DarkGlassPalette.cardSurface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      side: BorderSide(color: DarkGlassPalette.cardBorder),
+    ),
+    builder: (_) => _ConnectionTimerSheet(settings: settings, core: core),
+  );
+}
 
 class _ConnectionTimerSheet extends StatefulWidget {
   const _ConnectionTimerSheet({required this.settings, required this.core});

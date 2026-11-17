@@ -19,6 +19,13 @@ class QuickTile : TileService() {
 
     override fun onClick() {
         super.onClick()
+        if (!CoreService.isProActive(this)) {
+            // Quick tiles are an exclusive VIP feature: redirect non-pro users to upgrade
+            openApp("pro")
+            show()
+            refresh(this)
+            return
+        }
         if (CoreService.on && !CoreService.isDnsOnly) {
             // VPN is already on: clicking it turns off both modes.
             CoreService.turnOff(this)
@@ -44,11 +51,17 @@ class QuickTile : TileService() {
         val tile = qsTile ?: return
         tile.state = if (CoreService.on && !CoreService.isDnsOnly) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
         tile.label = getString(R.string.quick_tile_vpn)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            tile.subtitle = if (!CoreService.isProActive(this)) "VIP" else null
+        }
         tile.updateTile()
     }
 
-    private fun openApp() {
+    private fun openApp(route: String? = null) {
         val intent = Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (route != null) {
+            intent.putExtra("route", route)
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startActivityAndCollapse(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE))
         } else {
