@@ -21,17 +21,17 @@ class AnnouncementOverlay extends StatelessWidget {
   final VoidCallback onOpenUpdates;
   final Widget child;
 
-  Widget _layout(BuildContext context, bool visible) => Stack(
+  Widget _layout(BuildContext context, bool visible, {bool modal = false}) => Stack(
     fit: StackFit.expand,
     children: [
       child,
       if (visible)
         Positioned.fill(
           child: AbsorbPointer(
-            absorbing: true,
+            absorbing: modal,
             child: ColoredBox(
               color: Theme.of(context).colorScheme.scrim
-                  .withValues(alpha: 0.55),
+                  .withValues(alpha: modal ? 0.55 : 0.16),
             ),
           ),
         ),
@@ -55,8 +55,13 @@ class AnnouncementOverlay extends StatelessWidget {
             ? _layout(context, false)
             : ListenableBuilder(
                 listenable: store,
-                builder: (context, _) =>
-                    _layout(context, store.visible.isNotEmpty),
+                builder: (context, _) => _layout(
+                  context,
+                  store.visible.isNotEmpty,
+                  modal: store.visible.any(
+                    (a) => !a.dismissible || a.type == 'critical',
+                  ),
+                ),
               ),
       );
 }
@@ -106,14 +111,14 @@ class _AnnouncementPanelState extends State<AnnouncementPanel>
     setState(() => _opening = true);
     try {
       if (action.type == 'navigate') {
+        store.acknowledge(item);
         widget.onOpenUpdates();
-        if (item.dismissible) store.acknowledge(item);
       } else {
         final opened = await (widget.openExternal ?? openUrl)(action.url!);
         if (!mounted) return;
-        if (opened && item.dismissible) {
+        if (opened) {
           store.acknowledge(item);
-        } else if (!opened) {
+        } else {
           await showLink(context, action.url!);
         }
       }

@@ -19,8 +19,12 @@ class CompareTarget {
   final InstalledAppDetail? installed;
   final UnifiedAppResult? unified;
 
-  String get title =>
-      unified?.displayTitle ?? installed?.label ?? packageName;
+  String get title {
+    if (installed != null && installed!.label.trim().isNotEmpty) {
+      return installed!.label;
+    }
+    return unified?.displayTitle ?? packageName;
+  }
 
   String get sizeText {
     if (installed != null && installed!.totalBytes > 0) {
