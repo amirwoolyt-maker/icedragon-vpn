@@ -117,12 +117,12 @@ String? updateProxy(CoreStatus? status) {
 /// cannot install it, and on Android, whose core does not update, the notice
 /// opens the download.
 abstract final class Updates {
-  /// How long a successful look holds on desktop.
-  static const every = Duration(days: 1);
+  /// How long a successful look holds on desktop (30 minutes).
+  static const every = Duration(minutes: 30);
 
-  /// Faster background refresh interval on mobile networks.
+  /// Faster background refresh interval on mobile networks (10 minutes).
   @visibleForTesting
-  static Duration androidEvery = const Duration(hours: 4);
+  static Duration androidEvery = const Duration(minutes: 10);
 
   /// Delay after app launch before the first automatic update check.
   @visibleForTesting
@@ -135,6 +135,20 @@ abstract final class Updates {
   /// The newer release, once one was found.
   static final available = ValueNotifier<Release?>(null);
   static final announcements = ValueNotifier<AnnouncementStore?>(null);
+
+  /// Whether this version is permanently obsolete or a mandatory update is pending.
+  static bool get isObsoleteOrMandatory {
+    final rel = available.value;
+    if (rel != null && rel.mandatory && newerVersion(rel.version, appVersion)) {
+      return true;
+    }
+    final store = announcements.value;
+    if (store != null &&
+        store.visible.any((a) => !a.dismissible || a.type == 'critical')) {
+      return true;
+    }
+    return false;
+  }
 
   /// The app installs a downloaded version at its start (automatic
   /// updates) and quits in a moment, so it does not connect first.
@@ -203,7 +217,7 @@ abstract final class Updates {
     }
     core.addListener(_onStatus);
     _first = Timer(initialDelay, _due);
-    _timer = Timer.periodic(const Duration(hours: 1), (_) => _due());
+    _timer = Timer.periodic(const Duration(minutes: 5), (_) => _due());
   }
 
   /// Forgets everything, for the next test.
@@ -407,6 +421,9 @@ abstract final class Updates {
           : previous;
     }
     available.value = release;
+    if (isObsoleteOrMandatory) {
+      _core?.setOn(false);
+    }
     _settings?.update(
       updateCheckedAt: android && check == UpdateCheck.manual
           ? null
@@ -418,6 +435,10 @@ abstract final class Updates {
     _downloadInBackground();
   }
 
-  static void receiveAnnouncements(List<Announcement> items) =>
-      announcements.value?.receive(items);
+  static void receiveAnnouncements(List<Announcement> items) {
+    announcements.value?.receive(items);
+    if (isObsoleteOrMandatory) {
+      _core?.setOn(false);
+    }
+  }
 }

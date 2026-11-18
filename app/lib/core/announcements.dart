@@ -172,15 +172,16 @@ class AnnouncementStore extends ChangeNotifier {
         .where(
           (a) =>
               a.eligible(os, version, now()) &&
-              !_dismissed.contains(a.key) &&
-              switch (a.mode) {
-                'once' =>
-                  settings.announcementSeen[a.id] != a.revision ||
-                      _presented.contains(a.key),
-                'until_acknowledged' =>
-                  settings.announcementAcknowledged[a.id] != a.revision,
-                _ => true,
-              },
+              ((a.type == 'critical' && !a.dismissible) ||
+                  (!_dismissed.contains(a.key) &&
+                      switch (a.mode) {
+                        'once' =>
+                          settings.announcementSeen[a.id] != a.revision ||
+                              _presented.contains(a.key),
+                        'until_acknowledged' =>
+                          settings.announcementAcknowledged[a.id] != a.revision,
+                        _ => true,
+                      })),
         )
         .toList();
     items.sort((a, b) {
@@ -205,13 +206,16 @@ class AnnouncementStore extends ChangeNotifier {
   }
 
   void dismiss(Announcement item) {
-    if (!item.dismissible) return;
+    if (!item.dismissible || item.type == 'critical') return;
     acknowledge(item);
   }
 
   /// Closing or successfully following the explicit action acknowledges a
   /// message. A failed external launch leaves it available to try again.
   void acknowledge(Announcement item) {
+    if (item.type == 'critical' && !item.dismissible) {
+      return; // Absolute block: critical non-dismissible alerts can never be dismissed locally
+    }
     presented(item);
     _dismissed.add(item.key);
     if (item.mode == 'until_acknowledged') {

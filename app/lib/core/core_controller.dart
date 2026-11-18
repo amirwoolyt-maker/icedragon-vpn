@@ -7,6 +7,7 @@ import 'remote_flags.dart';
 import 'models.dart';
 import 'ports.dart';
 import 'tun_service.dart';
+import 'updates.dart';
 
 /// Connects to the core, polls its status and accounts, and runs the
 /// user's actions. It holds no VPN logic: every decision is the core's.
@@ -251,6 +252,9 @@ class CoreController extends ChangeNotifier {
   /// Turns the proxy on or off ([turnOn] on the phone, the core's API on the
   /// computer) and waits, briefly, until the core reports it.
   Future<void> setOn(bool on) => _act(() async {
+    if (on && Updates.isObsoleteOrMandatory) {
+      return;
+    }
     switchingProxy = true;
     notifyListeners();
     try {
