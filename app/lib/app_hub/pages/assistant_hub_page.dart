@@ -1144,11 +1144,12 @@ class _NewCollectionDialogState extends State<_NewCollectionDialog> {
         FilledButton(
           onPressed: () async {
             if (_nameCtrl.text.trim().isEmpty) return;
+            final nav = Navigator.of(context);
             await widget.hub.createCollection(
               name: _nameCtrl.text,
               description: _descCtrl.text,
             );
-            if (context.mounted) Navigator.of(context).pop();
+            if (mounted) nav.pop();
           },
           child: Text(widget.s.create),
         ),
@@ -1207,10 +1208,11 @@ class _ImportCollectionDialogState extends State<_ImportCollectionDialog> {
         ),
         FilledButton(
           onPressed: () async {
+            final nav = Navigator.of(context);
             final ok = await widget.hub.importSharedCollection(_ctrl.text);
             if (!mounted) return;
             if (ok) {
-              Navigator.of(context).pop();
+              nav.pop();
             } else {
               setState(() {
                 _errorText = widget.s.importCollectionInvalid;

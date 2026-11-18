@@ -515,12 +515,13 @@ class _NewCategoryDialogState extends State<_NewCategoryDialog> {
             if (_enCtrl.text.trim().isEmpty && _faCtrl.text.trim().isEmpty) {
               return;
             }
+            final nav = Navigator.of(context);
             final created = await widget.hub.createCustomCategory(
               nameEn: _enCtrl.text,
               nameFa: _faCtrl.text,
               colorValue: _selectedColor,
             );
-            if (context.mounted) Navigator.of(context).pop(created);
+            if (mounted) nav.pop(created);
           },
           child: Text(widget.s.create),
         ),
@@ -574,10 +575,11 @@ class _QuickCreateCollectionDialogState
         FilledButton(
           onPressed: () async {
             if (_ctrl.text.trim().isEmpty) return;
+            final nav = Navigator.of(context);
             final col = await widget.hub.createCollection(
               name: _ctrl.text,
             );
-            if (context.mounted) Navigator.of(context).pop(col);
+            if (mounted) nav.pop(col);
           },
           child: Text(widget.s.create),
         ),
