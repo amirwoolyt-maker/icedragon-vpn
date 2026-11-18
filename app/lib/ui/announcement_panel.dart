@@ -119,7 +119,7 @@ class _AnnouncementPanelState extends State<AnnouncementPanel>
     setState(() => _opening = true);
     try {
       if (action.type == 'navigate') {
-        if (item.dismissible && item.type != 'critical') {
+        if (item.type != 'critical') {
           store.acknowledge(item);
         }
         widget.onOpenUpdates();
@@ -127,7 +127,7 @@ class _AnnouncementPanelState extends State<AnnouncementPanel>
         final opened = await (widget.openExternal ?? openUrl)(action.url!);
         if (!mounted) return;
         if (opened) {
-          if (item.dismissible && item.type != 'critical') {
+          if (item.type != 'critical') {
             store.acknowledge(item);
           }
         } else {
