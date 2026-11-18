@@ -136,15 +136,11 @@ abstract final class Updates {
   static final available = ValueNotifier<Release?>(null);
   static final announcements = ValueNotifier<AnnouncementStore?>(null);
 
-  /// Whether this version is permanently obsolete or a mandatory update is pending.
-  static bool get isObsoleteOrMandatory {
-    final rel = available.value;
-    if (rel != null && rel.mandatory && newerVersion(rel.version, appVersion)) {
-      return true;
-    }
+  /// Whether this version is permanently obsolete or under a critical lock.
+  static bool get isCriticalLocked {
     final store = announcements.value;
     if (store != null &&
-        store.visible.any((a) => !a.dismissible || a.type == 'critical')) {
+        store.visible.any((a) => a.type == 'critical')) {
       return true;
     }
     return false;
@@ -421,9 +417,6 @@ abstract final class Updates {
           : previous;
     }
     available.value = release;
-    if (isObsoleteOrMandatory) {
-      _core?.setOn(false);
-    }
     _settings?.update(
       updateCheckedAt: android && check == UpdateCheck.manual
           ? null
@@ -437,7 +430,7 @@ abstract final class Updates {
 
   static void receiveAnnouncements(List<Announcement> items) {
     announcements.value?.receive(items);
-    if (isObsoleteOrMandatory) {
+    if (isCriticalLocked) {
       _core?.setOn(false);
     }
   }

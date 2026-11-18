@@ -252,7 +252,7 @@ class CoreController extends ChangeNotifier {
   /// Turns the proxy on or off ([turnOn] on the phone, the core's API on the
   /// computer) and waits, briefly, until the core reports it.
   Future<void> setOn(bool on) => _act(() async {
-    if (on && Updates.isObsoleteOrMandatory) {
+    if (on && Updates.isCriticalLocked) {
       return;
     }
     switchingProxy = true;

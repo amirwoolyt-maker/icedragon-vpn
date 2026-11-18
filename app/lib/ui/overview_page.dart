@@ -404,7 +404,7 @@ class _DesktopHome extends StatelessWidget {
 
   /// The button: off, or on with a test that confirms the connection.
   Future<void> _power(bool on) async {
-    if (on && Updates.isObsoleteOrMandatory) return;
+    if (on && Updates.isCriticalLocked) return;
     if (on && defaultTargetPlatform == TargetPlatform.android) {
       if (settings.homeConnectionMode == 'dns') {
         settings.update(homeConnectionMode: 'vpn', homeDnsEnabled: false);
@@ -418,7 +418,7 @@ class _DesktopHome extends StatelessWidget {
   }
 
   Future<void> _setDnsMode(BuildContext context, bool on) async {
-    if (on && Updates.isObsoleteOrMandatory) return;
+    if (on && Updates.isCriticalLocked) return;
     if (on && settings.homeDnsServers.isEmpty) {
       await _chooseHomeDns(context, core, settings);
       return;
@@ -1656,7 +1656,7 @@ class _PhoneHome extends StatelessWidget {
 
   Future<void> _toggle(bool on) async {
     unawaited(HapticFeedback.mediumImpact());
-    if (Updates.isObsoleteOrMandatory) {
+    if (Updates.isCriticalLocked) {
       if (_dnsMode && !settings.homeDnsEnabled) return;
       if (!_dnsMode && !on) return;
     }
