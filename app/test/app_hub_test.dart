@@ -912,7 +912,7 @@ void main() {
       stores: stores,
       intelligence: AppIntelligence(
         stores: stores,
-        geminiEndpoint: Uri.parse('http://127.0.0.1:1/generate'),
+        clientFactory: () => _FakeGeminiHttpClient('{}'),
       ),
     );
     addTearDown(hub.dispose);
@@ -922,41 +922,30 @@ void main() {
     expect(platform.secrets['gemini_api_key'], 'AIzaLegacyKey99');
     expect(legacyFile.readAsStringSync(), isNot(contains('AIzaLegacyKey99')));
 
-    // Live loopback server proves x-goog-api-key header is used without ?key= query string
-    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    addTearDown(() => server.close(force: true));
-    Uri? capturedUri;
-    String? capturedHeaderKey;
-    final serverSub = server.listen((req) async {
-      capturedUri = req.requestedUri;
-      capturedHeaderKey = req.headers.value('x-goog-api-key');
-      req.response.statusCode = 200;
-      req.response.headers.contentType = ContentType.json;
-      req.response.write(
-        jsonEncode({
-          'candidates': [
-            {
-              'content': {
-                'parts': [
-                  {
-                    'text': jsonEncode({
-                      'summary': 'Try Snapseed',
-                      'search_query': 'photo editor',
-                      'packages': ['com.niksoftware.snapseed'],
-                    }),
-                  },
-                ],
-              },
+    // Mock client proves x-goog-api-key header is used without ?key= query string
+    final fakeClient = _FakeGeminiHttpClient(
+      jsonEncode({
+        'candidates': [
+          {
+            'content': {
+              'parts': [
+                {
+                  'text': jsonEncode({
+                    'summary': 'Try Snapseed',
+                    'search_query': 'photo editor',
+                    'packages': ['com.niksoftware.snapseed'],
+                  }),
+                },
+              ],
             },
-          ],
-        }),
-      );
-      await req.response.close();
-    });
+          },
+        ],
+      }),
+    );
 
     final okIntel = AppIntelligence(
       stores: _StubStoreAggregator(),
-      geminiEndpoint: Uri.parse('http://127.0.0.1:${server.port}/generate'),
+      clientFactory: () => fakeClient,
     );
     final rec = await okIntel.recommendForNeed(
       'edit photos',
@@ -965,11 +954,9 @@ void main() {
       geminiApiKey: 'AIzaTestSecret123',
     );
     expect(rec.usedGemini, isTrue);
-    expect(capturedUri?.queryParameters.containsKey('key'), isFalse);
-    expect(capturedUri.toString(), isNot(contains('AIzaTestSecret123')));
-    expect(capturedHeaderKey, 'AIzaTestSecret123');
-    await serverSub.cancel();
-    await server.close(force: true);
+    expect(fakeClient.capturedUri?.queryParameters.containsKey('key'), isFalse);
+    expect(fakeClient.capturedUri.toString(), isNot(contains('AIzaTestSecret123')));
+    expect(fakeClient.capturedHeaders?.value('x-goog-api-key'), 'AIzaTestSecret123');
 
     // Failing store sets lastError and AssistantHubPage displays real error + invalid collection error
     await hub.setGeminiApiKey('');
@@ -996,8 +983,7 @@ void main() {
       findsOneWidget,
     );
     await tester.tap(find.text('Cancel'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
 
     // Switch to AI sub-tab and verify visible error banner
     await tester.tap(find.text('App Intelligence'));
@@ -1018,7 +1004,7 @@ void main() {
     await tester.pump();
     expect(find.text('Delete'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
-    await tester.pump();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('MobileShell switches tabs and preserves existing VPN controls', (
@@ -1140,4 +1126,90 @@ extension on UnifiedAppResult {
       listings.containsKey(StoreId.googlePlay) &&
       listings.containsKey(StoreId.bazaar) &&
       listings.containsKey(StoreId.myket);
+}
+
+class _FakeHttpHeaders implements HttpHeaders {
+  final Map<String, Object> _headers = {};
+
+  @override
+  void set(String name, Object value, {bool preserveHeaderCase = false}) {
+    _headers[name.toLowerCase()] = value;
+  }
+
+  String? value(String name) => _headers[name.toLowerCase()]?.toString();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class _FakeHttpClientRequest implements HttpClientRequest {
+  _FakeHttpClientRequest(this.uri, this.responseBody);
+  @override
+  final Uri uri;
+  final String responseBody;
+
+  @override
+  final HttpHeaders headers = _FakeHttpHeaders();
+
+  @override
+  void add(List<int> data) {}
+
+  @override
+  Future<HttpClientResponse> close() async => _FakeHttpClientResponse(responseBody);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class _FakeHttpClientResponse extends Stream<List<int>> implements HttpClientResponse {
+  _FakeHttpClientResponse(this.body);
+  final String body;
+
+  @override
+  int get statusCode => 200;
+
+  @override
+  StreamSubscription<List<int>> listen(
+    void Function(List<int> event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
+    return Stream.value(utf8.encode(body)).listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class _FakeGeminiHttpClient implements HttpClient {
+  _FakeGeminiHttpClient(this.responseBody);
+  final String responseBody;
+  Uri? capturedUri;
+  _FakeHttpHeaders? capturedHeaders;
+
+  @override
+  Duration? connectionTimeout;
+
+  @override
+  String Function(Uri url)? findProxy;
+
+  @override
+  Future<HttpClientRequest> postUrl(Uri url) async {
+    capturedUri = url;
+    final req = _FakeHttpClientRequest(url, responseBody);
+    capturedHeaders = req.headers as _FakeHttpHeaders;
+    return req;
+  }
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
 }
