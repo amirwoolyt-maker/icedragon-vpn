@@ -927,7 +927,7 @@ void main() {
     addTearDown(() => server.close(force: true));
     Uri? capturedUri;
     String? capturedHeaderKey;
-    server.listen((req) async {
+    final serverSub = server.listen((req) async {
       capturedUri = req.requestedUri;
       capturedHeaderKey = req.headers.value('x-goog-api-key');
       req.response.statusCode = 200;
@@ -968,9 +968,11 @@ void main() {
     expect(capturedUri?.queryParameters.containsKey('key'), isFalse);
     expect(capturedUri.toString(), isNot(contains('AIzaTestSecret123')));
     expect(capturedHeaderKey, 'AIzaTestSecret123');
+    await serverSub.cancel();
     await server.close(force: true);
 
     // Failing store sets lastError and AssistantHubPage displays real error + invalid collection error
+    await hub.setGeminiApiKey('');
     await hub.runAiRecommendation('photo editor', fa: false);
     expect(hub.lastError, contains('offline store error'));
 
@@ -1015,6 +1017,8 @@ void main() {
     await tester.enterText(find.byType(TextField), 'AIzaTypedKey');
     await tester.pump();
     expect(find.text('Delete'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
   });
 
   testWidgets('MobileShell switches tabs and preserves existing VPN controls', (
