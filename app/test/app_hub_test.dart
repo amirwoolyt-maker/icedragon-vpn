@@ -896,12 +896,12 @@ void main() {
   testWidgets('Collections error, AI error, HubSettings UI & Keystore + x-goog-api-key security', (
     tester,
   ) async {
+    // Legacy plaintext key migration scrubs JSON and moves key into Keystore secret
     final dir = Directory.systemTemp.createTempSync('hub_sec_test_');
     addTearDown(() {
       if (dir.existsSync()) dir.deleteSync(recursive: true);
     });
 
-    // Legacy plaintext key migration scrubs JSON and moves key into Keystore secret
     final legacyFile = File('${dir.path}/app-hub-state.json')
       ..parent.createSync(recursive: true)
       ..writeAsStringSync(jsonEncode({'gemini_api_key': 'AIzaLegacyKey99'}));
@@ -983,8 +983,10 @@ void main() {
       find.text('Invalid or corrupted collection code. Paste a valid IceDragon code or JSON.'),
       findsOneWidget,
     );
+    FocusManager.instance.primaryFocus?.unfocus();
     await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     // Switch to AI sub-tab and verify visible error banner
     await tester.tap(find.text('App Intelligence'));
@@ -1004,9 +1006,11 @@ void main() {
     await tester.enterText(find.byType(TextField), 'AIzaTypedKey');
     await tester.pump();
     expect(find.text('Delete'), findsOneWidget);
+    FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpWidget(const SizedBox());
-    await tester.pumpAndSettle();
-  });
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+  }, timeout: const Timeout(Duration(seconds: 30)));
 
   testWidgets('MobileShell switches tabs and preserves existing VPN controls', (
     tester,
