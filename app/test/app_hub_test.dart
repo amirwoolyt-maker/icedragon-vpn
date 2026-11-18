@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -1136,6 +1137,7 @@ class _FakeHttpHeaders implements HttpHeaders {
     _headers[name.toLowerCase()] = value;
   }
 
+  @override
   String? value(String name) => _headers[name.toLowerCase()]?.toString();
 
   @override
