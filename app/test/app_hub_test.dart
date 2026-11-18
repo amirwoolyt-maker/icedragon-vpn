@@ -962,8 +962,13 @@ void main() {
       platform: platform,
       stores: stores,
       repository: HubRepository(),
+      intelligence: AppIntelligence(
+        stores: stores,
+        clientFactory: () => _FakeGeminiHttpClient('{}'),
+      ),
     );
     addTearDown(hub.dispose);
+    await hub.ensureLoaded();
 
     await hub.runAiRecommendation('photo editor', fa: false);
     expect(hub.lastError, contains('offline store error'));
@@ -991,6 +996,7 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 300));
 
     // Switch to AI sub-tab and verify visible error banner
     await tester.tap(find.text('App Intelligence'));
@@ -1011,6 +1017,7 @@ void main() {
       repository: HubRepository(),
     );
     addTearDown(hub.dispose);
+    await hub.ensureLoaded();
 
     await tester.pumpWidget(
       _wrap(HubSettingsPage(hub: hub, settings: AppSettings())),

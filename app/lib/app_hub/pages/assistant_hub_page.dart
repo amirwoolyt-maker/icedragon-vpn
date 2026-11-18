@@ -669,93 +669,17 @@ class _CollectionsView extends StatelessWidget {
   final HubStrings s;
 
   Future<void> _showNewCollection(BuildContext context) async {
-    final nameCtrl = TextEditingController();
-    final descCtrl = TextEditingController();
     await showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(s.newCollection),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameCtrl,
-              decoration: InputDecoration(labelText: s.collectionName),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: descCtrl,
-              decoration: InputDecoration(labelText: s.collectionDesc),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(s.cancel),
-          ),
-          FilledButton(
-            onPressed: () async {
-              if (nameCtrl.text.trim().isEmpty) return;
-              await hub.createCollection(
-                name: nameCtrl.text,
-                description: descCtrl.text,
-              );
-              if (ctx.mounted) Navigator.of(ctx).pop();
-            },
-            child: Text(s.create),
-          ),
-        ],
-      ),
+      builder: (ctx) => _NewCollectionDialog(hub: hub, s: s),
     );
-    nameCtrl.dispose();
-    descCtrl.dispose();
   }
 
   Future<void> _showImportDialog(BuildContext context) async {
-    final ctrl = TextEditingController();
-    String? errorText;
     await showDialog<void>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: Text(s.importCollection),
-          content: TextField(
-            controller: ctrl,
-            maxLines: 4,
-            onChanged: (_) {
-              if (errorText != null) setDialogState(() => errorText = null);
-            },
-            decoration: InputDecoration(
-              hintText: s.importHint,
-              errorText: errorText,
-              errorMaxLines: 2,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(s.cancel),
-            ),
-            FilledButton(
-              onPressed: () async {
-                final ok = await hub.importSharedCollection(ctrl.text);
-                if (!ctx.mounted) return;
-                if (ok) {
-                  Navigator.of(ctx).pop();
-                } else {
-                  setDialogState(() {
-                    errorText = s.importCollectionInvalid;
-                  });
-                }
-              },
-              child: Text(s.apply),
-            ),
-          ],
-        ),
-      ),
+      builder: (ctx) => _ImportCollectionDialog(hub: hub, s: s),
     );
-    ctrl.dispose();
   }
 
   void _openCollectionDetail(BuildContext context, AppCollection col) {
@@ -1160,6 +1084,140 @@ class _MiniMetric extends StatelessWidget {
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w700,
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NewCollectionDialog extends StatefulWidget {
+  final HubController hub;
+  final HubStrings s;
+
+  const _NewCollectionDialog({required this.hub, required this.s});
+
+  @override
+  State<_NewCollectionDialog> createState() => _NewCollectionDialogState();
+}
+
+class _NewCollectionDialogState extends State<_NewCollectionDialog> {
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _descCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtrl = TextEditingController();
+    _descCtrl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _descCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.s.newCollection),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _nameCtrl,
+            decoration: InputDecoration(labelText: widget.s.collectionName),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _descCtrl,
+            decoration: InputDecoration(labelText: widget.s.collectionDesc),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(widget.s.cancel),
+        ),
+        FilledButton(
+          onPressed: () async {
+            if (_nameCtrl.text.trim().isEmpty) return;
+            await widget.hub.createCollection(
+              name: _nameCtrl.text,
+              description: _descCtrl.text,
+            );
+            if (context.mounted) Navigator.of(context).pop();
+          },
+          child: Text(widget.s.create),
+        ),
+      ],
+    );
+  }
+}
+
+class _ImportCollectionDialog extends StatefulWidget {
+  final HubController hub;
+  final HubStrings s;
+
+  const _ImportCollectionDialog({required this.hub, required this.s});
+
+  @override
+  State<_ImportCollectionDialog> createState() =>
+      _ImportCollectionDialogState();
+}
+
+class _ImportCollectionDialogState extends State<_ImportCollectionDialog> {
+  late final TextEditingController _ctrl;
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.s.importCollection),
+      content: TextField(
+        controller: _ctrl,
+        maxLines: 4,
+        onChanged: (_) {
+          if (_errorText != null) setState(() => _errorText = null);
+        },
+        decoration: InputDecoration(
+          hintText: widget.s.importHint,
+          errorText: _errorText,
+          errorMaxLines: 2,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(widget.s.cancel),
+        ),
+        FilledButton(
+          onPressed: () async {
+            final ok = await widget.hub.importSharedCollection(_ctrl.text);
+            if (!mounted) return;
+            if (ok) {
+              Navigator.of(context).pop();
+            } else {
+              setState(() {
+                _errorText = widget.s.importCollectionInvalid;
+              });
+            }
+          },
+          child: Text(widget.s.apply),
         ),
       ],
     );
