@@ -893,10 +893,7 @@ void main() {
     expect(find.text('2 of 2 app(s) uninstalled'), findsOneWidget);
   });
 
-  testWidgets('Collections error, AI error, HubSettings UI & Keystore + x-goog-api-key security', (
-    tester,
-  ) async {
-    print('DEBUG: 1 start');
+  test('Keystore migration and x-goog-api-key security header', () async {
     // Legacy plaintext key migration scrubs JSON and moves key into Keystore secret
     final dir = Directory.systemTemp.createTempSync('hub_sec_test_');
     addTearDown(() {
@@ -908,20 +905,13 @@ void main() {
       ..writeAsStringSync(jsonEncode({'gemini_api_key': 'AIzaLegacyKey99'}));
 
     final platform = _FakeHubPlatform(dirPath: dir.path);
-    final stores = _FailingStoreAggregator();
     final hub = HubController(
       platform: platform,
-      stores: stores,
-      intelligence: AppIntelligence(
-        stores: stores,
-        clientFactory: () => _FakeGeminiHttpClient('{}'),
-      ),
+      stores: _StubStoreAggregator(),
     );
     addTearDown(hub.dispose);
 
-    print('DEBUG: 2 before ensureLoaded');
     await hub.ensureLoaded();
-    print('DEBUG: 3 after ensureLoaded');
     expect(hub.repo.geminiApiKey, 'AIzaLegacyKey99');
     expect(platform.secrets['gemini_api_key'], 'AIzaLegacyKey99');
     expect(legacyFile.readAsStringSync(), isNot(contains('AIzaLegacyKey99')));
@@ -951,46 +941,48 @@ void main() {
       stores: _StubStoreAggregator(),
       clientFactory: () => fakeClient,
     );
-    print('DEBUG: 4 before recommendForNeed');
     final rec = await okIntel.recommendForNeed(
       'edit photos',
       device: const DeviceEnvironment(),
       fa: false,
       geminiApiKey: 'AIzaTestSecret123',
     );
-    print('DEBUG: 5 after recommendForNeed');
     expect(rec.usedGemini, isTrue);
     expect(fakeClient.capturedUri?.queryParameters.containsKey('key'), isFalse);
     expect(fakeClient.capturedUri.toString(), isNot(contains('AIzaTestSecret123')));
     expect(fakeClient.capturedHeaders?.value('x-goog-api-key'), 'AIzaTestSecret123');
+  });
 
-    // Failing store sets lastError and AssistantHubPage displays real error + invalid collection error
-    await hub.setGeminiApiKey('');
-    print('DEBUG: 6 before runAiRecommendation');
+  testWidgets('AssistantHubPage displays collections and AI error banner', (
+    tester,
+  ) async {
+    final platform = _FakeHubPlatform();
+    final stores = _FailingStoreAggregator();
+    final hub = HubController(
+      platform: platform,
+      stores: stores,
+      repository: HubRepository(),
+    );
+    addTearDown(hub.dispose);
+
     await hub.runAiRecommendation('photo editor', fa: false);
-    print('DEBUG: 7 after runAiRecommendation');
     expect(hub.lastError, contains('offline store error'));
 
-    print('DEBUG: 8 before pump AssistantHubPage');
     await tester.pumpWidget(_wrap(AssistantHubPage(hub: hub)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    print('DEBUG: 9 after pump AssistantHubPage');
 
     // Switch to Collections sub-tab and trigger invalid import error
     await tester.tap(find.text('Collections'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    print('DEBUG: 10 after tap Collections');
     await tester.tap(find.byIcon(Icons.download_rounded));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    print('DEBUG: 11 after tap download');
     await tester.enterText(find.byType(TextField).last, 'invalid-collection-data');
     await tester.tap(find.text('Apply'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    print('DEBUG: 12 after tap Apply');
     expect(
       find.text('Invalid or corrupted collection code. Paste a valid IceDragon code or JSON.'),
       findsOneWidget,
@@ -999,36 +991,41 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    print('DEBUG: 13 after tap Cancel');
 
     // Switch to AI sub-tab and verify visible error banner
     await tester.tap(find.text('App Intelligence'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    print('DEBUG: 14 after tap App Intelligence');
     expect(find.textContaining('Recommendation failed:'), findsOneWidget);
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+  });
 
-    // HubSettingsPage updates Delete visibility on typing
-    await hub.setGeminiApiKey('');
-    print('DEBUG: 15 before pump HubSettingsPage');
+  testWidgets('HubSettingsPage updates Delete visibility on typing', (
+    tester,
+  ) async {
+    final hub = HubController(
+      platform: _FakeHubPlatform(),
+      stores: _StubStoreAggregator(),
+      repository: HubRepository(),
+    );
+    addTearDown(hub.dispose);
+
     await tester.pumpWidget(
       _wrap(HubSettingsPage(hub: hub, settings: AppSettings())),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    print('DEBUG: 16 after pump HubSettingsPage');
     await tester.ensureVisible(find.byType(TextField));
     expect(find.text('Delete'), findsNothing);
     await tester.enterText(find.byType(TextField), 'AIzaTypedKey');
     await tester.pump();
-    print('DEBUG: 17 after enterText AIzaTypedKey');
     expect(find.text('Delete'), findsOneWidget);
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpWidget(const SizedBox());
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    print('DEBUG: 18 done test body');
-  }, timeout: const Timeout(Duration(seconds: 5)));
+  });
 
   testWidgets('MobileShell switches tabs and preserves existing VPN controls', (
     tester,
