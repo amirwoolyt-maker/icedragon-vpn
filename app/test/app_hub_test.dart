@@ -956,6 +956,10 @@ void main() {
   testWidgets('AssistantHubPage displays collections and AI error banner', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1200, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
     final platform = _FakeHubPlatform();
     final stores = _FailingStoreAggregator();
     final hub = HubController(
@@ -978,6 +982,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     // Switch to Collections sub-tab and trigger invalid import error
+    await tester.ensureVisible(find.text('Collections'));
     await tester.tap(find.text('Collections'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -999,6 +1004,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     // Switch to AI sub-tab and verify visible error banner
+    await tester.ensureVisible(find.text('App Intelligence'));
     await tester.tap(find.text('App Intelligence'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
